@@ -6,6 +6,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/utils.cmake)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(TAGRET_NAME_PREFIX arenaforge)
 set(ArenaForge_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(ArenaForge_ROOT_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(ArenaForge_THIRD_PARTY_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
