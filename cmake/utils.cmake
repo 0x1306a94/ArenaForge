@@ -9,7 +9,7 @@ macro(add_files_by_extension target_var extensions)
     endif()
   endif()
 
-  set(${target_var} "" PARENT_SCOPE)
+  set(${target_var} "")
 
   foreach(dir ${directories})
     foreach(ext ${extensions})
@@ -19,7 +19,8 @@ macro(add_files_by_extension target_var extensions)
     endforeach()
   endforeach()
 
-  set(${target_var} "${${target_var}}" PARENT_SCOPE)
+  # set(${target_var} "${${target_var}}" PARENT_SCOPE)
+  set(${target_var} "${${target_var}}")
 endmacro()
 
 function(make_files_relative OUT_VAR BASE_DIR)
@@ -28,7 +29,7 @@ function(make_files_relative OUT_VAR BASE_DIR)
     file(RELATIVE_PATH _rel "${BASE_DIR}" "${_abs}")
     list(APPEND _result "${_rel}")
   endforeach()
-  set(${OUT_VAR} "${_result}" PARENT_SCOPE)
+  set(${OUT_VAR} "${_result}")
 endfunction()
 
 macro(add_source_group files base_dir group_prefix)

@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(TARGET_NAME_SUFFIX core)
+set(TARGET_NAME_SUFFIX core_test)
 set(TAGRGET_NAME ${TAGRET_NAME_PREFIX}_${TARGET_NAME_SUFFIX})
+
 
 message(STATUS "========== Configuration ${TAGRGET_NAME} ==========")
 
@@ -29,23 +30,20 @@ endif ()
 
 add_files_by_extension(SRC_FILES ".h;.hpp;.cpp"
     .
+    ../base
 )
 
-add_files_by_extension(PUBLIC_HEADER_FILES ".h;.hpp"
-    ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAME_PREFIX}/${TARGET_NAME_SUFFIX}
-    ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAME_PREFIX}/${TARGET_NAME_SUFFIX}
-)
-
-message(STATUS "PUBLIC_HEADER_FILES: ${PUBLIC_HEADER_FILES}")
 message(STATUS "SRC_FILES: ${SRC_FILES}")
 
-add_library(${TAGRGET_NAME} STATIC ${SRC_FILES} ${PUBLIC_HEADER_FILES})
-
-add_source_group(PUBLIC_HEADER_FILES ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAME_PREFIX}/${TARGET_NAME_SUFFIX} "PublicHeaders")
-add_source_group(SRC_FILES ${CMAKE_CURRENT_LIST_DIR} "Sources")
+add_executable(${TAGRGET_NAME} ${SRC_FILES})
+target_link_libraries(${TAGRGET_NAME} 
+    ${TAGRET_NAME_PREFIX}_core
+    gtest
+)
 
 target_include_directories(${TAGRGET_NAME} PRIVATE
     .
     ${ArenaForge_ROOT_INCLUDE_DIR}
+    ${GOOGLE_TEST_ROOT}/googletest/include
 )
 
