@@ -18,24 +18,49 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  Node.cpp
-//  ArenaForge
+//  BaseLayer.h
+//  arenaforge_core
 //
-//  Created by king on 2025/9/4.
+//  Created by king on 2025/9/5.
 //
 
-#include <arenaforge/core/node/Node.h>
+#ifndef BaseLayer_h_ArenaForge
+#define BaseLayer_h_ArenaForge
+
+#include <tgfx/layers/ShapeLayer.h>
 
 namespace arenaforge {
+class IdGenerator;
 
-std::shared_ptr<Node> Node::Make() {
-    return std::shared_ptr<Node>(new Node());
-}
+class BaseLayer : public tgfx::ShapeLayer {
+  public:
+    static std::shared_ptr<BaseLayer> Make(uint32_t layerId);
 
-Node::Node() {
-}
+    virtual ~BaseLayer() = default;
 
-Node::~Node() {
-}
+    uint32_t layerId() const {
+        return _layerId;
+    }
 
+    bool transient() const {
+        return _transient;
+    }
+
+    void setTransient(bool value);
+
+    std::shared_ptr<BaseLayer> getChildById(uint32_t layerId);
+
+    virtual std::shared_ptr<BaseLayer> clone(IdGenerator *idGen, bool cloneChildren) const;
+
+  protected:
+    BaseLayer(uint32_t layerId);
+
+    virtual void doClone(BaseLayer *target, IdGenerator *idGen, bool cloneChildren) const;
+
+  private:
+    uint32_t _layerId{0};
+    bool _transient;
+};
 };  // namespace arenaforge
+
+#endif /* BaseLayer_h_ArenaForge */

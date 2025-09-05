@@ -18,14 +18,23 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  ProjectFile.cpp
-//  ArenaForge
+//  ShapeStyleClone.h
+//  arenaforge_core
 //
-//  Created by king on 2025/9/4.
+//  Created by king on 2025/9/5.
 //
 
-#include <arenaforge/core/ProjectFile.h>
+#ifndef ShapeStyleClone_h_ArenaForge
+#define ShapeStyleClone_h_ArenaForge
+
+#include <memory>
+
+namespace tgfx {
+class ShapeStyle;
+};
 
 namespace arenaforge {
-
+std::shared_ptr<tgfx::ShapeStyle> cloneShapeStyle(const tgfx::ShapeStyle *style);
 };
+
+#endif /* ShapeStyleClone_h_ArenaForge */

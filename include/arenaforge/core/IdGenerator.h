@@ -18,19 +18,38 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  ProjectFile.h
-//  ArenaForge
+//  IdGenerator.h
+//  arenaforge_core
 //
-//  Created by king on 2025/9/4.
+//  Created by king on 2025/9/5.
 //
 
-#ifndef ProjectFile_h_ArenaForge
-#define ProjectFile_h_ArenaForge
+#ifndef IdGenerator_h_ArenaForge
+#define IdGenerator_h_ArenaForge
 
-#include <stdio.h>
+#include <cstdint>
 
 namespace arenaforge {
+class IdGenerator {
+  public:
+    explicit IdGenerator(uint32_t start = 1)
+        : _nextId(start) {}
 
+    uint32_t generate() {
+        return _nextId++;
+    }
+
+    void reset(uint32_t start = 1) {
+        _nextId = start;
+    }
+
+    uint32_t peek() const {
+        return _nextId;
+    }
+
+  private:
+    uint32_t _nextId = 1;
 };
+};  // namespace arenaforge
 
-#endif /* ProjectFile_h_ArenaForge */
+#endif /* IdGenerator_h_ArenaForge */

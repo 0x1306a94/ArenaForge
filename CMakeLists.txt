@@ -23,14 +23,13 @@ set(TGFX_BUILD_LAYERS ON)
 add_subdirectory(third_party/tgfx/third_party/json)
 add_subdirectory(third_party/tgfx)
 
+add_subdirectory(src/core)
+
 if(BUILD_CORE_TESTS)
     message(STATUS "GOOGLE_TEST_ROOT: ${GOOGLE_TEST_ROOT}")
     add_subdirectory(${GOOGLE_TEST_ROOT})
 
     add_subdirectory(test/core)
 endif()
-
-
-add_subdirectory(src/core)
 
 

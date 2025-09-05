@@ -18,21 +18,23 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  PointTest.cpp
-//  arenaforge_core_test
+//  LayerStyleClone.h
+//  arenaforge_core
 //
-//  Created by king on 2025/9/4.
+//  Created by king on 2025/9/5.
 //
 
-#include "../base/ArenaForgeTest.h"
+#ifndef LayerStyleClone_h_ArenaForge
+#define LayerStyleClone_h_ArenaForge
 
-#include <arenaforge/core/Point.h>
+#include <memory>
 
-namespace arenaforge {
-
-ArenaForge_TEST(PointTest, Zero) {
-    auto zero = Point::Zero();
-    EXPECT_TRUE(zero.isZero());
+namespace tgfx {
+class LayerStyle;
 };
 
-};  // namespace arenaforge
+namespace arenaforge {
+std::shared_ptr<tgfx::LayerStyle> cloneLayerStyle(const tgfx::LayerStyle *style);
+};
+
+#endif /* LayerStyleClone_h_ArenaForge */

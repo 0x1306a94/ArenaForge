@@ -44,6 +44,10 @@ add_library(${TAGRGET_NAME} STATIC ${SRC_FILES} ${PUBLIC_HEADER_FILES})
 add_source_group(PUBLIC_HEADER_FILES ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAME_PREFIX}/${TARGET_NAME_SUFFIX} "PublicHeaders")
 add_source_group(SRC_FILES ${CMAKE_CURRENT_LIST_DIR} "Sources")
 
+target_link_libraries(${TAGRGET_NAME}
+    tgfx
+)
+
 target_include_directories(${TAGRGET_NAME} PRIVATE
     .
     ${ArenaForge_ROOT_INCLUDE_DIR}

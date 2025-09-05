@@ -18,51 +18,37 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  Node.h
-//  ArenaForge
+//  ShapeStyleClone.cpp
+//  arenaforge_core
 //
-//  Created by king on 2025/9/4.
+//  Created by king on 2025/9/5.
 //
 
-#ifndef Node_h_ArenaForge
-#define Node_h_ArenaForge
+#include "ShapeStyleClone.h"
 
-#include <memory>
-#include <vector>
+#include <tgfx/layers/SolidColor.h>
 
 namespace arenaforge {
-class Node : std::enable_shared_from_this<Node> {
-  public:
-    /**
-     * Creates a new Node instance.
-     */
-    static std::shared_ptr<Node> Make();
+void cloneShapeStyleBase(const tgfx::ShapeStyle *source, tgfx::ShapeStyle *target) {
+    if (source == nullptr || target == nullptr) {
+        return;
+    }
+    target->setBlendMode(source->blendMode());
+    target->setAlpha(source->alpha());
+    target->setMatrix(source->matrix());
+}
 
-    virtual ~Node();
-
-    /**
-     * Returns the parent node that contains the calling node.
-     */
-    Node *parent() const {
-        return _parent;
+std::shared_ptr<tgfx::ShapeStyle> cloneShapeStyle(const tgfx::ShapeStyle *style) {
+    if (style == nullptr) {
+        return nullptr;
     }
 
-    /**
-     * Returns the list of child nodes that are direct children of the calling node. Note: Do not
-     * iterate through this list directly with a loop while modifying it, as the loop may skip
-     * children. Instead, make a copy of the list and iterate through the copy.
-     */
-    const std::vector<std::shared_ptr<Node>> &children() const {
-        return _children;
+    if (auto source = dynamic_cast<const tgfx::SolidColor *>(style)) {
+        auto copied = tgfx::SolidColor::Make(source->color());
+        cloneShapeStyleBase(source, copied.get());
+        return copied;
     }
 
-  protected:
-    Node();
-
-  private:
-    Node *_parent{nullptr};
-    std::vector<std::shared_ptr<Node>> _children = {};
-};
+    return nullptr;
+}
 };  // namespace arenaforge
-
-#endif /* Node_h_ArenaForge */
