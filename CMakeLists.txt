@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(TAGRET_NAME_PREFIX arenaforge)
 
+option(BUILD_EDITOR "build editor" ON)
 option(BUILD_CORE_TESTS "build core tests" ON)
 
 set(ArenaForge_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
@@ -15,6 +16,7 @@ set(ArenaForge_ROOT_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(ArenaForge_THIRD_PARTY_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
 set(GOOGLE_TEST_ROOT ${ArenaForge_THIRD_PARTY_ROOT_DIR}/tgfx/third_party/googletest)
 
+message(STATUS "BUILD_EDITOR: ${BUILD_EDITOR}")
 message(STATUS "BUILD_CORE_TESTS: ${BUILD_CORE_TESTS}")
 
 set(TGFX_BUILD_SVG ON)
@@ -24,6 +26,10 @@ add_subdirectory(third_party/tgfx/third_party/json)
 add_subdirectory(third_party/tgfx)
 
 add_subdirectory(src/core)
+
+if(BUILD_EDITOR)
+    add_subdirectory(src/editor)
+endif()
 
 if(BUILD_CORE_TESTS)
     message(STATUS "GOOGLE_TEST_ROOT: ${GOOGLE_TEST_ROOT}")

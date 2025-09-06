@@ -1,0 +1,11 @@
+//
+//  Config.xcconfig
+//  ArenaForgeStudio
+//
+//  Created by KK on 2025/9/6.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+FRAMEWORK_SEARCH_PATHS = $(SRCROOT)/../gen_xcode/Products/$CONFIGURATION

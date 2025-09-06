@@ -30,3 +30,4 @@ ${@} \
 echo "[*] path xcode PATH environment"
 sed -i '' "s#shellScript = \"#shellScript = \"export PATH=${HOMEBREW_PATH}:\\\$PATH\\n#" "$GEN_XCODE_PROJEC_FILE"
 echo "[*] Patch done."
+
