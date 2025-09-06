@@ -27,6 +27,13 @@ if (CMAKE_BUILD_TYPE MATCHES "Debug")
 endif ()
 
 
+if(APPLE)
+    find_library(CORE_FOUNDATION CoreFoundation REQUIRED)
+    list(APPEND CORE_SHARED_LIBS ${CORE_FOUNDATION})
+endif()
+
+
+
 add_files_by_extension(SRC_FILES ".h;.hpp;.cpp"
     .
 )
@@ -38,6 +45,7 @@ add_files_by_extension(PUBLIC_HEADER_FILES ".h;.hpp"
 
 message(STATUS "PUBLIC_HEADER_FILES: ${PUBLIC_HEADER_FILES}")
 message(STATUS "SRC_FILES: ${SRC_FILES}")
+message(STATUS "CORE_SHARED_LIBS: ${CORE_SHARED_LIBS}")
 
 add_library(${TAGRGET_NAME} STATIC ${SRC_FILES} ${PUBLIC_HEADER_FILES})
 
@@ -45,6 +53,7 @@ add_source_group(PUBLIC_HEADER_FILES ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAM
 add_source_group(SRC_FILES ${CMAKE_CURRENT_LIST_DIR} "Sources")
 
 target_link_libraries(${TAGRGET_NAME}
+    ${CORE_SHARED_LIBS}
     tgfx
 )
 

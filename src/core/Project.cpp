@@ -27,7 +27,7 @@
 #include <arenaforge/core/Project.h>
 
 #include <arenaforge/core/Venue.h>
-#include <arenaforge/core/IdGenerator.h>
+#include <arenaforge/core/uuid/UUID.h>
 
 #include <tgfx/platform/Print.h>
 
@@ -38,8 +38,7 @@ std::shared_ptr<Project> Project::Make(const std::string &name, const std::strin
 
 Project::Project(const std::string &name, const std::string &description)
     : _name(name)
-    , _description(description)
-    , _idGen(std::make_unique<IdGenerator>(1)) {
+    , _description(description) {
 }
 
 Project::~Project() {
@@ -47,7 +46,7 @@ Project::~Project() {
 }
 
 std::shared_ptr<Venue> Project::createVenue(const std::string &name, const std::string &description) {
-    auto venueId = _idGen->generate();
+    auto venueId = UUID::Instance().generate();
     auto venue = Venue::Make(venueId, name, description);
     return venue;
 }

@@ -31,12 +31,11 @@
 #include <string>
 
 namespace arenaforge {
-class IdGenerator;
 class Project;
 class BaseLayer;
 class Venue : public std::enable_shared_from_this<Venue> {
   public:
-    static std::shared_ptr<Venue> Make(uint32_t venueId, const std::string &name, const std::string &description);
+    static std::shared_ptr<Venue> Make(const std::string &venueId, const std::string &name, const std::string &description);
 
     ~Venue();
 
@@ -56,7 +55,7 @@ class Venue : public std::enable_shared_from_this<Venue> {
         _description = description;
     }
 
-    uint32_t venueId() const {
+    std::string venueId() const {
         return _venueId;
     }
 
@@ -69,17 +68,16 @@ class Venue : public std::enable_shared_from_this<Venue> {
     BaseLayer *mask() const;
 
   protected:
-    Venue(uint32_t venueId, const std::string &name, const std::string &description);
+    Venue(const std::string &venueId, const std::string &name, const std::string &description);
 
   private:
     void attachProject(std::weak_ptr<Project> project);
     void detachProject();
 
   private:
-    uint32_t _venueId{0};
+    std::string _venueId{""};
     std::string _name{""};
     std::string _description{""};
-    std::unique_ptr<IdGenerator> _idGen{nullptr};
     std::shared_ptr<BaseLayer> _root{nullptr};
     std::shared_ptr<BaseLayer> _container{nullptr};
     std::shared_ptr<BaseLayer> _mask{nullptr};

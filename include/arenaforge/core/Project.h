@@ -32,7 +32,6 @@
 #include <vector>
 
 namespace arenaforge {
-class IdGenerator;
 class Venue;
 class Project : public std::enable_shared_from_this<Project> {
   public:
@@ -73,7 +72,6 @@ class Project : public std::enable_shared_from_this<Project> {
   private:
     std::string _name{""};
     std::string _description{""};
-    std::unique_ptr<IdGenerator> _idGen{nullptr};
     std::vector<std::shared_ptr<Venue>> _venues{};
 };
 };  // namespace arenaforge

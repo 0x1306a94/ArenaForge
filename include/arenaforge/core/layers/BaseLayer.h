@@ -27,18 +27,22 @@
 #ifndef BaseLayer_h_ArenaForge
 #define BaseLayer_h_ArenaForge
 
+#include <arenaforge/core/PathCommand.h>
+#include <arenaforge/core/layers/ShapeType.h>
+
 #include <tgfx/layers/ShapeLayer.h>
 
-namespace arenaforge {
-class IdGenerator;
+#include <string>
+#include <unordered_map>
 
+namespace arenaforge {
 class BaseLayer : public tgfx::ShapeLayer {
   public:
-    static std::shared_ptr<BaseLayer> Make(uint32_t layerId);
+    static std::shared_ptr<BaseLayer> Make(const std::string &layerId, ShapeType type);
 
     virtual ~BaseLayer() = default;
 
-    uint32_t layerId() const {
+    std::string layerId() const {
         return _layerId;
     }
 
@@ -48,18 +52,42 @@ class BaseLayer : public tgfx::ShapeLayer {
 
     void setTransient(bool value);
 
-    std::shared_ptr<BaseLayer> getChildById(uint32_t layerId);
+    tgfx::Rect frame() const {
+        return _frame;
+    }
 
-    virtual std::shared_ptr<BaseLayer> clone(IdGenerator *idGen, bool cloneChildren) const;
+    void setFrame(const tgfx::Rect &frame);
+
+    const std::unordered_map<std::string, std::string> attributes() const {
+        return _attributes;
+    }
+
+    void clearAttributes();
+
+    void addAttribute(const std::string &key, const std::string &value);
+
+    std::shared_ptr<BaseLayer> getChildById(const std::string &layerId);
+
+    virtual std::shared_ptr<BaseLayer> clone(bool cloneChildren) const;
 
   protected:
-    BaseLayer(uint32_t layerId);
+    BaseLayer(const std::string &layerId, ShapeType type);
 
-    virtual void doClone(BaseLayer *target, IdGenerator *idGen, bool cloneChildren) const;
+    virtual void doClone(BaseLayer *target, bool cloneChildren) const;
+
+    void updatePathCommands();
+
+    void onUpdateContent(tgfx::LayerRecorder *recorder) override;
 
   private:
-    uint32_t _layerId{0};
+    void initializePathCommand(ShapeType type);
+
+  private:
+    std::string _layerId{""};
     bool _transient;
+    std::unordered_map<std::string, std::string> _attributes{};
+    tgfx::Rect _frame{};
+    std::vector<PathCommand> _pathCommands{};
 };
 };  // namespace arenaforge
 

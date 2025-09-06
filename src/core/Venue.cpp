@@ -26,28 +26,28 @@
 
 #include <arenaforge/core/Venue.h>
 
-#include <arenaforge/core/IdGenerator.h>
 #include <arenaforge/core/Project.h>
 #include <arenaforge/core/layers/BaseLayer.h>
+#include <arenaforge/core/uuid/UUID.h>
 
 #include <tgfx/layers/Layer.h>
 #include <tgfx/platform/Print.h>
 
 namespace arenaforge {
 
-std::shared_ptr<Venue> Venue::Make(uint32_t venueId, const std::string &name, const std::string &description) {
+std::shared_ptr<Venue> Venue::Make(const std::string &venueId, const std::string &name, const std::string &description) {
     return std::shared_ptr<Venue>(new Venue(venueId, name, description));
 }
 
-Venue::Venue(uint32_t venueId, const std::string &name, const std::string &description)
+Venue::Venue(const std::string &venueId, const std::string &name, const std::string &description)
     : _venueId(venueId)
     , _name(name)
-    , _description(description)
-    , _idGen(std::make_unique<IdGenerator>(1)) {
+    , _description(description) {
 
-    _root = BaseLayer::Make(_idGen->generate());
-    _container = BaseLayer::Make(_idGen->generate());
-    _mask = BaseLayer::Make(_idGen->generate());
+    auto &uuid = UUID::Instance();
+    _root = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _container = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _mask = BaseLayer::Make(uuid(), ShapeType::Rectangle);
 
     _root->addChild(_container);
     _root->addChild(_mask);

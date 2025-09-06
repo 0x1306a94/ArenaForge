@@ -18,38 +18,21 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  IdGenerator.h
+//  UnitConverter.h
 //  arenaforge_core
 //
-//  Created by king on 2025/9/5.
+//  Created by KK on 2025/9/6.
 //
 
-#ifndef IdGenerator_h_ArenaForge
-#define IdGenerator_h_ArenaForge
+#ifndef UnitConverter_h_ArenaForge
+#define UnitConverter_h_ArenaForge
 
-#include <cstdint>
+#include <tgfx/core/Point.h>
+#include <tgfx/core/Size.h>
 
 namespace arenaforge {
-class IdGenerator {
-  public:
-    explicit IdGenerator(uint32_t start = 1)
-        : _nextId(start) {}
 
-    uint32_t generate() {
-        return _nextId++;
-    }
-
-    void reset(uint32_t start = 1) {
-        _nextId = start;
-    }
-
-    uint32_t peek() const {
-        return _nextId;
-    }
-
-  private:
-    uint32_t _nextId = 1;
+tgfx::Point operator*(const tgfx::Point &point, const tgfx::Size &size);
 };
-};  // namespace arenaforge
 
-#endif /* IdGenerator_h_ArenaForge */
+#endif /* UnitConverter_h_ArenaForge */

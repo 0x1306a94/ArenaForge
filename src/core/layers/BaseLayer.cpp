@@ -26,19 +26,23 @@
 
 #include <arenaforge/core/layers/BaseLayer.h>
 
-#include <arenaforge/core/IdGenerator.h>
+#include <arenaforge/core/PathCommand.h>
+#include <arenaforge/core/utils/UnitConverter.h>
+#include <arenaforge/core/uuid/UUID.h>
 
 #include "LayerStyleClone.h"
 #include "ShapeStyleClone.h"
 
 namespace arenaforge {
-std::shared_ptr<BaseLayer> BaseLayer::Make(uint32_t layerId) {
-    return std::shared_ptr<BaseLayer>(new BaseLayer(layerId));
+std::shared_ptr<BaseLayer> BaseLayer::Make(const std::string &layerId, ShapeType type) {
+    return std::shared_ptr<BaseLayer>(new BaseLayer(layerId, type));
 }
 
-BaseLayer::BaseLayer(uint32_t layerId)
+BaseLayer::BaseLayer(const std::string &layerId, ShapeType type)
     : tgfx::ShapeLayer()
     , _layerId(layerId) {
+
+    initializePathCommand(type);
 }
 
 void BaseLayer::setTransient(bool value) {
@@ -49,7 +53,23 @@ void BaseLayer::setTransient(bool value) {
     invalidateContent();
 }
 
-std::shared_ptr<BaseLayer> BaseLayer::getChildById(uint32_t layerId) {
+void BaseLayer::setFrame(const tgfx::Rect &frame) {
+    if (_frame == frame) {
+        return;
+    }
+    _frame = frame;
+    invalidateContent();
+}
+
+void BaseLayer::clearAttributes() {
+    _attributes.clear();
+}
+
+void BaseLayer::addAttribute(const std::string &key, const std::string &value) {
+    _attributes[key] = value;
+}
+
+std::shared_ptr<BaseLayer> BaseLayer::getChildById(const std::string &layerId) {
     for (const auto &child : children()) {
         if (auto base = std::dynamic_pointer_cast<BaseLayer>(child); base->layerId() == layerId) {
             return base;
@@ -58,13 +78,13 @@ std::shared_ptr<BaseLayer> BaseLayer::getChildById(uint32_t layerId) {
     return nullptr;
 }
 
-std::shared_ptr<BaseLayer> BaseLayer::clone(IdGenerator *idGen, bool cloneChildren) const {
-    auto copied = BaseLayer::Make(idGen->generate());
-    doClone(copied.get(), idGen, cloneChildren);
+std::shared_ptr<BaseLayer> BaseLayer::clone(bool cloneChildren) const {
+    auto copied = BaseLayer::Make(UUID::Instance().generate(), ShapeType::Rectangle);
+    doClone(copied.get(), cloneChildren);
     return copied;
 }
 
-void BaseLayer::doClone(BaseLayer *target, IdGenerator *idGen, bool cloneChildren) const {
+void BaseLayer::doClone(BaseLayer *target, bool cloneChildren) const {
     target->setName(name());
     target->setAlpha(alpha());
     target->setVisible(visible());
@@ -75,12 +95,15 @@ void BaseLayer::doClone(BaseLayer *target, IdGenerator *idGen, bool cloneChildre
     target->setAllowsGroupOpacity(allowsGroupOpacity());
     target->setAllowsEdgeAntialiasing(allowsEdgeAntialiasing());
     target->setExcludeChildEffectsInLayerStyle(excludeChildEffectsInLayerStyle());
+    target->_pathCommands = _pathCommands;
+
+    target->setFrame(frame());
 
     auto maskLayer = mask();
     if (maskLayer) {
         auto baseLayer = std::dynamic_pointer_cast<BaseLayer>(maskLayer);
         if (baseLayer) {
-            auto copied = baseLayer->clone(idGen, cloneChildren);
+            auto copied = baseLayer->clone(cloneChildren);
             target->setMask(copied);
         }
     }
@@ -99,7 +122,7 @@ void BaseLayer::doClone(BaseLayer *target, IdGenerator *idGen, bool cloneChildre
         target->setLayerStyles(std::move(copiedStyles));
     }
 
-    target->setPath(path());
+    //    target->setPath(path());
     target->setLineWidth(lineWidth());
     target->setMiterLimit(miterLimit());
     target->setStrokeStart(strokeStart());
@@ -141,11 +164,86 @@ void BaseLayer::doClone(BaseLayer *target, IdGenerator *idGen, bool cloneChildre
         for (auto &child : children) {
             auto baseLayer = std::dynamic_pointer_cast<BaseLayer>(child);
             if (baseLayer) {
-                auto copied = baseLayer->clone(idGen, cloneChildren);
+                auto copied = baseLayer->clone(cloneChildren);
                 target->addChild(copied);
             }
         }
     }
 }
 
+void BaseLayer::updatePathCommands() {
+}
+
+void BaseLayer::onUpdateContent(tgfx::LayerRecorder *recorder) {
+    // rebuild path
+    tgfx::Path path;
+    auto size = frame().size();
+    for (const auto &command : _pathCommands) {
+        switch (command.type) {
+            case PathCommandType::MoveTo: {
+                auto moveTo = command.cmd.moveTo;
+                auto p = moveTo.p * size;
+                path.moveTo(p);
+                break;
+            }
+            case PathCommandType::LineTo: {
+                auto lineTo = command.cmd.lineTo;
+                auto p = lineTo.p * size;
+                path.lineTo(p);
+                break;
+            }
+            case PathCommandType::QuadTo: {
+                auto quadTo = command.cmd.quadTo;
+                auto c = quadTo.c * size;
+                auto p = quadTo.p * size;
+                path.quadTo(c, p);
+                break;
+            }
+            case PathCommandType::CubicTo: {
+                auto cubicTo = command.cmd.cubicTo;
+                auto c1 = cubicTo.c1 * size;
+                auto c2 = cubicTo.c2 * size;
+                auto p = cubicTo.p * size;
+                path.cubicTo(c1, c2, p);
+                break;
+            }
+            case PathCommandType::ClosePath: {
+                path.close();
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+
+    setPath(path);
+
+    tgfx::ShapeLayer::onUpdateContent(recorder);
+}
+
+void BaseLayer::initializePathCommand(ShapeType type) {
+    switch (type) {
+        case ShapeType::Rectangle: {
+            _pathCommands.push_back(PathCommand::MakeMoveTo({0.0, 0.0}));
+            _pathCommands.push_back(PathCommand::MakeLineTo({1.0, 0.0}));
+            _pathCommands.push_back(PathCommand::MakeLineTo({1.0, 1.0}));
+            _pathCommands.push_back(PathCommand::MakeLineTo({0.0, 1.0}));
+            _pathCommands.push_back(PathCommand::MakeLineTo({0.0, 0.0}));
+            _pathCommands.push_back(PathCommand::MakeClose());
+            break;
+        }
+        case ShapeType::Triangle: {
+            _pathCommands.push_back(PathCommand::MakeMoveTo({0.5, 0.0}));
+            _pathCommands.push_back(PathCommand::MakeLineTo({1.0, 1.0}));
+            _pathCommands.push_back(PathCommand::MakeLineTo({0.0, 1.0}));
+            _pathCommands.push_back(PathCommand::MakeLineTo({0.5, 0.0}));
+            _pathCommands.push_back(PathCommand::MakeClose());
+            break;
+        }
+
+        default:
+            break;
+    }
+}
 };  // namespace arenaforge

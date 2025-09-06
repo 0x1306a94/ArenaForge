@@ -18,25 +18,22 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  IdGeneratorTest.cpp
-//  arenaforge_core_test
+//  ShapeType.h
+//  arenaforge_core
 //
-//  Created by king on 2025/9/5.
+//  Created by KK on 2025/9/6.
 //
 
-#include "../base/ArenaForgeTest.h"
-
-#include <arenaforge/core/IdGenerator.h>
+#ifndef ShapeType_h_ArenaForge
+#define ShapeType_h_ArenaForge
 
 namespace arenaforge {
-ArenaForge_TEST(IdGeneratorTest, Generator) {
-    IdGenerator gen{1};
-    EXPECT_EQ(gen.generate(), 1);
-    EXPECT_EQ(gen.generate(), 2);
-    EXPECT_EQ(gen.peek(), 3);
-    gen.reset(1000);
-    EXPECT_EQ(gen.generate(), 1000);
-    EXPECT_EQ(gen.generate(), 1001);
-    EXPECT_EQ(gen.peek(), 1002);
+enum class ShapeType {
+    Rectangle,
+    Ellipse,
+    Line,
+    Triangle,
 };
-};  // namespace arenaforge
+};
+
+#endif /* ShapeType_h_ArenaForge */
