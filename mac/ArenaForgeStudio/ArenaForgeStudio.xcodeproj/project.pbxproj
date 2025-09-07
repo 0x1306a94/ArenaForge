@@ -295,11 +295,13 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				$SRCROOT/../gen_xcode/Products/$CONFIGURATION/arenaforge.framework,
 			);
 			name = "Copy arenaforge framework";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				$CONFIGURATION_BUILD_DIR/arenaforge.framework,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
