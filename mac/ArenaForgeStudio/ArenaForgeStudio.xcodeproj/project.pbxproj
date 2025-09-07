@@ -10,6 +10,7 @@
 		4B3A89E42E6C63F50095AF78 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4B3A89E32E6C63F50095AF78 /* Config.xcconfig */; };
 		4B3A89EC2E6C64F40095AF78 /* arenaforge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B3A89EB2E6C64F40095AF78 /* arenaforge.framework */; };
 		4B3A89ED2E6C64F40095AF78 /* arenaforge.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4B3A89EB2E6C64F40095AF78 /* arenaforge.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4BC04DB82E6D241900EC6B09 /* WelcomeWindow in Frameworks */ = {isa = PBXBuildFile; productRef = 4BC04DB72E6D241900EC6B09 /* WelcomeWindow */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,7 +56,7 @@
 		4B3A891A2E6C61F20095AF78 /* Exceptions for "ArenaForgeStudio" folder in "ArenaForgeStudio" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				Config/Info.plist,
 			);
 			target = 4B3A88F32E6C61F10095AF78 /* ArenaForgeStudio */;
 		};
@@ -88,6 +89,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B3A89EC2E6C64F40095AF78 /* arenaforge.framework in Frameworks */,
+				4BC04DB82E6D241900EC6B09 /* WelcomeWindow in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -160,6 +162,7 @@
 			);
 			name = ArenaForgeStudio;
 			packageProductDependencies = (
+				4BC04DB72E6D241900EC6B09 /* WelcomeWindow */,
 			);
 			productName = ArenaForgeStudio;
 			productReference = 4B3A88F42E6C61F10095AF78 /* ArenaForgeStudio.app */;
@@ -243,6 +246,9 @@
 			);
 			mainGroup = 4B3A88EB2E6C61F10095AF78;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4BC04DB62E6D241900EC6B09 /* XCRemoteSwiftPackageReference "WelcomeWindow" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4B3A88F52E6C61F10095AF78 /* Products */;
 			projectDirPath = "";
@@ -344,13 +350,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ArenaForgeStudio/ArenaForgeStudio.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "$(SRCROOT)/ArenaForgeStudio/Config/ArenaForgeStudio.entitlements";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ArenaForgeStudio/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/ArenaForgeStudio/Config/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -372,13 +378,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ArenaForgeStudio/ArenaForgeStudio.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "$(SRCROOT)/ArenaForgeStudio/Config/ArenaForgeStudio.entitlements";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ArenaForgeStudio/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/ArenaForgeStudio/Config/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -619,6 +625,26 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4BC04DB62E6D241900EC6B09 /* XCRemoteSwiftPackageReference "WelcomeWindow" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CodeEditApp/WelcomeWindow";
+			requirement = {
+				kind = versionRange;
+				maximumVersion = 1.1.0;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4BC04DB72E6D241900EC6B09 /* WelcomeWindow */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4BC04DB62E6D241900EC6B09 /* XCRemoteSwiftPackageReference "WelcomeWindow" */;
+			productName = WelcomeWindow;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4B3A88EC2E6C61F10095AF78 /* Project object */;
 }
