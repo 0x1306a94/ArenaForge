@@ -24,11 +24,16 @@
 //  Created by KK on 2025/9/6.
 //
 
-#include <arenaforge/editor/core/AFEditor.h>
+#import <arenaforge/editor/core/AFEditor.h>
 
-#include <arenaforge/editor/core/Editor.h>
+#import <arenaforge/editor/core/AFLayer.h>
+#import <arenaforge/editor/core/AFProject.h>
+#import <arenaforge/editor/core/Editor.h>
+
+#import "AFLayer+Private.h"
 
 @interface AFEditor ()
+@property (nonatomic, strong) AFProject *project;
 @property (nonatomic, strong) AFMacCanvasView *canvasView;
 @end
 
@@ -42,8 +47,19 @@
 }
 #endif
 
+- (instancetype)initWithProject:(AFProject *)project {
+    if (self == [super init]) {
+        self.project = project;
+    }
+    return self;
+}
+
 - (void)setupCanvasView:(AFMacCanvasView *)canvasView {
     self.canvasView = canvasView;
+}
+
+- (AFLayer *_Nullable)createLayerWithName:(NSString *)name {
+    return [AFLayer createWithName:name];
 }
 
 @end

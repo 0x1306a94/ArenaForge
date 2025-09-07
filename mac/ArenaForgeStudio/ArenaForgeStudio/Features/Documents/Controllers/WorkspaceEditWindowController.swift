@@ -25,13 +25,75 @@
 //
 
 import AppKit
+import arenaforge
+import Combine
 
-final class WorkspaceEditWindowController: NSWindowController {
+final class WorkspaceEditWindowController: NSWindowController, NSWindowDelegate, ObservableObject {
+    @Published var navigatorCollapsed: Bool = false
+    @Published var inspectorCollapsed: Bool = false
+
+    private var workspce: WorkspaceDocument?
+    private var editor: AFEditor?
+
+    var splitViewController: WorkspaceEditSplitViewController? {
+        contentViewController as? WorkspaceEditSplitViewController
+    }
+
+    init(window: NSWindow?, workspace: WorkspaceDocument?) {
+        super.init(window: window)
+        window?.delegate = self
+        guard let workspace else { return }
+        self.workspce = workspace
+
+        guard let splitViewController = setupSplitViewController(workspace: workspace) else {
+            fatalError("Failed to set up content view.")
+        }
+
+        contentViewController = splitViewController
+
+        guard let editor = makeEditor(workspace: workspace) else {
+            fatalError("Failed to set up editor.")
+        }
+
+        self.editor = editor
+
+        setupToolbar()
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func windowDidLoad() {
         super.windowDidLoad()
-    
-        // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     }
 
+    func setupSplitViewController(workspace: WorkspaceDocument) -> WorkspaceEditSplitViewController? {
+        guard let window else {
+            assertionFailure("No window found for this controller. Cannot set up content.")
+            return nil
+        }
+        return WorkspaceEditSplitViewController(workspace: workspace, windowRef: window)
+    }
+
+    private func makeEditor(workspace: WorkspaceDocument) -> AFEditor? {
+        guard let project = workspace.project else {
+            return nil
+        }
+        let editor = AFEditor(project: project)
+        return editor
+    }
+
+    // MARK: NSWindowDelegate
+
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        return true
+    }
+
+    #if DEBUG
+        deinit {
+            print("\(type(of: self)) deinit")
+        }
+    #endif
 }

@@ -18,32 +18,14 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  OpenFileOrFolderButton.swift
-//  ArenaForgeStudio
+//  AFVenue+Private.h
+//  arenaforge_editor
 //
 //  Created by KK on 2025/9/7.
 //
 
-import SwiftUI
-import WelcomeWindow
+#import <arenaforge/editor/core/AFVenue.h>
 
-struct OpenFileOrFolderButton: View {
-    @Environment(\.openWindow)
-    private var openWindow
-
-    var dismissWindow: () -> Void
-
-    var body: some View {
-        WelcomeButton(
-            iconName: "folder",
-            title: "Open File or Folder...",
-            action: {
-                NSDocumentController.shared.openDocumentWithDialog(
-                    configuration: .init(canChooseFiles: true, canChooseDirectories: true),
-                    onDialogPresented: { dismissWindow() },
-                    onCancel: { openWindow(id: DefaultSceneID.welcome) }
-                )
-            }
-        )
-    }
-}
+@interface AFVenue ()
++ (instancetype)createWithName:(NSString *)name;
+@end

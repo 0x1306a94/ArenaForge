@@ -30,6 +30,9 @@
 #import <Foundation/Foundation.h>
 
 #import <arenaforge/editor/core/AFEditor.h>
+#import <arenaforge/editor/core/AFProject.h>
+#import <arenaforge/editor/core/AFVenue.h>
+#import <arenaforge/editor/core/AFLayer.h>
 #import <arenaforge/editor/platform/mac/AFMacCanvasView.h>
 
 #endif /* arenaforge_editor_h_ArenaForge */

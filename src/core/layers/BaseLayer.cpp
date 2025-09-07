@@ -79,7 +79,8 @@ std::shared_ptr<BaseLayer> BaseLayer::getChildById(const std::string &layerId) {
 }
 
 std::shared_ptr<BaseLayer> BaseLayer::clone(bool cloneChildren) const {
-    auto copied = BaseLayer::Make(UUID::Instance().generate(), ShapeType::Rectangle);
+    auto uuid = UUID::Instance();
+    auto copied = BaseLayer::Make(uuid(), ShapeType::Rectangle);
     doClone(copied.get(), cloneChildren);
     return copied;
 }

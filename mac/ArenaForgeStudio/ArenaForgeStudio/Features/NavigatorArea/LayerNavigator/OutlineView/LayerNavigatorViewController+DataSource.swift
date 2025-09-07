@@ -18,34 +18,39 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  ArenaForgeStudioApp.swift
+//  LayerNavigatorViewController+DataSource.swift
 //  ArenaForgeStudio
 //
 //  Created by KK on 2025/9/7.
 //
 
-import SwiftUI
-import WelcomeWindow
+import AppKit
 
-@main
-struct ArenaForgeStudioApp: App {
-    @NSApplicationDelegateAdaptor var appdelegate: AppDelegate
+extension LayerNavigatorViewController: NSOutlineViewDataSource {
+//    private func getOutlineViewItems(for item: any) -> [any] {
+//        return []
+//    }
 
-    var body: some Scene {
-        Group {
-            WelcomeWindow(
-                // Add two action buttons below your icon
-                actions: { dismissWindow in
-                    NewProjectButton(dismissWindow: dismissWindow)
-                    OpenProjectButton(dismissWindow: dismissWindow)
-                },
-                // Receive files via drag and drop
-                onDrop: { url, dismiss in
-                    print("File dropped at: \(url.path)")
+    func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
+//        if let item = item as? CEWorkspaceFile {
+//            return getOutlineViewItems(for: item).count
+//        }
+//        return content.count
+        return 0
+    }
 
-                    dismiss()
-                }
-            )
-        }
+    func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
+//        if let item = item as? CEWorkspaceFile {
+//            return getOutlineViewItems(for: item)[index]
+//        }
+//        return content[index]
+        return 0
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
+//        if let item = item as? CEWorkspaceFile {
+//            return item.isFolder
+//        }
+        return false
     }
 }

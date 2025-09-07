@@ -18,34 +18,42 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  ArenaForgeStudioApp.swift
+//  WorkspaceEditCanvasViewController.swift
 //  ArenaForgeStudio
 //
 //  Created by KK on 2025/9/7.
 //
 
-import SwiftUI
-import WelcomeWindow
+import AppKit
+import arenaforge
 
-@main
-struct ArenaForgeStudioApp: App {
-    @NSApplicationDelegateAdaptor var appdelegate: AppDelegate
+final class WorkspaceEditCanvasViewController: NSViewController {
+    var editor: AFEditor?
+    var canvasView: AFMacCanvasView?
 
-    var body: some Scene {
-        Group {
-            WelcomeWindow(
-                // Add two action buttons below your icon
-                actions: { dismissWindow in
-                    NewProjectButton(dismissWindow: dismissWindow)
-                    OpenProjectButton(dismissWindow: dismissWindow)
-                },
-                // Receive files via drag and drop
-                onDrop: { url, dismiss in
-                    print("File dropped at: \(url.path)")
+    override func viewDidLoad() {
+        super.viewDidLoad()
 
-                    dismiss()
-                }
-            )
-        }
+        setupCanvasView()
     }
+
+    private func setupCanvasView() {
+        let canvasView = AFMacCanvasView()
+        canvasView.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(canvasView)
+        self.canvasView = canvasView
+        NSLayoutConstraint.activate([
+            canvasView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            canvasView.topAnchor.constraint(equalTo: view.topAnchor),
+            canvasView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            canvasView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+    }
+
+    #if DEBUG
+        deinit {
+            print("\(type(of: self)) deinit")
+        }
+    #endif
 }

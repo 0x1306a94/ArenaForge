@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		4B3A89E42E6C63F50095AF78 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4B3A89E32E6C63F50095AF78 /* Config.xcconfig */; };
-		4B3A89EC2E6C64F40095AF78 /* arenaforge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B3A89EB2E6C64F40095AF78 /* arenaforge.framework */; };
-		4B3A89ED2E6C64F40095AF78 /* arenaforge.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4B3A89EB2E6C64F40095AF78 /* arenaforge.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4B3E93722E6D666C00F5FCD7 /* arenaforge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B3E93712E6D666C00F5FCD7 /* arenaforge.framework */; };
+		4B3E93732E6D666C00F5FCD7 /* arenaforge.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4B3E93712E6D666C00F5FCD7 /* arenaforge.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4BC04DB82E6D241900EC6B09 /* WelcomeWindow in Frameworks */ = {isa = PBXBuildFile; productRef = 4BC04DB72E6D241900EC6B09 /* WelcomeWindow */; };
 /* End PBXBuildFile section */
 
@@ -31,13 +31,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		4B3A89E92E6C64600095AF78 /* Embed Frameworks */ = {
+		4BC2726B2E6D665600C6B3AD /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				4B3A89ED2E6C64F40095AF78 /* arenaforge.framework in Embed Frameworks */,
+				4B3E93732E6D666C00F5FCD7 /* arenaforge.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -49,7 +49,7 @@
 		4B3A89082E6C61F20095AF78 /* ArenaForgeStudioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ArenaForgeStudioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B3A89122E6C61F20095AF78 /* ArenaForgeStudioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ArenaForgeStudioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B3A89E32E6C63F50095AF78 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		4B3A89EB2E6C64F40095AF78 /* arenaforge.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = arenaforge.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B3E93712E6D666C00F5FCD7 /* arenaforge.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = arenaforge.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -88,7 +88,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B3A89EC2E6C64F40095AF78 /* arenaforge.framework in Frameworks */,
+				4B3E93722E6D666C00F5FCD7 /* arenaforge.framework in Frameworks */,
 				4BC04DB82E6D241900EC6B09 /* WelcomeWindow in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -135,7 +135,7 @@
 		4B3A89AE2E6C63A30095AF78 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4B3A89EB2E6C64F40095AF78 /* arenaforge.framework */,
+				4B3E93712E6D666C00F5FCD7 /* arenaforge.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -151,7 +151,7 @@
 				4B3A88F02E6C61F10095AF78 /* Sources */,
 				4B3A88F12E6C61F10095AF78 /* Frameworks */,
 				4B3A88F22E6C61F10095AF78 /* Resources */,
-				4B3A89E92E6C64600095AF78 /* Embed Frameworks */,
+				4BC2726B2E6D665600C6B3AD /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -295,13 +295,11 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				$SRCROOT/../gen_xcode/Products/$CONFIGURATION/arenaforge.framework,
 			);
 			name = "Copy arenaforge framework";
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				$CONFIGURATION_BUILD_DIR/arenaforge.framework,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

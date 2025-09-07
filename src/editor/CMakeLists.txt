@@ -36,12 +36,6 @@ if (MSVC)
     add_compile_options("/utf-8")
 endif (MSVC)
 
-if (CMAKE_BUILD_TYPE MATCHES "Debug")
-    add_definitions(-DDEBUG)
-endif ()
-
-
-
 
 if(MACOS)
     # find_library(CORE_FOUNDATION CoreFoundation REQUIRED)
@@ -57,6 +51,9 @@ if(APPLE)
         ${PUBLIC_HEADER_ROOT_DIR}/arenaforge_editor.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/defines.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/Platform.h
+        ${PUBLIC_HEADER_ROOT_DIR}/core/AFProject.h
+        ${PUBLIC_HEADER_ROOT_DIR}/core/AFVenue.h
+        ${PUBLIC_HEADER_ROOT_DIR}/core/AFLayer.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFEditor.h
         ${PUBLIC_HEADER_ROOT_DIR}/platform/mac/AFMacCanvasView.h
     )
@@ -107,6 +104,10 @@ target_include_directories(${TAGRGET_NAME} PRIVATE
     .
     ${ArenaForge_ROOT_INCLUDE_DIR}
 )
+
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    target_compile_definitions(${TAGRGET_NAME} PRIVATE DEBUG)
+endif ()
 
 if(APPLE)
     set_target_properties(${TAGRGET_NAME} PROPERTIES

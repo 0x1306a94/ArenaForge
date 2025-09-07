@@ -22,9 +22,7 @@ if (MSVC)
     add_compile_options("/utf-8")
 endif (MSVC)
 
-if (CMAKE_BUILD_TYPE MATCHES "Debug")
-    add_definitions(-DDEBUG)
-endif ()
+
 
 
 if(APPLE)
@@ -63,3 +61,6 @@ target_include_directories(${TAGRGET_NAME} PRIVATE
     ${ArenaForge_ROOT_INCLUDE_DIR}
 )
 
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    target_compile_definitions(${TAGRGET_NAME} PRIVATE DEBUG)
+endif ()

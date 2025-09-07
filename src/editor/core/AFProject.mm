@@ -18,34 +18,29 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFEditor.h
+//  AFProject.mm
 //  arenaforge
 //
-//  Created by KK on 2025/9/6.
+//  Created by KK on 2025/9/7.
 //
 
-#ifndef AFEditor_h_ArenaForge
-#define AFEditor_h_ArenaForge
+#include <arenaforge/editor/core/AFProject.h>
 
-#import <Foundation/Foundation.h>
-
-#import <arenaforge/editor/core/defines.h>
-
-NS_ASSUME_NONNULL_BEGIN
-
-@class AFMacCanvasView;
-@class AFLayer;
-@class AFProject;
-ARENA_FORGE_EXPORT_API @interface AFEditor : NSObject
-@property (nonatomic, strong, readonly) AFProject *project;
-+ (instancetype)new NS_UNAVAILABLE;
-- (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithProject:(AFProject *)project NS_DESIGNATED_INITIALIZER;
-- (void)setupCanvasView:(AFMacCanvasView *)canvasView;
-
-- (AFLayer *_Nullable)createLayerWithName:(NSString *)name;
+@interface AFProject ()
+@property (nonatomic, strong) NSURL *fileURL;
 @end
 
-NS_ASSUME_NONNULL_END
+@implementation AFProject
+#if DEBUG
+- (void)dealloc {
+    NSLog(@"[%@ dealloc]", NSStringFromClass(self.class));
+}
+#endif
 
-#endif /* AFEditor_h_ArenaForge */
+- (instancetype __nullable)initWithFileURL:(NSURL *)fileURL error:(NSError **)error {
+    if (self == [super init]) {
+        self.fileURL = fileURL;
+    }
+    return self;
+}
+@end

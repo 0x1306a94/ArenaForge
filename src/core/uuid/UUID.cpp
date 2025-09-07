@@ -56,10 +56,11 @@ class UUID::UUIDImpl {
 
         const char *cStr = CFStringGetCStringPtr(stringRef, kCFStringEncodingUTF8);
         if (cStr != nullptr) {
+            auto copied = std::string(cStr, strlen(cStr));
             // fast path
             CFRelease(uuidRef);
             CFRelease(stringRef);
-            return cStr;
+            return copied;
         }
 
         std::string str(static_cast<size_t>(CFStringGetLength(stringRef)) + 1, '\0');

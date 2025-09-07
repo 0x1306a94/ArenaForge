@@ -31,6 +31,11 @@
 #include <arenaforge/editor/core/defines.h>
 
 #include <memory>
+#include <vector>
+
+namespace arenaforge {
+class Venue;
+};
 
 namespace arenaforge::editor {
 class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor> {
@@ -38,10 +43,15 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
     static std::shared_ptr<Editor> Make();
     ~Editor();
 
+    std::vector<std::shared_ptr<arenaforge::Venue>> venues() const {
+        return _venues;
+    }
+
   protected:
     Editor();
 
   private:
+    std::vector<std::shared_ptr<arenaforge::Venue>> _venues{};
 };
 };  // namespace arenaforge::editor
 

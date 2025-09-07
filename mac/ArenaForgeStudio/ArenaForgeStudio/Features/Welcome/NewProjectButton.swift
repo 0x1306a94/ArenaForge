@@ -18,7 +18,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  NewFileButton.swift
+//  NewProjectButton.swift
 //  ArenaForgeStudio
 //
 //  Created by KK on 2025/9/7.
@@ -27,13 +27,13 @@
 import SwiftUI
 import WelcomeWindow
 
-struct NewFileButton: View {
+struct NewProjectButton: View {
     var dismissWindow: () -> Void
 
     var body: some View {
         WelcomeButton(
             iconName: "plus.square",
-            title: "Create New File...",
+            title: "Create New Project...",
             action: {
 //                let documentController = NSDocumentController()
 //                documentController.createAndOpenNewDocument(onCompletion: { dismissWindow() })

@@ -18,34 +18,39 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFEditor.h
+//  AFLayer.mm
 //  arenaforge
 //
-//  Created by KK on 2025/9/6.
+//  Created by KK on 2025/9/7.
 //
 
-#ifndef AFEditor_h_ArenaForge
-#define AFEditor_h_ArenaForge
+#include <arenaforge/editor/core/AFLayer.h>
 
-#import <Foundation/Foundation.h>
+#include <arenaforge/core/layers/BaseLayer.h>
+#include <arenaforge/core/uuid/UUID.h>
 
-#import <arenaforge/editor/core/defines.h>
-
-NS_ASSUME_NONNULL_BEGIN
-
-@class AFMacCanvasView;
-@class AFLayer;
-@class AFProject;
-ARENA_FORGE_EXPORT_API @interface AFEditor : NSObject
-@property (nonatomic, strong, readonly) AFProject *project;
-+ (instancetype)new NS_UNAVAILABLE;
-- (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithProject:(AFProject *)project NS_DESIGNATED_INITIALIZER;
-- (void)setupCanvasView:(AFMacCanvasView *)canvasView;
-
-- (AFLayer *_Nullable)createLayerWithName:(NSString *)name;
+@interface AFLayer ()
+@property (nonatomic, copy) NSString *name;
 @end
 
-NS_ASSUME_NONNULL_END
+@implementation AFLayer {
+    std::shared_ptr<arenaforge::BaseLayer> _layer;
+}
 
-#endif /* AFEditor_h_ArenaForge */
+#if DEBUG
+- (void)dealloc {
+    NSLog(@"[%@ dealloc]", NSStringFromClass(self.class));
+}
+#endif
+
++ (instancetype)createWithName:(NSString *)name {
+    auto uuid = arenaforge::UUID::Instance();
+    auto layerId = uuid();
+
+    AFLayer *layer = [[AFLayer alloc] init];
+    auto backLayer = arenaforge::BaseLayer::Make(layerId, arenaforge::ShapeType::Rectangle);
+    backLayer->setName((name == nil ? "" : std::string(name.UTF8String)));
+    layer->_layer = std::move(backLayer);
+    return layer;
+}
+@end

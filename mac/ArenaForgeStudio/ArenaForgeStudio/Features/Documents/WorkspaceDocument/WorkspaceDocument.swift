@@ -25,8 +25,11 @@
 //
 
 import AppKit
+import arenaforge
 
 final class WorkspaceDocument: NSDocument {
+    var project: AFProject?
+
     override static var autosavesInPlace: Bool {
         false
     }
@@ -43,7 +46,9 @@ final class WorkspaceDocument: NSDocument {
             defer: false
         )
 
-        let windowController = WorkspaceEditWindowController(window: window)
+        window.minSize = NSSize(width: 1000, height: 600)
+
+        let windowController = WorkspaceEditWindowController(window: window, workspace: self)
 
         window.setFrame(NSRect(x: 0, y: 0, width: 1400, height: 900), display: true, animate: false)
         window.center()
@@ -55,9 +60,22 @@ final class WorkspaceDocument: NSDocument {
 
         window.makeKeyAndOrderFront(nil)
     }
-    
+
+    private func initWorkspaceState(_ url: URL) throws {
+        var url = url
+        if !url.absoluteString.hasSuffix("/") {
+            url = URL(filePath: url.absoluteURL.path(percentEncoded: false) + "/")
+        }
+
+        self.fileURL = url
+        self.displayName = url.lastPathComponent
+
+        let project = try AFProject(fileURL: url)
+        self.project = project
+    }
+
     override func read(from url: URL, ofType typeName: String) throws {
-//        try initWorkspaceState(url)
+        try self.initWorkspaceState(url)
     }
 
     override func write(to url: URL, ofType typeName: String) throws {}
@@ -66,6 +84,11 @@ final class WorkspaceDocument: NSDocument {
 
     override func close() {
         super.close()
-        
     }
+
+    #if DEBUG
+        deinit {
+            Swift.print("\(type(of: self)) deinit")
+        }
+    #endif
 }
