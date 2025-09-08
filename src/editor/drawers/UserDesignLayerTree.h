@@ -50,7 +50,6 @@ class UserDesignLayerTree : public Drawer {
     virtual void onDraw(tgfx::Canvas *canvas, const RendererState *state) override;
 
   private:
-    std::shared_ptr<tgfx::Layer> _root{nullptr};
     std::unique_ptr<tgfx::DisplayList> _displayList{nullptr};
 };
 

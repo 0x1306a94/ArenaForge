@@ -56,9 +56,6 @@ std::vector<std::shared_ptr<tgfx::Layer>> UserDesignLayerTree::getLayersUnderPoi
 }
 
 bool UserDesignLayerTree::hasContentChanged() const {
-    if (_root == nullptr) {
-        return true;
-    }
     return _displayList->hasContentChanged();
 }
 
