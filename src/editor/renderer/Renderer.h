@@ -37,6 +37,8 @@ class Window;
 namespace arenaforge::editor {
 class RendererBackend;
 class RendererState;
+class GridBackgroundLayerTree;
+class UserDesignLayerTree;
 class Renderer : public std::enable_shared_from_this<Renderer> {
   public:
     static std::shared_ptr<Renderer> Make(std::shared_ptr<RendererState> state, std::shared_ptr<RendererBackend> backend);
@@ -60,6 +62,8 @@ class Renderer : public std::enable_shared_from_this<Renderer> {
   private:
     std::shared_ptr<RendererState> _state;
     std::shared_ptr<RendererBackend> _backend;
+    std::unique_ptr<GridBackgroundLayerTree> _gridLayer;
+    std::unique_ptr<UserDesignLayerTree> _designLayerTree;
     bool _invalidate;
 };
 };  // namespace arenaforge::editor

@@ -65,6 +65,7 @@ endif()
 add_files_by_extension(SRC_FILES ".h;.hpp;.cpp"
     core
     renderer
+    drawers
 )
 
 if(MACOS)

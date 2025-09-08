@@ -18,23 +18,34 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  defines.h
+//  Drawer.cpp
+//  arenaforge
 //
+//  Created by king on 2025/9/8.
 //
-//  Created by KK on 2025/9/6.
-//
 
-#ifndef defines_h_ArenaForge
-#define defines_h_ArenaForge
+#include "Drawer.h"
 
-#ifndef ARENA_FORGE_EXPORT_API
-#define ARENA_FORGE_EXPORT_API __attribute__((visibility("default")))
-#endif
+#include "renderer/RendererState.h"
 
-#if defined(__GNUC__) || defined(__clang__)
-#define UNUSED_PARAM(x) (void)(x)
-#else
-#define UNUSED_PARAM(x) (void)(x)
-#endif
+#include <tgfx/core/Canvas.h>
+#include <tgfx/platform/Print.h>
 
-#endif /* defines_h_ArenaForge */
+namespace arenaforge::editor {
+Drawer::Drawer(const std::string &name)
+    : _name(name) {
+}
+
+void Drawer::draw(tgfx::Canvas *canvas, const RendererState *state) {
+    if (canvas == nullptr) {
+        tgfx::PrintError("Drawer::draw() canvas is nullptr!");
+        return;
+    }
+    if (state == nullptr) {
+        tgfx::PrintError("Drawer::draw() state is nullptr!");
+        return;
+    }
+    tgfx::AutoCanvasRestore autoRestore(canvas);
+    onDraw(canvas, state);
+}
+};  // namespace arenaforge::editor

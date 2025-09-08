@@ -29,6 +29,9 @@
 #include "RendererBackend.h"
 #include "RendererState.h"
 
+#include "drawers/GridBackgroundLayerTree.h"
+#include "drawers/UserDesignLayerTree.h"
+
 #include <tgfx/core/Canvas.h>
 #include <tgfx/core/Surface.h>
 #include <tgfx/gpu/Device.h>
@@ -42,7 +45,10 @@ std::shared_ptr<Renderer> Renderer::Make(std::shared_ptr<RendererState> state, s
 
 Renderer::Renderer(std::shared_ptr<RendererState> state, std::shared_ptr<RendererBackend> backend)
     : _state(std::move(state))
-    , _backend(std::move(backend)) {
+    , _backend(std::move(backend))
+    , _gridLayer(std::make_unique<GridBackgroundLayerTree>())
+    , _designLayerTree(std::make_unique<UserDesignLayerTree>())
+    , _invalidate(false) {
 }
 
 Renderer::~Renderer() {
@@ -81,13 +87,13 @@ void Renderer::invalidateContent() {
     _invalidate = true;
 }
 
-//    tgfx::Layer *Renderer::designLayerRoot() const {
-//        return _designLayerTree->root();
-//    }
-//
-//    std::vector<std::shared_ptr<tgfx::Layer>> Renderer::getDesignLayersUnderPoint(float x, float y) const {
-//        return _designLayerTree->getLayersUnderPoint(x, y);
-//    }
+tgfx::Layer *Renderer::designLayerRoot() const {
+    return _designLayerTree->root();
+}
+
+std::vector<std::shared_ptr<tgfx::Layer>> Renderer::getDesignLayersUnderPoint(float x, float y) const {
+    return _designLayerTree->getLayersUnderPoint(x, y);
+}
 
 void Renderer::draw(bool force) {
     if (_backend == nullptr) {
@@ -125,22 +131,22 @@ void Renderer::draw(bool force) {
         return;
     }
 
-    //    auto appPtr = _app.get();
-    //    _gridLayer->prepare(canvas, appPtr, force);
-    //    _designLayerTree->prepare(canvas, appPtr, force);
-    //
-    bool hasContentChanged = true;  //_gridLayer->hasContentChanged() || _designLayerTree->hasContentChanged();
+    auto statePtr = _state.get();
+    _gridLayer->prepare(canvas, statePtr, force);
+    _designLayerTree->prepare(canvas, statePtr, force);
+
+    bool hasContentChanged = _gridLayer->hasContentChanged() || _designLayerTree->hasContentChanged();
 
     if (!hasContentChanged && !force && !_invalidate) {
         device->unlock();
         return;
     }
 
-    canvas->clear(tgfx::Color::Red());
+    canvas->clear();
     canvas->save();
 
-    //    _gridLayer->draw(canvas, appPtr);
-    //    _designLayerTree->draw(canvas, appPtr);
+    _gridLayer->draw(canvas, statePtr);
+    _designLayerTree->draw(canvas, statePtr);
 
     canvas->restore();
 

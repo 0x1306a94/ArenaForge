@@ -18,23 +18,42 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  defines.h
+//  Drawer.h
+//  arenaforge
 //
+//  Created by king on 2025/9/8.
 //
-//  Created by KK on 2025/9/6.
-//
 
-#ifndef defines_h_ArenaForge
-#define defines_h_ArenaForge
+#ifndef Drawer_h_ArenaForge
+#define Drawer_h_ArenaForge
 
-#ifndef ARENA_FORGE_EXPORT_API
-#define ARENA_FORGE_EXPORT_API __attribute__((visibility("default")))
-#endif
+#include <string>
 
-#if defined(__GNUC__) || defined(__clang__)
-#define UNUSED_PARAM(x) (void)(x)
-#else
-#define UNUSED_PARAM(x) (void)(x)
-#endif
+namespace tgfx {
+class Canvas;
+class Layer;
+class DisplayList;
+};  // namespace tgfx
 
-#endif /* defines_h_ArenaForge */
+namespace arenaforge::editor {
+class RendererState;
+class Drawer {
+  public:
+    explicit Drawer(const std::string &name);
+    virtual ~Drawer() = default;
+    std::string name() const {
+        return _name;
+    }
+
+    virtual void prepare(tgfx::Canvas *canvas, const RendererState *state, bool force = false) = 0;
+    void draw(tgfx::Canvas *canvas, const RendererState *state);
+
+  protected:
+    virtual void onDraw(tgfx::Canvas *canvas, const RendererState *state) = 0;
+
+  private:
+    std::string _name;
+};
+};  // namespace arenaforge::editor
+
+#endif /* Drawer_h_ArenaForge */

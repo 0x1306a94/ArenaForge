@@ -18,23 +18,42 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  defines.h
+//  UserDesignLayerTree.h
+//  arenaforge
 //
+//  Created by king on 2025/9/8.
 //
-//  Created by KK on 2025/9/6.
-//
 
-#ifndef defines_h_ArenaForge
-#define defines_h_ArenaForge
+#ifndef UserDesignLayerTree_h_ArenaForge
+#define UserDesignLayerTree_h_ArenaForge
 
-#ifndef ARENA_FORGE_EXPORT_API
-#define ARENA_FORGE_EXPORT_API __attribute__((visibility("default")))
-#endif
+#include "Drawer.h"
 
-#if defined(__GNUC__) || defined(__clang__)
-#define UNUSED_PARAM(x) (void)(x)
-#else
-#define UNUSED_PARAM(x) (void)(x)
-#endif
+#include <vector>
 
-#endif /* defines_h_ArenaForge */
+namespace arenaforge::editor {
+class UserDesignLayerTree : public Drawer {
+  public:
+    explicit UserDesignLayerTree();
+
+    virtual ~UserDesignLayerTree();
+
+    std::vector<std::shared_ptr<tgfx::Layer>> getLayersUnderPoint(float x, float y);
+
+    bool hasContentChanged() const;
+
+    tgfx::Layer *root() const;
+
+    virtual void prepare(tgfx::Canvas *canvas, const RendererState *state, bool force) override;
+
+  protected:
+    virtual void onDraw(tgfx::Canvas *canvas, const RendererState *state) override;
+
+  private:
+    std::shared_ptr<tgfx::Layer> _root{nullptr};
+    std::unique_ptr<tgfx::DisplayList> _displayList{nullptr};
+};
+
+};  // namespace arenaforge::editor
+
+#endif /* UserDesignLayerTree_h_ArenaForge */

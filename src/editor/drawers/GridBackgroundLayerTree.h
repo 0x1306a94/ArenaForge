@@ -18,23 +18,36 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  defines.h
+//  GridBackgroundLayerTree.h
+//  arenaforge
 //
+//  Created by king on 2025/9/8.
 //
-//  Created by KK on 2025/9/6.
-//
 
-#ifndef defines_h_ArenaForge
-#define defines_h_ArenaForge
+#ifndef GridBackgroundLayerTree_h_ArenaForge
+#define GridBackgroundLayerTree_h_ArenaForge
 
-#ifndef ARENA_FORGE_EXPORT_API
-#define ARENA_FORGE_EXPORT_API __attribute__((visibility("default")))
-#endif
+#include "Drawer.h"
 
-#if defined(__GNUC__) || defined(__clang__)
-#define UNUSED_PARAM(x) (void)(x)
-#else
-#define UNUSED_PARAM(x) (void)(x)
-#endif
+namespace arenaforge::editor {
+class GridBackgroundLayer;
+class GridBackgroundLayerTree : public Drawer {
+  public:
+    explicit GridBackgroundLayerTree();
 
-#endif /* defines_h_ArenaForge */
+    virtual ~GridBackgroundLayerTree();
+
+    bool hasContentChanged() const;
+
+    virtual void prepare(tgfx::Canvas *canvas, const RendererState *state, bool force) override;
+
+  protected:
+    virtual void onDraw(tgfx::Canvas *canvas, const RendererState *state) override;
+
+  private:
+    std::shared_ptr<GridBackgroundLayer> _root{nullptr};
+    std::unique_ptr<tgfx::DisplayList> _displayList{nullptr};
+};
+};  // namespace arenaforge::editor
+
+#endif /* GridBackgroundLayerTree_h_ArenaForge */
