@@ -37,6 +37,12 @@ final class WorkspaceEditCanvasViewController: NSViewController {
     var createVenueStartPoint: NSPoint?
     var createVenue: AFVenue?
 
+    private var minimumZoomScale: CGFloat = 0.1
+    private var maximumZoomScale: CGFloat = 30.0
+    private var mouseScaleRatio: CGFloat = 300.0
+    private var mouseScrollRatio: CGFloat = 0.8
+    private var mousePosition: NSPoint = .zero
+
     init(workspace: WorkspaceDocument, editor: AFEditor) {
         super.init(nibName: nil, bundle: nil)
         self.workspace = workspace
@@ -80,11 +86,11 @@ final class WorkspaceEditCanvasViewController: NSViewController {
 
     private func updateTrackingArea() {
         if let trackingArea {
-            self.view.removeTrackingArea(trackingArea)
+            view.removeTrackingArea(trackingArea)
             self.trackingArea = nil
         }
 
-        guard !self.view.bounds.isEmpty else {
+        guard !view.bounds.isEmpty else {
             return
         }
 
@@ -94,9 +100,9 @@ final class WorkspaceEditCanvasViewController: NSViewController {
             .activeAlways,
         ]
 
-        let trackingArea = NSTrackingArea(rect: self.view.bounds, options: options, owner: self)
+        let trackingArea = NSTrackingArea(rect: view.bounds, options: options, owner: self)
         self.trackingArea = trackingArea
-        self.view.addTrackingArea(trackingArea)
+        view.addTrackingArea(trackingArea)
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -106,29 +112,23 @@ final class WorkspaceEditCanvasViewController: NSViewController {
 
         let veune = editor.project.createVenue()
 
-        let location = self.canvasView.convert(event.locationInWindow, from: nil)
+        let location = canvasView.convert(event.locationInWindow, from: nil)
         let canvasLocation = toCanvasPoint(source: location)
-        self.createVenueStartPoint = canvasLocation
-        self.createVenue = veune
-        print("mouseDown \(location) canvasLocation \(canvasLocation)")
+        createVenueStartPoint = canvasLocation
+        createVenue = veune
     }
 
     override func mouseMoved(with event: NSEvent) {
-        guard let createVenueStartPoint, let createVenue else {
-            return
-        }
-        let location = self.canvasView.convert(event.locationInWindow, from: nil)
-        let canvasLocation = toCanvasPoint(source: location)
-        print("mouseMoved \(location) canvasLocation \(canvasLocation)")
+//        let location = self.canvasView.convert(event.locationInWindow, from: nil)
+//        let canvasLocation = toCanvasPoint(source: location)
     }
 
     override func mouseDragged(with event: NSEvent) {
         guard let createVenueStartPoint, let createVenue else {
             return
         }
-        let location = self.canvasView.convert(event.locationInWindow, from: nil)
+        let location = canvasView.convert(event.locationInWindow, from: nil)
         let canvasLocation = toCanvasPoint(source: location)
-        print("mouseDragged \(location) canvasLocation \(canvasLocation)")
 
         let rect = computeRect(start: createVenueStartPoint, end: canvasLocation)
         createVenue.frame = rect
@@ -138,9 +138,8 @@ final class WorkspaceEditCanvasViewController: NSViewController {
         guard let createVenueStartPoint, let createVenue else {
             return
         }
-        let location = self.canvasView.convert(event.locationInWindow, from: nil)
+        let location = canvasView.convert(event.locationInWindow, from: nil)
         var canvasLocation = toCanvasPoint(source: location)
-        print("mouseUp \(location) canvasLocation \(canvasLocation)")
 
         if createVenueStartPoint == canvasLocation {
             canvasLocation.x = createVenueStartPoint.x + 300
@@ -152,11 +151,60 @@ final class WorkspaceEditCanvasViewController: NSViewController {
 
         self.createVenue = nil
 
-        self.workspace?.activateEditorToolbarItem = .cursors
+        workspace?.activateEditorToolbarItem = .cursors
     }
 
     override func scrollWheel(with event: NSEvent) {
-//        print("scrollWheel \(event)")
+        guard let editor else {
+            return
+        }
+
+        let density = editor.density()
+        var contentOffset = editor.contentOffset()
+
+        let scrollingDeltaX = event.scrollingDeltaX
+        let scrollingDeltaY = event.scrollingDeltaY
+
+        let modifiers = event.modifierFlags
+        let isShiftPressed = modifiers.contains(.shift)
+        let isControlPressed = modifiers.contains(.control)
+        let isCommandPressed = modifiers.contains(.command)
+
+        if isControlPressed || isCommandPressed {
+            var location = canvasView.convert(event.locationInWindow, from: nil)
+            location.x *= density
+            location.y *= density
+            mousePosition = location
+
+            let scaleFactor = exp(scrollingDeltaY / mouseScaleRatio)
+            updateZooming(scaleFactor: scaleFactor)
+        } else {
+            var deltaX = scrollingDeltaX * density * mouseScrollRatio
+            var deltaY = scrollingDeltaY * density * mouseScrollRatio
+            if isShiftPressed, deltaX == 0.0, deltaY != 0.0 {
+                deltaX = deltaY
+                deltaY = 0
+            }
+            contentOffset.x += deltaX
+            contentOffset.y += deltaY
+            editor.updateOffset(contentOffset)
+        }
+    }
+
+    override func magnify(with event: NSEvent) {
+        guard let editor else {
+            super.magnify(with: event)
+            return
+        }
+
+        let density = editor.density()
+
+        let scaleFactor = 1.0 + event.magnification
+        var location = canvasView.convert(event.locationInWindow, from: nil)
+        location.x *= density
+        location.y *= density
+        mousePosition = location
+        updateZooming(scaleFactor: scaleFactor)
     }
 
     private func toCanvasPoint(source: NSPoint) -> NSPoint {
@@ -172,6 +220,21 @@ final class WorkspaceEditCanvasViewController: NSViewController {
         let y = (py - contentOffset.y) / currentZoom
 
         return NSPoint(x: x, y: y)
+    }
+
+    private func updateZooming(scaleFactor: CGFloat) {
+        guard let editor else {
+            return
+        }
+
+        let currentZoom = editor.zoomScale()
+        var contentOffset = editor.contentOffset()
+
+        let newZoom = max(minimumZoomScale, min(maximumZoomScale, currentZoom * scaleFactor))
+        contentOffset.x = (contentOffset.x - mousePosition.x) * (newZoom / currentZoom) + mousePosition.x
+        contentOffset.y = (contentOffset.y - mousePosition.y) * (newZoom / currentZoom) + mousePosition.y
+
+        editor.updateZoomScale(newZoom, offset: contentOffset)
     }
 
     private func computeRect(start: NSPoint, end: NSPoint) -> NSRect {

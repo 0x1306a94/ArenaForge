@@ -125,6 +125,27 @@
     return 1.0;
 }
 
+- (void)updateZoomScale:(CGFloat)zoomScale {
+    if (_editor) {
+        float offsetX = 0, offsetY = 0;
+        _editor->contentOffset(offsetX, offsetY);
+        _editor->updateZoomAndOffset(static_cast<float>(zoomScale), offsetX, offsetY);
+    }
+}
+
+- (void)updateOffset:(NSPoint)offset {
+    if (_editor) {
+        auto zoomScale = _editor->zoomScale();
+        _editor->updateZoomAndOffset(zoomScale, static_cast<float>(offset.x), static_cast<float>(offset.y));
+    }
+}
+
+- (void)updateZoomScale:(CGFloat)zoomScale offset:(NSPoint)offset {
+    if (_editor) {
+        _editor->updateZoomAndOffset(static_cast<float>(zoomScale), static_cast<float>(offset.x), static_cast<float>(offset.y));
+    }
+}
+
 #pragma mark - AFMacCanvasViewDelegate
 - (void)AFMacCanvasViewDidUpdateSize:(AFMacCanvasView *)view {
     if (_editor) {
