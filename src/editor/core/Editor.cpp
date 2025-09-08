@@ -50,6 +50,77 @@ void Editor::setRendererBackend(std::shared_ptr<RendererBackend> rendererBackend
     }
 }
 
+bool Editor::getBoundsSize(float &width, float &height) const {
+    if (!_renderer) {
+        return false;
+    }
+
+    auto state = _renderer->state();
+    if (!state) {
+        return false;
+    }
+    auto bounds = state->getBoundsSize();
+    width = bounds.width;
+    height = bounds.height;
+    return true;
+}
+
+float Editor::density() const {
+    if (!_renderer) {
+        return 1.0;
+    }
+
+    auto state = _renderer->state();
+    if (!state) {
+        return 1.0;
+    }
+    auto density = state->density();
+    return density;
+}
+
+/// 当前缩放比例
+float Editor::zoomScale() const {
+    if (!_renderer) {
+        return 1.0;
+    }
+
+    auto state = _renderer->state();
+    if (!state) {
+        return 1.0;
+    }
+    auto zoomScale = state->zoomScale();
+    return zoomScale;
+}
+
+/// 当前滑动偏移
+bool Editor::contentOffset(float &x, float &y) const {
+    if (!_renderer) {
+        return false;
+    }
+
+    auto state = _renderer->state();
+    if (!state) {
+        return false;
+    }
+    auto contentOffset = state->contentOffset();
+    x = contentOffset.x;
+    y = contentOffset.y;
+    return true;
+}
+
+bool Editor::updateZoomAndOffset(float zoomScale, float offsetX, float offsetY) {
+    if (!_renderer) {
+        return false;
+    }
+
+    auto state = _renderer->state();
+    if (!state) {
+        return false;
+    }
+    auto changed = state->updateZoomAndOffset(zoomScale, tgfx::Point{offsetX, offsetY});
+    return changed;
+}
+
 bool Editor::updateSize() {
     if (!_renderer) {
         return false;

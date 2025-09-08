@@ -48,6 +48,18 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
 
     void setRendererBackend(std::shared_ptr<RendererBackend> rendererBackend);
 
+    bool getBoundsSize(float &width, float &height) const;
+
+    float density() const;
+
+    /// 当前缩放比例
+    float zoomScale() const;
+
+    /// 当前滑动偏移
+    bool contentOffset(float &x, float &y) const;
+
+    bool updateZoomAndOffset(float zoomScale, float offsetX, float offsetY);
+
     bool updateSize();
 
     void invalidateContent();

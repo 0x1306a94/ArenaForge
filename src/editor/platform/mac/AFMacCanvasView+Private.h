@@ -28,9 +28,14 @@
 
 #import "AFMacCanvasViewDelegate.h"
 
+#import <arenaforge/editor/core/Editor.h>
+
 @interface AFMacCanvasView ()
 @property (nonatomic, weak) id<AFMacCanvasViewDelegate> delegate;
 
 - (void)startDisplayLink;
+
 - (void)stopDisplayLink;
+
+- (void)setupEditor:(std::shared_ptr<arenaforge::editor::Editor>)editor;
 @end

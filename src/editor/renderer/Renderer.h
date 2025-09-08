@@ -48,6 +48,10 @@ class Renderer : public std::enable_shared_from_this<Renderer> {
 
     void replaceBackend(std::shared_ptr<RendererBackend> backend);
 
+    std::shared_ptr<RendererState> state() const {
+        return _state;
+    }
+
     bool updateSize();
 
     void invalidateContent();
