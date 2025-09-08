@@ -33,6 +33,7 @@
 
 @interface AFProject ()
 @property (nonatomic, strong) NSURL *fileURL;
+@property (nonatomic, strong) NSMutableArray<AFVenue *> *internalVenues;
 @end
 
 @implementation AFProject {
@@ -49,6 +50,7 @@
         self.fileURL = fileURL;
 
         _project = arenaforge::Project::Make("test", "");
+        _internalVenues = [NSMutableArray<AFVenue *> array];
     }
     return self;
 }
@@ -61,9 +63,15 @@
     AFVenue *venue = [[AFVenue alloc] initWithName:@"Venue"];
     auto cppVenue = [venue cppObject];
     _project->addVenue(cppVenue);
+    [self.internalVenues addObject:venue];
     if (self.venueChangeHandler) {
         self.venueChangeHandler(self);
     }
     return venue;
+}
+
+#pragma mark - getter
+- (NSArray<AFVenue *> *)venues {
+    return [self.internalVenues copy];
 }
 @end
