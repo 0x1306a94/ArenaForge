@@ -18,44 +18,50 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFMacCanvasViewRef.h
+//  Renderer.h
+//  arenaforge
 //
-//
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/8.
 //
 
-#ifndef AFMacCanvasViewRef_h_ArenaForge
-#define AFMacCanvasViewRef_h_ArenaForge
-
-#include <arenaforge/editor/core/Platform.h>
+#ifndef Renderer_h_ArenaForge
+#define Renderer_h_ArenaForge
 
 #include <memory>
 
+namespace tgfx {
+class Layer;
+class Window;
+};  // namespace tgfx
+
 namespace arenaforge::editor {
 class RendererBackend;
-class Editor;
-class AFMacCanvasViewRef {
+class RendererState;
+class Renderer : public std::enable_shared_from_this<Renderer> {
   public:
-    AFMacCanvasViewRef(void *hostView);
-    ~AFMacCanvasViewRef();
+    static std::shared_ptr<Renderer> Make(std::shared_ptr<RendererState> state, std::shared_ptr<RendererBackend> backend);
+    ~Renderer();
 
-    AFMacCanvasViewRef(const AFMacCanvasViewRef &other) = delete;
-    AFMacCanvasViewRef &operator=(const AFMacCanvasViewRef &other) = delete;
-    AFMacCanvasViewRef(AFMacCanvasViewRef &&other) noexcept;
-    AFMacCanvasViewRef &operator=(AFMacCanvasViewRef &&other) noexcept;
-
-    void startDisplayLink();
-    void stopDisplayLink();
-
-  private:
     std::shared_ptr<RendererBackend> getRendererBackend();
 
-  private:
-    void *_hostView{nullptr};
-    std::shared_ptr<RendererBackend> _rendererBackend{nullptr};
-    friend class Editor;
-};
+    void replaceBackend(std::shared_ptr<RendererBackend> backend);
 
+    bool updateSize();
+
+    void invalidateContent();
+    tgfx::Layer *designLayerRoot() const;
+    std::vector<std::shared_ptr<tgfx::Layer>> getDesignLayersUnderPoint(float x, float y) const;
+
+    void draw(bool force = false);
+
+  protected:
+    Renderer(std::shared_ptr<RendererState> state, std::shared_ptr<RendererBackend> backend);
+
+  private:
+    std::shared_ptr<RendererState> _state;
+    std::shared_ptr<RendererBackend> _backend;
+    bool _invalidate;
+};
 };  // namespace arenaforge::editor
 
-#endif /* AFMacCanvasViewRef_h_ArenaForge */
+#endif /* Renderer_h_ArenaForge */

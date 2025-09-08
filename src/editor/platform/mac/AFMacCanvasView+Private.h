@@ -26,10 +26,11 @@
 
 #import <arenaforge/editor/platform/mac/AFMacCanvasView.h>
 
-@interface AFMacCanvasView ()
+#import "AFMacCanvasViewDelegate.h"
 
-- (void)updateSize;
+@interface AFMacCanvasView ()
+@property (nonatomic, weak) id<AFMacCanvasViewDelegate> delegate;
+
 - (void)startDisplayLink;
 - (void)stopDisplayLink;
-- (void)draw;
 @end

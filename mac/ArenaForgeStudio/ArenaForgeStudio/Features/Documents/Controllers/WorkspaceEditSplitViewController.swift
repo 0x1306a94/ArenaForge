@@ -25,6 +25,7 @@
 //
 
 import AppKit
+import arenaforge
 import SwiftUI
 
 final class WorkspaceEditSplitViewController: NSSplitViewController {
@@ -34,18 +35,21 @@ final class WorkspaceEditSplitViewController: NSSplitViewController {
     static let minSnapWidth: CGFloat = snapWidth - 10
 
     private weak var workspace: WorkspaceDocument?
+    private weak var editor: AFEditor?
     private weak var windowRef: NSWindow?
     private unowned var hapticPerformer: NSHapticFeedbackPerformer
 
     // MARK: - Initialization
 
     init(
-        workspace: WorkspaceDocument,
         windowRef: NSWindow,
+        workspace: WorkspaceDocument,
+        editor: AFEditor,
         hapticPerformer: NSHapticFeedbackPerformer = NSHapticFeedbackManager.defaultPerformer
     ) {
-        self.workspace = workspace
         self.windowRef = windowRef
+        self.workspace = workspace
+        self.editor = editor
         self.hapticPerformer = hapticPerformer
         super.init(nibName: nil, bundle: nil)
     }
@@ -63,16 +67,16 @@ final class WorkspaceEditSplitViewController: NSSplitViewController {
             return
         }
 
-        guard let workspace else {
+        guard let workspace, let editor else {
             // swiftlint:disable:next line_length
-            assertionFailure("Missing a workspace model: workspace=\(workspace == nil))")
+            assertionFailure("Missing a workspace model: workspace=\(workspace == nil) editor=\(editor == nil)")
             return
         }
 
         splitView.translatesAutoresizingMaskIntoConstraints = false
 
         let navigator = makeNavigator()
-        let canvas = makeCanvas()
+        let canvas = makeCanvas(editor: editor)
         let inspector = makeInspector(view: InspectorAreaView())
         addSplitViewItem(navigator)
         addSplitViewItem(canvas)
@@ -105,8 +109,8 @@ final class WorkspaceEditSplitViewController: NSSplitViewController {
         return inspector
     }
 
-    private func makeCanvas() -> NSSplitViewItem {
-        let canvasViewController = WorkspaceEditCanvasViewController()
+    private func makeCanvas(editor: AFEditor) -> NSSplitViewItem {
+        let canvasViewController = WorkspaceEditCanvasViewController(editor: editor)
         let canvas = NSSplitViewItem(viewController: canvasViewController)
         canvas.titlebarSeparatorStyle = .line
         canvas.minimumThickness = 200

@@ -28,13 +28,27 @@ import AppKit
 import arenaforge
 
 final class WorkspaceEditCanvasViewController: NSViewController {
-    var editor: AFEditor?
+    weak var editor: AFEditor?
     var canvasView: AFMacCanvasView?
+
+    init(editor: AFEditor) {
+        super.init(nibName: nil, bundle: nil)
+        self.editor = editor
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         setupCanvasView()
+
+        if let editor, let canvasView {
+            editor.setupCanvasView(canvasView)
+        }
     }
 
     private func setupCanvasView() {

@@ -45,17 +45,17 @@ final class WorkspaceEditWindowController: NSWindowController, NSWindowDelegate,
         guard let workspace else { return }
         self.workspce = workspace
 
-        guard let splitViewController = setupSplitViewController(workspace: workspace) else {
-            fatalError("Failed to set up content view.")
-        }
-
-        contentViewController = splitViewController
-
         guard let editor = makeEditor(workspace: workspace) else {
             fatalError("Failed to set up editor.")
         }
 
         self.editor = editor
+
+        guard let splitViewController = setupSplitViewController(workspace: workspace, editor: editor) else {
+            fatalError("Failed to set up content view.")
+        }
+
+        contentViewController = splitViewController
 
         setupToolbar()
     }
@@ -69,12 +69,12 @@ final class WorkspaceEditWindowController: NSWindowController, NSWindowDelegate,
         super.windowDidLoad()
     }
 
-    func setupSplitViewController(workspace: WorkspaceDocument) -> WorkspaceEditSplitViewController? {
+    func setupSplitViewController(workspace: WorkspaceDocument, editor: AFEditor) -> WorkspaceEditSplitViewController? {
         guard let window else {
             assertionFailure("No window found for this controller. Cannot set up content.")
             return nil
         }
-        return WorkspaceEditSplitViewController(workspace: workspace, windowRef: window)
+        return WorkspaceEditSplitViewController(windowRef: window, workspace: workspace, editor: editor)
     }
 
     private func makeEditor(workspace: WorkspaceDocument) -> AFEditor? {

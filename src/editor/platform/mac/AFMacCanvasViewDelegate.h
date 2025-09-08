@@ -18,39 +18,20 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFLayer.mm
+//  AFMacCanvasViewDelegate.h
 //  arenaforge
 //
-//  Created by KK on 2025/9/7.
+//  Created by king on 2025/9/8.
 //
 
-#import <arenaforge/editor/core/AFLayer.h>
+#import <Foundation/Foundation.h>
 
-#import <arenaforge/core/layers/BaseLayer.h>
-#import <arenaforge/core/uuid/UUID.h>
+NS_ASSUME_NONNULL_BEGIN
 
-@interface AFLayer ()
-@property (nonatomic, copy) NSString *name;
+@class AFMacCanvasView;
+@protocol AFMacCanvasViewDelegate <NSObject>
+- (void)AFMacCanvasViewDidUpdateSize:(AFMacCanvasView *)view;
+- (void)AFMacCanvasViewDidDraw:(AFMacCanvasView *)view;
 @end
 
-@implementation AFLayer {
-    std::shared_ptr<arenaforge::BaseLayer> _layer;
-}
-
-#if DEBUG
-- (void)dealloc {
-    NSLog(@"[%@ dealloc]", NSStringFromClass(self.class));
-}
-#endif
-
-+ (instancetype)createWithName:(NSString *)name {
-    auto uuid = arenaforge::UUID::Instance();
-    auto layerId = uuid();
-
-    AFLayer *layer = [[AFLayer alloc] init];
-    auto backLayer = arenaforge::BaseLayer::Make(layerId, arenaforge::ShapeType::Rectangle);
-    backLayer->setName((name == nil ? "" : std::string(name.UTF8String)));
-    layer->_layer = std::move(backLayer);
-    return layer;
-}
-@end
+NS_ASSUME_NONNULL_END

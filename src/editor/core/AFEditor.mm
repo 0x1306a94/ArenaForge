@@ -30,9 +30,14 @@
 #import <arenaforge/editor/core/AFProject.h>
 #import <arenaforge/editor/core/Editor.h>
 
+#import "AFEditor+Private.h"
 #import "AFLayer+Private.h"
+#import "AFProject+Private.h"
 
-@interface AFEditor ()
+#import "platform/mac/AFMacCanvasView+Private.h"
+#import "platform/mac/MacRendererBackend.h"
+
+@interface AFEditor () <AFMacCanvasViewDelegate>
 @property (nonatomic, strong) AFProject *project;
 @property (nonatomic, strong) AFMacCanvasView *canvasView;
 @end
@@ -50,16 +55,51 @@
 - (instancetype)initWithProject:(AFProject *)project {
     if (self == [super init]) {
         self.project = project;
+
+        [self commonInit];
     }
     return self;
 }
 
+- (void)commonInit {
+
+    auto project = [self.project cppProject];
+    _editor = arenaforge::editor::Editor::Make(std::move(project));
+}
+
 - (void)setupCanvasView:(AFMacCanvasView *)canvasView {
+    if (_canvasView == canvasView) {
+        return;
+    }
+
+    _canvasView.delegate = nil;
     self.canvasView = canvasView;
+
+    if (_editor != nullptr) {
+        if (canvasView == nil) {
+            _editor->setRendererBackend(nullptr);
+        } else {
+            canvasView.delegate = self;
+            auto rendererBackend = std::make_shared<arenaforge::editor::MacRendererBackend>((NSView *)canvasView);
+            _editor->setRendererBackend(std::move(rendererBackend));
+        }
+    }
 }
 
 - (AFLayer *_Nullable)createLayerWithName:(NSString *)name {
     return [AFLayer createWithName:name];
 }
 
+#pragma mark - AFMacCanvasViewDelegate
+- (void)AFMacCanvasViewDidUpdateSize:(AFMacCanvasView *)view {
+    if (_editor) {
+        _editor->updateSize();
+    }
+}
+
+- (void)AFMacCanvasViewDidDraw:(AFMacCanvasView *)view {
+    if (_editor) {
+        _editor->draw();
+    }
+}
 @end

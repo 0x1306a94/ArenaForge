@@ -26,6 +26,8 @@
 
 #import <arenaforge/editor/core/AFProject.h>
 
+#import <arenaforge/core/Project.h>
 @interface AFProject ()
 
+- (std::shared_ptr<arenaforge::Project>)cppProject;
 @end

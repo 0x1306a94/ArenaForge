@@ -18,49 +18,44 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  Editor.h
-//  arenaforge_editor
+//  RendererState.h
+//  arenaforge
 //
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/8.
 //
 
-#ifndef Editor_h_ArenaForge
-#define Editor_h_ArenaForge
+#ifndef RendererState_h_ArenaForge
+#define RendererState_h_ArenaForge
 
-#include <arenaforge/editor/core/Platform.h>
-#include <arenaforge/editor/core/defines.h>
-
-#include <memory>
-#include <vector>
-
-namespace arenaforge {
-class Project;
-class Venue;
-};  // namespace arenaforge
+#include <tgfx/core/Point.h>
+#include <tgfx/core/Size.h>
 
 namespace arenaforge::editor {
-class RendererBackend;
-class Renderer;
-class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor> {
+class RendererState {
   public:
-    static std::shared_ptr<Editor> Make(std::shared_ptr<arenaforge::Project> project);
-    ~Editor();
+    explicit RendererState(const tgfx::Size &boundsSize = {1280, 720}, float density = 1.0f);
+    ~RendererState();
+    /// canvas 尺寸
+    const tgfx::Size &getBoundsSize() const;
 
-    void setRendererBackend(std::shared_ptr<RendererBackend> rendererBackend);
+    float density() const;
 
-    bool updateSize();
+    /// 当前缩放比例
+    float zoomScale() const;
 
-    void invalidateContent();
+    /// 当前滑动偏移
+    const tgfx::Point &contentOffset() const;
 
-    void draw(bool force = false);
-
-  protected:
-    Editor(std::shared_ptr<arenaforge::Project> project);
+    bool updateBounds(const tgfx::Size &boundsSize, float density);
+    bool updateZoomAndOffset(float zoomScale, const tgfx::Point &contentOffset);
 
   private:
-    std::shared_ptr<arenaforge::Project> _project{nullptr};
-    std::shared_ptr<Renderer> _renderer{nullptr};
+    /// canvas 尺寸
+    tgfx::Size _boundsSize{1280, 720};
+    float _density{1.0f};
+    float _zoomScale = 1.0f;
+    tgfx::Point _contentOffset = {};
 };
 };  // namespace arenaforge::editor
 
-#endif /* Editor_h_ArenaForge */
+#endif /* RendererState_h_ArenaForge */

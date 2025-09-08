@@ -33,6 +33,9 @@
 @interface AFMacCanvasView ()
 @property (nonatomic, assign) CVDisplayLinkRef cvDisplayLink;
 @property (nonatomic, strong) CADisplayLink *caDisplayLink;
+
+- (void)updateSize;
+- (void)draw;
 @end
 
 static CVReturn OnDisplayLinkCallback(CVDisplayLinkRef, const CVTimeStamp *, const CVTimeStamp *, CVOptionFlags, CVOptionFlags *, void *userInfo) {
@@ -42,6 +45,13 @@ static CVReturn OnDisplayLinkCallback(CVDisplayLinkRef, const CVTimeStamp *, con
 }
 
 @implementation AFMacCanvasView {
+}
+
+- (void)dealloc {
+    [self clearDisplayLink];
+#if DEBUG
+    NSLog(@"[%@ dealloc]", NSStringFromClass(self.class));
+#endif
 }
 
 - (BOOL)acceptsFirstResponder {
@@ -65,48 +75,24 @@ static CVReturn OnDisplayLinkCallback(CVDisplayLinkRef, const CVTimeStamp *, con
 }
 
 - (void)updateSize {
+    [self.delegate AFMacCanvasViewDidUpdateSize:self];
 }
 
 - (void)viewDidMoveToWindow {
     [super viewDidMoveToWindow];
 
-    [self.window makeFirstResponder:self];
-
-    if (@available(macOS 14, *)) {
-        self.caDisplayLink = [self displayLinkWithTarget:self selector:@selector(draw)];
+    if (self.window) {
+        [self.window makeFirstResponder:self];
+        [self updateSize];
+        [self setupDisplayLink];
+        [self startDisplayLink];
     } else {
-        CVDisplayLinkCreateWithActiveCGDisplays(&_cvDisplayLink);
-        CVDisplayLinkSetOutputCallback(_cvDisplayLink, &OnDisplayLinkCallback, (__bridge void *)self);
-    }
-
-    [self updateSize];
-}
-
-- (void)startDisplayLink {
-    if (@available(macOS 14, *)) {
-        if (self.caDisplayLink) {
-            [self.caDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
-        }
-    } else {
-        if (self.cvDisplayLink) {
-            CVDisplayLinkStart(self.cvDisplayLink);
-        }
+        [self clearDisplayLink];
     }
 }
 
-- (void)stopDisplayLink {
-    if (@available(macOS 14, *)) {
-        if (self.caDisplayLink) {
-            [self.caDisplayLink removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
-        }
-    } else {
-        if (self.cvDisplayLink) {
-            CVDisplayLinkStop(self.cvDisplayLink);
-        }
-    }
-}
-
-- (void)dealloc {
+- (void)clearDisplayLink {
+    [self stopDisplayLink];
     if (@available(macOS 14, *)) {
         if (self.caDisplayLink) {
             [self.caDisplayLink invalidate];
@@ -116,11 +102,49 @@ static CVReturn OnDisplayLinkCallback(CVDisplayLinkRef, const CVTimeStamp *, con
         if (self.cvDisplayLink) {
             CVDisplayLinkStop(self.cvDisplayLink);
             CVDisplayLinkRelease(self.cvDisplayLink);
+            self.cvDisplayLink = nil;
+        }
+    }
+}
+
+- (void)setupDisplayLink {
+    if (@available(macOS 14, *)) {
+        if (self.caDisplayLink) {
+            return;
+        }
+        self.caDisplayLink = [self displayLinkWithTarget:self selector:@selector(draw)];
+        [self.caDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+    } else {
+        if (self.cvDisplayLink) {
+            return;
+        }
+        CVDisplayLinkCreateWithActiveCGDisplays(&_cvDisplayLink);
+        CVDisplayLinkSetOutputCallback(_cvDisplayLink, &OnDisplayLinkCallback, (__bridge void *)self);
+    }
+}
+
+- (void)startDisplayLink {
+    if (@available(macOS 14, *)) {
+        self.caDisplayLink.paused = NO;
+    } else {
+        if (self.cvDisplayLink) {
+            CVDisplayLinkStart(self.cvDisplayLink);
+        }
+    }
+}
+
+- (void)stopDisplayLink {
+    if (@available(macOS 14, *)) {
+        self.caDisplayLink.paused = YES;
+    } else {
+        if (self.cvDisplayLink) {
+            CVDisplayLinkStop(self.cvDisplayLink);
         }
     }
 }
 
 - (void)draw {
+    [self.delegate AFMacCanvasViewDidDraw:self];
 }
 
 @end

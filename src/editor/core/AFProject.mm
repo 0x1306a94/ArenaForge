@@ -24,13 +24,17 @@
 //  Created by KK on 2025/9/7.
 //
 
-#include <arenaforge/editor/core/AFProject.h>
+#import <arenaforge/editor/core/AFProject.h>
+
+#import "AFProject+Private.h"
 
 @interface AFProject ()
 @property (nonatomic, strong) NSURL *fileURL;
 @end
 
-@implementation AFProject
+@implementation AFProject {
+    std::shared_ptr<arenaforge::Project> _project;
+}
 #if DEBUG
 - (void)dealloc {
     NSLog(@"[%@ dealloc]", NSStringFromClass(self.class));
@@ -42,5 +46,9 @@
         self.fileURL = fileURL;
     }
     return self;
+}
+
+- (std::shared_ptr<arenaforge::Project>)cppProject {
+    return _project;
 }
 @end

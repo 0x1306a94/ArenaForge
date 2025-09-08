@@ -29,7 +29,7 @@
 
 #import "renderer/RendererBackend.h"
 
-#import <Cocoa/Cocoa.h>
+#import <AppKit/NSView.h>
 
 namespace arenaforge::editor {
 class MacRendererBackend : public RendererBackend {

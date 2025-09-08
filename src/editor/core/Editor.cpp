@@ -26,15 +26,53 @@
 
 #include <arenaforge/editor/core/Editor.h>
 
+#include "renderer/Renderer.h"
+#include "renderer/RendererBackend.h"
+#include "renderer/RendererState.h"
+
 namespace arenaforge::editor {
 
-std::shared_ptr<Editor> Editor::Make() {
-    return std::shared_ptr<Editor>(new Editor());
+std::shared_ptr<Editor> Editor::Make(std::shared_ptr<arenaforge::Project> project) {
+    return std::shared_ptr<Editor>(new Editor(std::move(project)));
 }
 
-Editor::Editor() {
+Editor::Editor(std::shared_ptr<arenaforge::Project> project)
+    : _project(std::move(project))
+    , _renderer(Renderer::Make(std::make_shared<RendererState>(), nullptr)) {
 }
 
 Editor::~Editor() {
 }
+
+void Editor::setRendererBackend(std::shared_ptr<RendererBackend> rendererBackend) {
+    if (_renderer) {
+        _renderer->replaceBackend(std::move(rendererBackend));
+    }
+}
+
+bool Editor::updateSize() {
+    if (!_renderer) {
+        return false;
+    }
+    auto sizeChanged = _renderer->updateSize();
+    if (sizeChanged) {
+        invalidateContent();
+    }
+    return sizeChanged;
+}
+
+void Editor::invalidateContent() {
+    if (!_renderer) {
+        return;
+    }
+    _renderer->invalidateContent();
+}
+
+void Editor::draw(bool force) {
+    if (!_renderer) {
+        return;
+    }
+    _renderer->draw(force);
+}
+
 };  // namespace arenaforge::editor

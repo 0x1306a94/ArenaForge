@@ -50,21 +50,24 @@ std::shared_ptr<tgfx::Window> MacRendererBackend::getWindow() {
 
 int MacRendererBackend::getWidth() {
     auto bounds = _hostView.bounds;
-    CGSize size = [_hostView convertSizeToBacking:bounds.size];
+    NSSize size = [_hostView convertSizeToBacking:bounds.size];
     auto width = static_cast<int>(roundf(static_cast<float>(size.width)));
     return width;
 }
 
 int MacRendererBackend::getHeight() {
     auto bounds = _hostView.bounds;
-    CGSize size = [_hostView convertSizeToBacking:bounds.size];
+    NSSize size = [_hostView convertSizeToBacking:bounds.size];
     auto height = static_cast<int>(roundf(static_cast<float>(size.height)));
     return height;
 }
 
 float MacRendererBackend::getDensity() {
     auto bounds = _hostView.bounds;
-    CGSize size = [_hostView convertSizeToBacking:bounds.size];
+    if (NSEqualSizes(bounds.size, NSSizeFromCGSize(CGSizeZero))) {
+        return 1.0;
+    }
+    NSSize size = [_hostView convertSizeToBacking:bounds.size];
     float contentsScale = static_cast<float>(size.height / bounds.size.height);
     return contentsScale;
 }
