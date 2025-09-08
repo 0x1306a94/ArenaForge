@@ -18,21 +18,34 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  arenaforge_editor.h
-//  ArenaForge
+//  AFEditor.h
+//  arenaforge
 //
 //  Created by KK on 2025/9/6.
 //
 
-#ifndef arenaforge_editor_h_ArenaForge
-#define arenaforge_editor_h_ArenaForge
+#ifndef AFEditor_h_ArenaForge
+#define AFEditor_h_ArenaForge
 
 #import <Foundation/Foundation.h>
 
-#import <arenaforge/editor/core/AFEditor.h>
-#import <arenaforge/editor/core/AFProject.h>
-#import <arenaforge/editor/core/AFVenue.h>
-#import <arenaforge/editor/core/AFLayer.h>
-#import <arenaforge/editor/platform/mac/AFMacCanvasView.h>
+#import <arenaforge_editor/core/defines.h>
 
-#endif /* arenaforge_editor_h_ArenaForge */
+NS_ASSUME_NONNULL_BEGIN
+
+@class AFMacCanvasView;
+@class AFLayer;
+@class AFProject;
+ARENA_FORGE_EXPORT_API @interface AFEditor : NSObject
+@property (nonatomic, strong, readonly) AFProject *project;
++ (instancetype)new NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithProject:(AFProject *)project NS_DESIGNATED_INITIALIZER;
+- (void)setupCanvasView:(AFMacCanvasView *)canvasView;
+
+- (AFLayer *_Nullable)createLayerWithName:(NSString *)name;
+@end
+
+NS_ASSUME_NONNULL_END
+
+#endif /* AFEditor_h_ArenaForge */

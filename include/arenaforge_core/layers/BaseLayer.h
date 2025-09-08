@@ -27,8 +27,8 @@
 #ifndef BaseLayer_h_ArenaForge
 #define BaseLayer_h_ArenaForge
 
-#include <arenaforge/core/PathCommand.h>
-#include <arenaforge/core/layers/ShapeType.h>
+#include <arenaforge_core/PathCommand.h>
+#include <arenaforge_core/layers/ShapeType.h>
 
 #include <tgfx/layers/ShapeLayer.h>
 

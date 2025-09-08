@@ -24,7 +24,7 @@
 //  Created by KK on 2025/9/6.
 //
 
-#include <arenaforge/editor/core/Editor.h>
+#include <arenaforge_editor/core/Editor.h>
 
 #include "renderer/Renderer.h"
 #include "renderer/RendererBackend.h"

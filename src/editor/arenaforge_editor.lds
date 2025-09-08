@@ -1,0 +1,2 @@
+*_OBJC_CLASS_$_AF*
+*_OBJC_METACLASS_$_AF*

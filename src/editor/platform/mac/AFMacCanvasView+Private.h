@@ -24,11 +24,11 @@
 //  Created by KK on 2025/9/6.
 //
 
-#import <arenaforge/editor/platform/mac/AFMacCanvasView.h>
+#import <arenaforge_editor/platform/mac/AFMacCanvasView.h>
 
 #import "AFMacCanvasViewDelegate.h"
 
-#import <arenaforge/editor/core/Editor.h>
+#import <arenaforge_editor/core/Editor.h>
 
 @interface AFMacCanvasView ()
 @property (nonatomic, weak) id<AFMacCanvasViewDelegate> delegate;

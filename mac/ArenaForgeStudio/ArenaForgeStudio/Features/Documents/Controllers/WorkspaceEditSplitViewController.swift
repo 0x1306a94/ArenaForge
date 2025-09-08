@@ -25,7 +25,7 @@
 //
 
 import AppKit
-import arenaforge
+import arenaforge_editor
 import SwiftUI
 
 final class WorkspaceEditSplitViewController: NSSplitViewController {

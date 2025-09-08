@@ -25,7 +25,7 @@
 //
 
 import AppKit
-import arenaforge
+import arenaforge_editor
 
 final class WorkspaceDocument: NSDocument {
     var project: AFProject?

@@ -18,30 +18,21 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFProject.h
-//  arenaforge
+//  arenaforge_editor.h
+//  ArenaForge
 //
-//  Created by KK on 2025/9/7.
+//  Created by KK on 2025/9/6.
 //
 
-#ifndef AFProject_h_ArenaForge
-#define AFProject_h_ArenaForge
+#ifndef arenaforge_editor_h_ArenaForge
+#define arenaforge_editor_h_ArenaForge
 
 #import <Foundation/Foundation.h>
 
-#import <arenaforge/editor/core/defines.h>
+#import <arenaforge_editor/core/AFEditor.h>
+#import <arenaforge_editor/core/AFProject.h>
+#import <arenaforge_editor/core/AFVenue.h>
+#import <arenaforge_editor/core/AFLayer.h>
+#import <arenaforge_editor/platform/mac/AFMacCanvasView.h>
 
-NS_ASSUME_NONNULL_BEGIN
-
-@class AFVenue;
-ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
-@property (nonatomic, copy, readonly) NSString *name;
-@property (nonatomic, copy, readonly) NSArray<AFVenue *> *venues;
-+ (instancetype)new NS_UNAVAILABLE;
-- (instancetype)init NS_UNAVAILABLE;
-- (instancetype __nullable)initWithFileURL:(NSURL *)fileURL error:(NSError **)error NS_DESIGNATED_INITIALIZER;
-@end
-
-NS_ASSUME_NONNULL_END
-
-#endif /* AFProject_h_ArenaForge */
+#endif /* arenaforge_editor_h_ArenaForge */

@@ -26,8 +26,8 @@
 
 #include "../base/ArenaForgeTest.h"
 
-#include <arenaforge/core/Project.h>
-#include <arenaforge/core/Venue.h>
+#include <arenaforge_core/Project.h>
+#include <arenaforge_core/Venue.h>
 
 namespace arenaforge {
 ArenaForge_TEST(ProjectTest, Create) {

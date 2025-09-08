@@ -25,7 +25,7 @@
 //
 
 import AppKit
-import arenaforge
+import arenaforge_editor
 
 final class WorkspaceEditCanvasViewController: NSViewController {
     weak var editor: AFEditor?

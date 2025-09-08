@@ -26,7 +26,7 @@
 
 #import <AppKit/AppKit.h>
 
-#import <arenaforge/editor/core/defines.h>
+#import <arenaforge_editor/core/defines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

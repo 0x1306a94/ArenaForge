@@ -1,5 +1,5 @@
-framework module arenaforge {
-  umbrella header "editor/arenaforge_editor.h"
+framework module arenaforge_editor {
+  umbrella header "arenaforge_editor.h"
   export *
 
   module * { export * }

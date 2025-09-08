@@ -24,7 +24,7 @@
 //  Created by KK on 2025/9/6.
 //
 
-#include <arenaforge/core/uuid/UUID.h>
+#include <arenaforge_core/uuid/UUID.h>
 
 #if __APPLE__
 #include <CoreFoundation/CFString.h>

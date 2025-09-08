@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3CF5CC5E2E6E8BFE00A4D9C9 /* arenaforge_editor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CF5CC5D2E6E8BFE00A4D9C9 /* arenaforge_editor.framework */; };
+		3CF5CC5F2E6E8BFE00A4D9C9 /* arenaforge_editor.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CF5CC5D2E6E8BFE00A4D9C9 /* arenaforge_editor.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4B3A89E42E6C63F50095AF78 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4B3A89E32E6C63F50095AF78 /* Config.xcconfig */; };
-		4B3E93722E6D666C00F5FCD7 /* arenaforge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B3E93712E6D666C00F5FCD7 /* arenaforge.framework */; };
-		4B3E93732E6D666C00F5FCD7 /* arenaforge.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4B3E93712E6D666C00F5FCD7 /* arenaforge.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4BC04DB82E6D241900EC6B09 /* WelcomeWindow in Frameworks */ = {isa = PBXBuildFile; productRef = 4BC04DB72E6D241900EC6B09 /* WelcomeWindow */; };
 /* End PBXBuildFile section */
 
@@ -37,7 +37,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				4B3E93732E6D666C00F5FCD7 /* arenaforge.framework in Embed Frameworks */,
+				3CF5CC5F2E6E8BFE00A4D9C9 /* arenaforge_editor.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -45,11 +45,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3CF5CC5D2E6E8BFE00A4D9C9 /* arenaforge_editor.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = arenaforge_editor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B3A88F42E6C61F10095AF78 /* ArenaForgeStudio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArenaForgeStudio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B3A89082E6C61F20095AF78 /* ArenaForgeStudioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ArenaForgeStudioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B3A89122E6C61F20095AF78 /* ArenaForgeStudioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ArenaForgeStudioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B3A89E32E6C63F50095AF78 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		4B3E93712E6D666C00F5FCD7 /* arenaforge.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = arenaforge.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -88,8 +88,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B3E93722E6D666C00F5FCD7 /* arenaforge.framework in Frameworks */,
 				4BC04DB82E6D241900EC6B09 /* WelcomeWindow in Frameworks */,
+				3CF5CC5E2E6E8BFE00A4D9C9 /* arenaforge_editor.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -135,7 +135,7 @@
 		4B3A89AE2E6C63A30095AF78 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4B3E93712E6D666C00F5FCD7 /* arenaforge.framework */,
+				3CF5CC5D2E6E8BFE00A4D9C9 /* arenaforge_editor.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -147,7 +147,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4B3A891B2E6C61F20095AF78 /* Build configuration list for PBXNativeTarget "ArenaForgeStudio" */;
 			buildPhases = (
-				4B3A89EA2E6C64720095AF78 /* Copy arenaforge framework */,
+				4B3A89EA2E6C64720095AF78 /* Copy arenaforge_editor framework */,
 				4B3A88F02E6C61F10095AF78 /* Sources */,
 				4B3A88F12E6C61F10095AF78 /* Frameworks */,
 				4B3A88F22E6C61F10095AF78 /* Resources */,
@@ -287,7 +287,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		4B3A89EA2E6C64720095AF78 /* Copy arenaforge framework */ = {
+		4B3A89EA2E6C64720095AF78 /* Copy arenaforge_editor framework */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -296,14 +296,14 @@
 			);
 			inputPaths = (
 			);
-			name = "Copy arenaforge framework";
+			name = "Copy arenaforge_editor framework";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -x\nrsync -avP --delete \"$SRCROOT/../gen_xcode/Products/$CONFIGURATION/arenaforge.framework\" \"$CONFIGURATION_BUILD_DIR\"\n";
+			shellScript = "set -x\nrsync -avP --delete \"$SRCROOT/../gen_xcode/Products/$CONFIGURATION/arenaforge_editor.framework\" \"$CONFIGURATION_BUILD_DIR\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -37,8 +37,8 @@ add_files_by_extension(SRC_FILES ".h;.hpp;.cpp"
 )
 
 add_files_by_extension(PUBLIC_HEADER_FILES ".h;.hpp"
-    ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAME_PREFIX}/${TARGET_NAME_SUFFIX}
-    ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAME_PREFIX}/${TARGET_NAME_SUFFIX}
+    ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRGET_NAME}
+    ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRGET_NAME}
 )
 
 message(STATUS "PUBLIC_HEADER_FILES: ${PUBLIC_HEADER_FILES}")
@@ -48,7 +48,7 @@ message(STATUS "CORE_SHARED_LIBS: ${CORE_SHARED_LIBS}")
 add_library(${TAGRGET_NAME} STATIC ${SRC_FILES} ${PUBLIC_HEADER_FILES})
 add_library(${TAGRET_NAME_PREFIX}::${TARGET_NAME_SUFFIX} ALIAS ${TAGRGET_NAME})
 
-add_source_group(PUBLIC_HEADER_FILES ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAME_PREFIX}/${TARGET_NAME_SUFFIX} "PublicHeaders")
+add_source_group(PUBLIC_HEADER_FILES ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRGET_NAME} "PublicHeaders")
 add_source_group(SRC_FILES ${CMAKE_CURRENT_LIST_DIR} "Sources")
 
 target_link_libraries(${TAGRGET_NAME}

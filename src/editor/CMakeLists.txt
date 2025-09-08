@@ -12,11 +12,6 @@ endif()
 
 message(STATUS "========== Configuration ${TAGRGET_NAME} ==========")
 
-if(BUILD_EDITOR_FRAMEWORK)
-    set(TAGRGET_NAME ${TAGRET_NAME_PREFIX})
-endif()
-
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 cmake_policy(SET CMP0063 NEW)
@@ -42,7 +37,7 @@ if(MACOS)
     # list(APPEND CORE_SHARED_LIBS ${CORE_FOUNDATION})
 endif()
 
-set(PUBLIC_HEADER_ROOT_DIR ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAME_PREFIX}/${TARGET_NAME_SUFFIX})
+set(PUBLIC_HEADER_ROOT_DIR ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRGET_NAME})
 
 
 
@@ -57,6 +52,8 @@ if(APPLE)
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFEditor.h
         ${PUBLIC_HEADER_ROOT_DIR}/platform/mac/AFMacCanvasView.h
     )
+
+    # set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -exported_symbols_list ${CMAKE_CURRENT_LIST_DIR}/arenaforge_editor.lds")
 else()
 
 endif()
@@ -94,7 +91,7 @@ if(NOT BUILD_EDITOR_FRAMEWORK)
 endif()
 
 
-add_source_group(PUBLIC_HEADER_FILES ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAME_PREFIX}/${TARGET_NAME_SUFFIX} "PublicHeaders")
+add_source_group(PUBLIC_HEADER_FILES ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRGET_NAME} "PublicHeaders")
 add_source_group(SRC_FILES ${CMAKE_CURRENT_LIST_DIR} "Sources")
 
 target_link_libraries(${TAGRGET_NAME}
@@ -120,6 +117,8 @@ if(APPLE)
       XCODE_ATTRIBUTE_STRIP_INSTALLED_PRODUCT "YES"
       XCODE_ATTRIBUTE_STRIP_STYLE "non-global"
     )
+
+    target_link_options(${TAGRGET_NAME} PRIVATE "-exported_symbols_list ${CMAKE_CURRENT_LIST_DIR}/arenaforge_editor.lds")
 endif()
 
 if (BUILD_EDITOR_FRAMEWORK)
@@ -143,7 +142,7 @@ if (BUILD_EDITOR_FRAMEWORK)
     )
 
     foreach (header ${PUBLIC_HEADER_FILES})
-        file(RELATIVE_PATH dir ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRET_NAME_PREFIX} ${header})
+        file(RELATIVE_PATH dir ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRGET_NAME} ${header})
         get_filename_component(dir "${dir}" DIRECTORY)
         if (dir)
             set(location "Headers/${dir}")

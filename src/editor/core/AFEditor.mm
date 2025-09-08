@@ -24,11 +24,11 @@
 //  Created by KK on 2025/9/6.
 //
 
-#import <arenaforge/editor/core/AFEditor.h>
+#import <arenaforge_editor/core/AFEditor.h>
 
-#import <arenaforge/editor/core/AFLayer.h>
-#import <arenaforge/editor/core/AFProject.h>
-#import <arenaforge/editor/core/Editor.h>
+#import <arenaforge_editor/core/AFLayer.h>
+#import <arenaforge_editor/core/AFProject.h>
+#import <arenaforge_editor/core/Editor.h>
 
 #import "AFEditor+Private.h"
 #import "AFLayer+Private.h"

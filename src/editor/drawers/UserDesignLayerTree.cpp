@@ -28,7 +28,7 @@
 
 #include "renderer/RendererState.h"
 
-#include <arenaforge/editor/core/defines.h>
+#include <arenaforge_editor/core/defines.h>
 
 #include <tgfx/layers/DisplayList.h>
 #include <tgfx/layers/Layer.h>

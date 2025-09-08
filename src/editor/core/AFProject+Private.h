@@ -24,9 +24,9 @@
 //  Created by KK on 2025/9/7.
 //
 
-#import <arenaforge/editor/core/AFProject.h>
+#import <arenaforge_editor/core/AFProject.h>
 
-#import <arenaforge/core/Project.h>
+#import <arenaforge_core/Project.h>
 @interface AFProject ()
 
 - (std::shared_ptr<arenaforge::Project>)cppProject;

@@ -24,10 +24,10 @@
 //  Created by king on 2025/9/4.
 //
 
-#include <arenaforge/core/Project.h>
+#include <arenaforge_core/Project.h>
 
-#include <arenaforge/core/Venue.h>
-#include <arenaforge/core/uuid/UUID.h>
+#include <arenaforge_core/Venue.h>
+#include <arenaforge_core/uuid/UUID.h>
 
 #include <tgfx/platform/Print.h>
 

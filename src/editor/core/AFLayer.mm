@@ -24,10 +24,10 @@
 //  Created by KK on 2025/9/7.
 //
 
-#import <arenaforge/editor/core/AFLayer.h>
+#import <arenaforge_editor/core/AFLayer.h>
 
-#import <arenaforge/core/layers/BaseLayer.h>
-#import <arenaforge/core/uuid/UUID.h>
+#import <arenaforge_core/layers/BaseLayer.h>
+#import <arenaforge_core/uuid/UUID.h>
 
 @interface AFLayer ()
 @property (nonatomic, copy) NSString *name;

@@ -24,11 +24,11 @@
 //  Created by king on 2025/9/5.
 //
 
-#include <arenaforge/core/layers/BaseLayer.h>
+#include <arenaforge_core/layers/BaseLayer.h>
 
-#include <arenaforge/core/PathCommand.h>
-#include <arenaforge/core/utils/UnitConverter.h>
-#include <arenaforge/core/uuid/UUID.h>
+#include <arenaforge_core/PathCommand.h>
+#include <arenaforge_core/utils/UnitConverter.h>
+#include <arenaforge_core/uuid/UUID.h>
 
 #include "LayerStyleClone.h"
 #include "ShapeStyleClone.h"

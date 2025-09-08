@@ -24,7 +24,7 @@
 //  Created by KK on 2025/9/6.
 //
 
-#include <arenaforge/core/PathCommand.h>
+#include <arenaforge_core/PathCommand.h>
 
 namespace arenaforge {
 

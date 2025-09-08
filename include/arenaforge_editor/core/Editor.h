@@ -27,8 +27,8 @@
 #ifndef Editor_h_ArenaForge
 #define Editor_h_ArenaForge
 
-#include <arenaforge/editor/core/Platform.h>
-#include <arenaforge/editor/core/defines.h>
+#include <arenaforge_editor/core/Platform.h>
+#include <arenaforge_editor/core/defines.h>
 
 #include <memory>
 #include <vector>
