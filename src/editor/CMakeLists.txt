@@ -118,7 +118,7 @@ if(APPLE)
       XCODE_ATTRIBUTE_STRIP_STYLE "non-global"
     )
 
-    target_link_options(${TAGRGET_NAME} PRIVATE "-exported_symbols_list ${CMAKE_CURRENT_LIST_DIR}/arenaforge_editor.lds")
+    target_link_options(${TAGRGET_NAME} PRIVATE -exported_symbols_list "${CMAKE_CURRENT_LIST_DIR}/arenaforge_editor.lds")
 endif()
 
 if (BUILD_EDITOR_FRAMEWORK)
