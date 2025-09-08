@@ -26,6 +26,8 @@
 
 #import <arenaforge_editor/core/AFVenue.h>
 
+#import <arenaforge_core/Venue.h>
+
 @interface AFVenue ()
-+ (instancetype)createWithName:(NSString *)name;
+- (std::shared_ptr<arenaforge::Venue>)cppObject;
 @end

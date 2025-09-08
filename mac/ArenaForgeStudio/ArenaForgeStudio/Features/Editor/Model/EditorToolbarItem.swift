@@ -18,21 +18,32 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFProject+Private.h
-//  arenaforge_editor
+//  EditorMouseMode.swift
+//  ArenaForgeStudio
 //
-//  Created by KK on 2025/9/7.
+//  Created by king on 2025/9/8.
 //
 
-#import <arenaforge_editor/core/AFProject.h>
+import Foundation
 
-#import <arenaforge_core/Project.h>
+enum EditorToolbarItem: Equatable, CaseIterable {
+    case cursors
+    case venue
+    case shape
 
-NS_ASSUME_NONNULL_BEGIN
+    var iconName: String {
+        switch self {
+        case .cursors: return "icon_cursors"
+        case .venue: return "icon_venue"
+        case .shape: return "icon_layer_rectangle"
+        }
+    }
 
-@interface AFProject ()
-@property (nonatomic, strong, nullable) void (^venueChangeHandler)(AFProject *project);
-- (std::shared_ptr<arenaforge::Project>)cppObject;
-@end
-
-NS_ASSUME_NONNULL_END
+    var helpTip: String {
+        switch self {
+        case .cursors: return "mouse mode"
+        case .venue: return "create venue"
+        case .shape: return "create shape"
+        }
+    }
+}

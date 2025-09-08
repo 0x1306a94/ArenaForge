@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "icon_close_eyes.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

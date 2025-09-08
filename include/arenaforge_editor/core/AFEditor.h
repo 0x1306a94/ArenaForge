@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class AFMacCanvasView;
 @class AFLayer;
 @class AFProject;
+@class AFVenue;
 ARENA_FORGE_EXPORT_API @interface AFEditor : NSObject
 @property (nonatomic, strong, readonly) AFProject *project;
 + (instancetype)new NS_UNAVAILABLE;
@@ -43,7 +44,12 @@ ARENA_FORGE_EXPORT_API @interface AFEditor : NSObject
 - (instancetype)initWithProject:(AFProject *)project NS_DESIGNATED_INITIALIZER;
 - (void)setupCanvasView:(AFMacCanvasView *)canvasView;
 
-- (AFLayer *_Nullable)createLayerWithName:(NSString *)name;
+- (CGFloat)zoomScale;
+
+- (NSPoint)contentOffset;
+
+- (CGFloat)density;
+
 @end
 
 NS_ASSUME_NONNULL_END

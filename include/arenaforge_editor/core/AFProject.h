@@ -40,6 +40,8 @@ ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype __nullable)initWithFileURL:(NSURL *)fileURL error:(NSError **)error NS_DESIGNATED_INITIALIZER;
+
+- (AFVenue *)createVenue;
 @end
 
 NS_ASSUME_NONNULL_END

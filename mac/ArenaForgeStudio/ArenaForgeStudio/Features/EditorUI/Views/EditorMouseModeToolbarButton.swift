@@ -18,21 +18,37 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFProject+Private.h
-//  arenaforge_editor
+//  EditorMouseModeToolbarButton.swift
+//  ArenaForgeStudio
 //
-//  Created by KK on 2025/9/7.
+//  Created by king on 2025/9/8.
 //
 
-#import <arenaforge_editor/core/AFProject.h>
+import SwiftUI
 
-#import <arenaforge_core/Project.h>
-
-NS_ASSUME_NONNULL_BEGIN
-
-@interface AFProject ()
-@property (nonatomic, strong, nullable) void (^venueChangeHandler)(AFProject *project);
-- (std::shared_ptr<arenaforge::Project>)cppObject;
-@end
-
-NS_ASSUME_NONNULL_END
+struct EditorMouseModeToolbarButton: View {
+    @Environment(\.controlActiveState)
+    private var controlActive
+    
+    let item: EditorToolbarItem
+    let isSelected: Bool
+    let action: () -> Void
+    
+    @State private var isHovering: Bool = false
+    
+    var body: some View {
+        HStack {
+            Button {
+                action()
+            } label: {
+                Image(item.iconName)
+                    .resizable()
+                    .renderingMode(.template)
+                    .foregroundColor(isSelected ? Color.white : Color.secondary)
+                    .frame(width: 24, height: 24)
+                    .opacity(controlActive == .inactive ? 0.5 : 1.0)
+                    .help(item.helpTip)
+            }
+          }
+    }
+}

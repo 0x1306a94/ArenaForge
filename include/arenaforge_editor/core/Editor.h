@@ -62,6 +62,8 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
 
     bool updateSize();
 
+    void onVenueChanges();
+
     void invalidateContent();
 
     void draw(bool force = false);

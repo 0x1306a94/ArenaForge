@@ -31,6 +31,7 @@
 #include <arenaforge_core/uuid/UUID.h>
 
 #include <tgfx/layers/Layer.h>
+#include <tgfx/layers/SolidColor.h>
 #include <tgfx/platform/Print.h>
 
 namespace arenaforge {
@@ -46,8 +47,13 @@ Venue::Venue(const std::string &venueId, const std::string &name, const std::str
 
     auto &uuid = UUID::Instance();
     _root = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _root->setPositionRelative(false);
+
     _container = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _container->setPositionRelative(false);
+
     _mask = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _mask->setPositionRelative(false);
 
     _root->addChild(_container);
     _root->addChild(_mask);
@@ -57,6 +63,32 @@ Venue::Venue(const std::string &venueId, const std::string &name, const std::str
 
 Venue::~Venue() {
     tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
+}
+
+void Venue::setFrame(const tgfx::Rect &frame) {
+    if (_frame == frame) {
+        return;
+    }
+    _frame = frame;
+
+    tgfx::Path rootPath;
+    rootPath.addRect(frame);
+
+    auto rootMatrix = tgfx::Matrix::MakeTrans(frame.x(), frame.y());
+
+    tgfx::Path containerPath;
+    containerPath.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
+
+    _root->setPath(rootPath);
+    _root->setMatrix(rootMatrix);
+
+    _container->setPath(containerPath);
+    _mask->setPath(containerPath);
+}
+
+void Venue::setBackgroundColor(const tgfx::Color &color) {
+    _container->setFillStyle(tgfx::SolidColor::Make(color));
+    _mask->setFillStyle(tgfx::SolidColor::Make(color));
 }
 
 void Venue::attachProject(std::weak_ptr<Project> project) {
@@ -74,8 +106,12 @@ std::shared_ptr<Project> Venue::project() const {
     return _ownerProject.lock();
 }
 
-BaseLayer *Venue::root() const {
+const BaseLayer *Venue::root() const {
     return _root.get();
+}
+
+std::shared_ptr<BaseLayer> Venue::rootPtr() const {
+    return _root;
 }
 
 BaseLayer *Venue::container() const {

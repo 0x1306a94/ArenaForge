@@ -28,11 +28,18 @@ import AppKit
 import arenaforge_editor
 
 final class WorkspaceEditCanvasViewController: NSViewController {
+    weak var workspace: WorkspaceDocument?
     weak var editor: AFEditor?
-    var canvasView: AFMacCanvasView?
+    var canvasView: AFMacCanvasView!
 
-    init(editor: AFEditor) {
+    var trackingArea: NSTrackingArea?
+
+    var createVenueStartPoint: NSPoint?
+    var createVenue: AFVenue?
+
+    init(workspace: WorkspaceDocument, editor: AFEditor) {
         super.init(nibName: nil, bundle: nil)
+        self.workspace = workspace
         self.editor = editor
     }
 
@@ -51,6 +58,12 @@ final class WorkspaceEditCanvasViewController: NSViewController {
         }
     }
 
+    override func viewDidLayout() {
+        super.viewDidLayout()
+
+        updateTrackingArea()
+    }
+
     private func setupCanvasView() {
         let canvasView = AFMacCanvasView()
         canvasView.translatesAutoresizingMaskIntoConstraints = false
@@ -65,9 +78,117 @@ final class WorkspaceEditCanvasViewController: NSViewController {
         ])
     }
 
-    #if DEBUG
-        deinit {
-            print("\(type(of: self)) deinit")
+    private func updateTrackingArea() {
+        if let trackingArea {
+            self.view.removeTrackingArea(trackingArea)
+            self.trackingArea = nil
         }
-    #endif
+
+        guard !self.view.bounds.isEmpty else {
+            return
+        }
+
+        let options: NSTrackingArea.Options = [
+            .mouseEnteredAndExited,
+            .mouseMoved,
+            .activeAlways,
+        ]
+
+        let trackingArea = NSTrackingArea(rect: self.view.bounds, options: options, owner: self)
+        self.trackingArea = trackingArea
+        self.view.addTrackingArea(trackingArea)
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        guard let workspace, let editor, workspace.activateEditorToolbarItem == .venue else {
+            return
+        }
+
+        let veune = editor.project.createVenue()
+
+        let location = self.canvasView.convert(event.locationInWindow, from: nil)
+        let canvasLocation = toCanvasPoint(source: location)
+        self.createVenueStartPoint = canvasLocation
+        self.createVenue = veune
+        print("mouseDown \(location) canvasLocation \(canvasLocation)")
+    }
+
+    override func mouseMoved(with event: NSEvent) {
+        guard let createVenueStartPoint, let createVenue else {
+            return
+        }
+        let location = self.canvasView.convert(event.locationInWindow, from: nil)
+        let canvasLocation = toCanvasPoint(source: location)
+        print("mouseMoved \(location) canvasLocation \(canvasLocation)")
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard let createVenueStartPoint, let createVenue else {
+            return
+        }
+        let location = self.canvasView.convert(event.locationInWindow, from: nil)
+        let canvasLocation = toCanvasPoint(source: location)
+        print("mouseDragged \(location) canvasLocation \(canvasLocation)")
+
+        let rect = computeRect(start: createVenueStartPoint, end: canvasLocation)
+        createVenue.frame = rect
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        guard let createVenueStartPoint, let createVenue else {
+            return
+        }
+        let location = self.canvasView.convert(event.locationInWindow, from: nil)
+        var canvasLocation = toCanvasPoint(source: location)
+        print("mouseUp \(location) canvasLocation \(canvasLocation)")
+
+        if createVenueStartPoint == canvasLocation {
+            canvasLocation.x = createVenueStartPoint.x + 300
+            canvasLocation.y = createVenueStartPoint.y + 300
+        }
+
+        let rect = computeRect(start: createVenueStartPoint, end: canvasLocation)
+        createVenue.frame = rect
+
+        self.createVenue = nil
+
+        self.workspace?.activateEditorToolbarItem = .cursors
+    }
+
+    override func scrollWheel(with event: NSEvent) {
+//        print("scrollWheel \(event)")
+    }
+
+    private func toCanvasPoint(source: NSPoint) -> NSPoint {
+        guard let editor else { return source }
+
+        let currentZoom = editor.zoomScale()
+        let density = editor.density()
+        let contentOffset = editor.contentOffset()
+
+        let px = source.x * density
+        let py = source.y * density
+        let x = (px - contentOffset.x) / currentZoom
+        let y = (py - contentOffset.y) / currentZoom
+
+        return NSPoint(x: x, y: y)
+    }
+
+    private func computeRect(start: NSPoint, end: NSPoint) -> NSRect {
+        let x = min(start.x, end.x)
+        let y = min(start.y, end.y)
+        let w = abs(end.x - start.x)
+        let h = abs(end.y - start.y)
+        return NSRect(x: x, y: y, width: w, height: h)
+    }
+
+    deinit {
+        if let trackingArea {
+            self.view.removeTrackingArea(trackingArea)
+            self.trackingArea = nil
+        }
+#if DEBUG
+        print("\(type(of: self)) deinit")
+#endif
+    }
 }

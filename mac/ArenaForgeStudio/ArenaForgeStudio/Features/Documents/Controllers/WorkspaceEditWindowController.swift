@@ -32,8 +32,8 @@ final class WorkspaceEditWindowController: NSWindowController, NSWindowDelegate,
     @Published var navigatorCollapsed: Bool = false
     @Published var inspectorCollapsed: Bool = false
 
-    private var workspce: WorkspaceDocument?
-    private var editor: AFEditor?
+    var workspce: WorkspaceDocument?
+    var editor: AFEditor?
 
     var splitViewController: WorkspaceEditSplitViewController? {
         contentViewController as? WorkspaceEditSplitViewController

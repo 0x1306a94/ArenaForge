@@ -53,6 +53,14 @@ void BaseLayer::setTransient(bool value) {
     invalidateContent();
 }
 
+void BaseLayer::setPositionRelative(bool value) {
+    if (_positionRelative == value) {
+        return;
+    }
+    _positionRelative = value;
+    invalidateContent();
+}
+
 void BaseLayer::setFrame(const tgfx::Rect &frame) {
     if (_frame == frame) {
         return;
@@ -99,6 +107,8 @@ void BaseLayer::doClone(BaseLayer *target, bool cloneChildren) const {
     target->_pathCommands = _pathCommands;
 
     target->setFrame(frame());
+    target->setTransient(transient());
+    target->setPositionRelative(positionRelative());
 
     auto maskLayer = mask();
     if (maskLayer) {
@@ -123,7 +133,7 @@ void BaseLayer::doClone(BaseLayer *target, bool cloneChildren) const {
         target->setLayerStyles(std::move(copiedStyles));
     }
 
-    //    target->setPath(path());
+    target->setPath(path());
     target->setLineWidth(lineWidth());
     target->setMiterLimit(miterLimit());
     target->setStrokeStart(strokeStart());
@@ -176,49 +186,51 @@ void BaseLayer::updatePathCommands() {
 }
 
 void BaseLayer::onUpdateContent(tgfx::LayerRecorder *recorder) {
-    // rebuild path
-    tgfx::Path path;
-    auto size = frame().size();
-    for (const auto &command : _pathCommands) {
-        switch (command.type) {
-            case PathCommandType::MoveTo: {
-                auto moveTo = command.cmd.moveTo;
-                auto p = moveTo.p * size;
-                path.moveTo(p);
-                break;
-            }
-            case PathCommandType::LineTo: {
-                auto lineTo = command.cmd.lineTo;
-                auto p = lineTo.p * size;
-                path.lineTo(p);
-                break;
-            }
-            case PathCommandType::QuadTo: {
-                auto quadTo = command.cmd.quadTo;
-                auto c = quadTo.c * size;
-                auto p = quadTo.p * size;
-                path.quadTo(c, p);
-                break;
-            }
-            case PathCommandType::CubicTo: {
-                auto cubicTo = command.cmd.cubicTo;
-                auto c1 = cubicTo.c1 * size;
-                auto c2 = cubicTo.c2 * size;
-                auto p = cubicTo.p * size;
-                path.cubicTo(c1, c2, p);
-                break;
-            }
-            case PathCommandType::ClosePath: {
-                path.close();
-                break;
-            }
+    if (_positionRelative) {
+        // rebuild path
+        tgfx::Path path;
+        auto size = frame().size();
+        for (const auto &command : _pathCommands) {
+            switch (command.type) {
+                case PathCommandType::MoveTo: {
+                    auto moveTo = command.cmd.moveTo;
+                    auto p = moveTo.p * size;
+                    path.moveTo(p);
+                    break;
+                }
+                case PathCommandType::LineTo: {
+                    auto lineTo = command.cmd.lineTo;
+                    auto p = lineTo.p * size;
+                    path.lineTo(p);
+                    break;
+                }
+                case PathCommandType::QuadTo: {
+                    auto quadTo = command.cmd.quadTo;
+                    auto c = quadTo.c * size;
+                    auto p = quadTo.p * size;
+                    path.quadTo(c, p);
+                    break;
+                }
+                case PathCommandType::CubicTo: {
+                    auto cubicTo = command.cmd.cubicTo;
+                    auto c1 = cubicTo.c1 * size;
+                    auto c2 = cubicTo.c2 * size;
+                    auto p = cubicTo.p * size;
+                    path.cubicTo(c1, c2, p);
+                    break;
+                }
+                case PathCommandType::ClosePath: {
+                    path.close();
+                    break;
+                }
 
-            default:
-                break;
+                default:
+                    break;
+            }
         }
-    }
 
-    setPath(path);
+        setPath(path);
+    }
 
     tgfx::ShapeLayer::onUpdateContent(recorder);
 }

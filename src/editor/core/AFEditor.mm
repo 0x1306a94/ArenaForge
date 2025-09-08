@@ -28,11 +28,13 @@
 
 #import <arenaforge_editor/core/AFLayer.h>
 #import <arenaforge_editor/core/AFProject.h>
+#import <arenaforge_editor/core/AFVenue.h>
 #import <arenaforge_editor/core/Editor.h>
 
 #import "AFEditor+Private.h"
 #import "AFLayer+Private.h"
 #import "AFProject+Private.h"
+#import "AFVenue+Private.h"
 
 #import "platform/mac/AFMacCanvasView+Private.h"
 #import "platform/mac/MacRendererBackend.h"
@@ -62,10 +64,23 @@
 }
 
 - (void)commonInit {
+    auto cppProject = [self.project cppObject];
+    _editor = arenaforge::editor::Editor::Make(std::move(cppProject));
 
-    auto project = [self.project cppProject];
-    _editor = arenaforge::editor::Editor::Make(std::move(project));
+    __weak AFEditor *weakSelf = self;
+    self.project.venueChangeHandler = ^(AFProject *_Nonnull project) {
+        UNUSED_PARAM(project);
+        if (weakSelf == nil) {
+            return;
+        }
+        [weakSelf onVenueChanges];
+    };
 }
+
+- (void)onVenueChanges {
+    _editor->onVenueChanges();
+}
+#pragma mark - public
 
 - (void)setupCanvasView:(AFMacCanvasView *)canvasView {
     if (_canvasView == canvasView) {
@@ -88,8 +103,26 @@
     }
 }
 
-- (AFLayer *_Nullable)createLayerWithName:(NSString *)name {
-    return [AFLayer createWithName:name];
+- (CGFloat)zoomScale {
+    if (_editor) {
+        return _editor->zoomScale();
+    }
+    return 1.0;
+}
+
+- (NSPoint)contentOffset {
+    float offsetX = 0, offsetY = 0;
+    if (_editor) {
+        _editor->contentOffset(offsetX, offsetY);
+    }
+    return NSPointFromCGPoint(CGPointMake(offsetX, offsetY));
+}
+
+- (CGFloat)density {
+    if (_editor) {
+        return _editor->density();
+    }
+    return 1.0;
 }
 
 #pragma mark - AFMacCanvasViewDelegate

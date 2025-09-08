@@ -25,9 +25,14 @@
 //
 
 import AppKit
+import SwiftUI
+import Combine
 import arenaforge_editor
 
-final class WorkspaceDocument: NSDocument {
+final class WorkspaceDocument: NSDocument, ObservableObject {
+    
+    @Published var activateEditorToolbarItem: EditorToolbarItem = .cursors
+    
     var project: AFProject?
 
     override static var autosavesInPlace: Bool {

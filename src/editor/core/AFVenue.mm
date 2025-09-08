@@ -26,11 +26,22 @@
 
 #import <arenaforge_editor/core/AFVenue.h>
 
+#import <arenaforge_editor/core/AFLayer.h>
+
+#import <arenaforge_core/Venue.h>
+#import <arenaforge_core/uuid/UUID.h>
+
+#import "AFLayer+Private.h"
+
+#import "AFVenue+Private.h"
+
 @interface AFVenue ()
 @property (nonatomic, copy) NSString *name;
 @end
 
-@implementation AFVenue
+@implementation AFVenue {
+    std::shared_ptr<arenaforge::Venue> _venue;
+}
 #if DEBUG
 - (void)dealloc {
     NSLog(@"[%@ dealloc]", NSStringFromClass(self.class));
@@ -40,7 +51,57 @@
 - (instancetype)initWithName:(NSString *)name {
     if (self == [super init]) {
         self.name = name;
+        auto uuid = arenaforge::UUID::Instance();
+        auto venueId = uuid();
+        _venue = arenaforge::Venue::Make(venueId, (name == nil ? "" : std::string(name.UTF8String)), "");
+        _venue->setBackgroundColor(tgfx::Color::FromRGBA(0xcc, 0xcc, 0xcc));
     }
     return self;
+}
+
+- (AFLayer *)createLayerWithName:(NSString *)name {
+    AFLayer *layer = [[AFLayer alloc] initWithName:name];
+    auto container = _venue->container();
+    auto cppLayer = [layer cppObject];
+    container->addChild(cppLayer);
+    return layer;
+}
+
+- (std::shared_ptr<arenaforge::Venue>)cppObject {
+    return _venue;
+}
+
+- (void)setFrame:(NSRect)frame {
+    auto cppRect = tgfx::Rect::MakeXYWH(
+        static_cast<float>(frame.origin.x),
+        static_cast<float>(frame.origin.y),
+        static_cast<float>(frame.size.width),
+        static_cast<float>(frame.size.height));
+    _venue->setFrame(cppRect);
+}
+
+- (NSRect)frame {
+    auto cppRect = _venue->frame();
+    return NSRectFromCGRect(CGRectMake(cppRect.x(), cppRect.y(), cppRect.width(), cppRect.height()));
+}
+
+- (void)setBackgroundColor:(NSColor *)backgroundColor {
+    if (backgroundColor == nil) {
+        _venue->setBackgroundColor(tgfx::Color::Transparent());
+        return;
+    }
+    CGFloat red, green, blue, alpha;
+    [backgroundColor getRed:&red green:&green blue:&blue alpha:&alpha];
+    auto cppColor = tgfx::Color{
+        static_cast<float>(red),
+        static_cast<float>(green),
+        static_cast<float>(blue),
+        static_cast<float>(alpha)};
+    _venue->setBackgroundColor(cppColor);
+}
+
+- (NSColor *)backgroundColor {
+    auto cppColor = _venue->backgroundColor();
+    return [NSColor colorWithRed:cppColor.red green:cppColor.green blue:cppColor.blue alpha:cppColor.alpha];
 }
 @end

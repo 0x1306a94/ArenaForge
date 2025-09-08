@@ -76,7 +76,7 @@ final class WorkspaceEditSplitViewController: NSSplitViewController {
         splitView.translatesAutoresizingMaskIntoConstraints = false
 
         let navigator = makeNavigator()
-        let canvas = makeCanvas(editor: editor)
+        let canvas = makeCanvas(workspace: workspace, editor: editor)
         let inspector = makeInspector(view: InspectorAreaView())
         addSplitViewItem(navigator)
         addSplitViewItem(canvas)
@@ -109,8 +109,8 @@ final class WorkspaceEditSplitViewController: NSSplitViewController {
         return inspector
     }
 
-    private func makeCanvas(editor: AFEditor) -> NSSplitViewItem {
-        let canvasViewController = WorkspaceEditCanvasViewController(editor: editor)
+    private func makeCanvas(workspace: WorkspaceDocument, editor: AFEditor) -> NSSplitViewItem {
+        let canvasViewController = WorkspaceEditCanvasViewController(workspace: workspace, editor: editor)
         let canvas = NSSplitViewItem(viewController: canvasViewController)
         canvas.titlebarSeparatorStyle = .line
         canvas.minimumThickness = 200

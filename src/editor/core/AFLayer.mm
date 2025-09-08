@@ -43,14 +43,26 @@
 }
 #endif
 
-+ (instancetype)createWithName:(NSString *)name {
-    auto uuid = arenaforge::UUID::Instance();
-    auto layerId = uuid();
+- (instancetype)initWithName:(NSString *)name {
+    if (self == [super init]) {
+        auto uuid = arenaforge::UUID::Instance();
+        auto layerId = uuid();
 
-    AFLayer *layer = [[AFLayer alloc] init];
-    auto backLayer = arenaforge::BaseLayer::Make(layerId, arenaforge::ShapeType::Rectangle);
-    backLayer->setName((name == nil ? "" : std::string(name.UTF8String)));
-    layer->_layer = std::move(backLayer);
-    return layer;
+        _layer = arenaforge::BaseLayer::Make(layerId, arenaforge::ShapeType::Rectangle);
+        _layer->setName((name == nil ? "" : std::string(name.UTF8String)));
+    }
+    return self;
+}
+
+- (std::shared_ptr<arenaforge::BaseLayer>)cppObject {
+    return _layer;
+}
+
+- (void)setTransient:(BOOL)transient {
+    _layer->setTransient(transient);
+}
+
+- (BOOL)transient {
+    return _layer->transient();
 }
 @end

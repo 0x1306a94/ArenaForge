@@ -52,6 +52,12 @@ class BaseLayer : public tgfx::ShapeLayer {
 
     void setTransient(bool value);
 
+    bool positionRelative() const {
+        return _positionRelative;
+    }
+
+    void setPositionRelative(bool value);
+
     tgfx::Rect frame() const {
         return _frame;
     }
@@ -84,7 +90,8 @@ class BaseLayer : public tgfx::ShapeLayer {
 
   private:
     std::string _layerId{""};
-    bool _transient;
+    bool _transient{false};
+    bool _positionRelative{false};
     std::unordered_map<std::string, std::string> _attributes{};
     tgfx::Rect _frame{};
     std::vector<PathCommand> _pathCommands{};

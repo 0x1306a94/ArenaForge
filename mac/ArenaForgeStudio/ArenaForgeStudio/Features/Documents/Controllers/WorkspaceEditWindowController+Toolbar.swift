@@ -25,11 +25,13 @@
 //
 
 import AppKit
+import SwiftUI
 
 extension NSToolbarItem.Identifier {
     static let toggleFirstSidebarItem: NSToolbarItem.Identifier = .init("ToggleFirstSidebarItem")
     static let toggleLastSidebarItem: NSToolbarItem.Identifier = .init("ToggleLastSidebarItem")
     static let itemListTrackingSeparator = NSToolbarItem.Identifier("ItemListTrackingSeparator")
+    static let editorToolbarViewItem = NSToolbarItem.Identifier("editorToolbarViewItem")
 }
 
 extension WorkspaceEditWindowController: NSToolbarDelegate {
@@ -41,7 +43,7 @@ extension WorkspaceEditWindowController: NSToolbarDelegate {
         } else {
             toolbar.showsBaselineSeparator = false
         }
-        self.window?.titleVisibility = .visible
+        self.window?.titleVisibility = .hidden
         self.window?.toolbarStyle = .unifiedCompact
         self.window?.titlebarSeparatorStyle = .automatic
         self.window?.toolbar = toolbar
@@ -54,6 +56,8 @@ extension WorkspaceEditWindowController: NSToolbarDelegate {
             .toggleFirstSidebarItem,
             .flexibleSpace,
             .sidebarTrackingSeparator,
+            .editorToolbarViewItem,
+            .flexibleSpace,
             .itemListTrackingSeparator,
             .flexibleSpace,
             .toggleLastSidebarItem,
@@ -67,6 +71,7 @@ extension WorkspaceEditWindowController: NSToolbarDelegate {
             .flexibleSpace,
             .itemListTrackingSeparator,
             .toggleLastSidebarItem,
+            .editorToolbarViewItem,
         ]
     }
 
@@ -96,6 +101,17 @@ extension WorkspaceEditWindowController: NSToolbarDelegate {
                 systemSymbolName: "sidebar.leading",
                 accessibilityDescription: nil
             )?.withSymbolConfiguration(.init(scale: .large))
+
+            return toolbarItem
+        case .editorToolbarViewItem:
+            guard let workspace = self.workspce else { return nil }
+
+            let toolbarItem = NSToolbarItem(itemIdentifier: .editorToolbarViewItem)
+            let view = NSHostingView(
+                rootView: EditorToolbarView()
+                    .environmentObject(workspace)
+            )
+            toolbarItem.view = view
 
             return toolbarItem
         case .toggleLastSidebarItem:

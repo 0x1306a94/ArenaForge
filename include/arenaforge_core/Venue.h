@@ -30,6 +30,9 @@
 #include <memory>
 #include <string>
 
+#include <tgfx/core/Color.h>
+#include <tgfx/core/Rect.h>
+
 namespace arenaforge {
 class Project;
 class BaseLayer;
@@ -59,9 +62,22 @@ class Venue : public std::enable_shared_from_this<Venue> {
         return _venueId;
     }
 
+    tgfx::Rect frame() const {
+        return _frame;
+    }
+
+    void setFrame(const tgfx::Rect &frame);
+
+    tgfx::Color backgroundColor() const {
+        return _backgroundColor;
+    }
+
+    void setBackgroundColor(const tgfx::Color &color);
+
     std::shared_ptr<Project> project() const;
 
-    BaseLayer *root() const;
+    const BaseLayer *root() const;
+    std::shared_ptr<BaseLayer> rootPtr() const;
 
     BaseLayer *container() const;
 
@@ -78,6 +94,8 @@ class Venue : public std::enable_shared_from_this<Venue> {
     std::string _venueId{""};
     std::string _name{""};
     std::string _description{""};
+    tgfx::Rect _frame{};
+    tgfx::Color _backgroundColor = tgfx::Color::Transparent();
     std::shared_ptr<BaseLayer> _root{nullptr};
     std::shared_ptr<BaseLayer> _container{nullptr};
     std::shared_ptr<BaseLayer> _mask{nullptr};

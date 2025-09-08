@@ -26,9 +26,15 @@
 
 #include <arenaforge_editor/core/Editor.h>
 
+#include <arenaforge_core/Project.h>
+#include <arenaforge_core/Venue.h>
+#include <arenaforge_core/layers/BaseLayer.h>
+
 #include "renderer/Renderer.h"
 #include "renderer/RendererBackend.h"
 #include "renderer/RendererState.h"
+
+#include <tgfx/layers/Layer.h>
 
 namespace arenaforge::editor {
 
@@ -130,6 +136,32 @@ bool Editor::updateSize() {
         invalidateContent();
     }
     return sizeChanged;
+}
+
+void Editor::onVenueChanges() {
+    auto root = _renderer->designLayerRoot();
+    auto existsChildren = root->children();
+    auto venues = _project->venues();
+    for (const auto &venue : venues) {
+        auto venueRoot = venue->rootPtr();
+        if (!venueRoot) {
+            continue;
+        }
+
+        auto iter = std::find_if(existsChildren.begin(), existsChildren.end(), [=](auto item) {
+            return item == venueRoot;
+        });
+
+        if (iter == existsChildren.end()) {
+            root->addChild(venueRoot);
+        } else {
+            existsChildren.erase(iter);
+        }
+    }
+
+    for (auto &item : existsChildren) {
+        item->removeFromParent();
+    }
 }
 
 void Editor::invalidateContent() {

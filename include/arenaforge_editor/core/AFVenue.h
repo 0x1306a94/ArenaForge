@@ -27,17 +27,25 @@
 #ifndef AFVenue_h_ArenaForge
 #define AFVenue_h_ArenaForge
 
+#import <AppKit/NSColor.h>
 #import <Foundation/Foundation.h>
 
 #import <arenaforge_editor/core/defines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class AFLayer;
 ARENA_FORGE_EXPORT_API @interface AFVenue : NSObject
 @property (nonatomic, copy, readonly) NSString *name;
+@property (nonatomic, assign) NSRect frame;
+@property (nonatomic, strong) NSColor *backgroundColor;
+
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name NS_DESIGNATED_INITIALIZER;
+
+- (AFLayer *)createLayerWithName:(NSString *)name;
+
 @end
 
 NS_ASSUME_NONNULL_END

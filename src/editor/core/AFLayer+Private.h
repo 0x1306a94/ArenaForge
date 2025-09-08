@@ -26,6 +26,8 @@
 
 #import <arenaforge_editor/core/AFLayer.h>
 
+#import <arenaforge_core/layers/BaseLayer.h>
+
 @interface AFLayer ()
-+ (instancetype)createWithName:(NSString *)name;
+- (std::shared_ptr<arenaforge::BaseLayer>)cppObject;
 @end

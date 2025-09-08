@@ -57,6 +57,10 @@ class Project : public std::enable_shared_from_this<Project> {
         _description = description;
     }
 
+    const std::vector<std::shared_ptr<Venue>> venues() const {
+        return _venues;
+    }
+
     bool addVenue(std::shared_ptr<Venue> venue);
     bool removeVenue(std::shared_ptr<Venue> venue);
     std::shared_ptr<Venue> removeVenueAt(int index);

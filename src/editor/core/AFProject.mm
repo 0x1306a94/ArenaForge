@@ -26,7 +26,10 @@
 
 #import <arenaforge_editor/core/AFProject.h>
 
+#import <arenaforge_editor/core/AFVenue.h>
+
 #import "AFProject+Private.h"
+#import "AFVenue+Private.h"
 
 @interface AFProject ()
 @property (nonatomic, strong) NSURL *fileURL;
@@ -44,11 +47,23 @@
 - (instancetype __nullable)initWithFileURL:(NSURL *)fileURL error:(NSError **)error {
     if (self == [super init]) {
         self.fileURL = fileURL;
+
+        _project = arenaforge::Project::Make("test", "");
     }
     return self;
 }
 
-- (std::shared_ptr<arenaforge::Project>)cppProject {
+- (std::shared_ptr<arenaforge::Project>)cppObject {
     return _project;
+}
+
+- (AFVenue *)createVenue {
+    AFVenue *venue = [[AFVenue alloc] initWithName:@"Venue"];
+    auto cppVenue = [venue cppObject];
+    _project->addVenue(cppVenue);
+    if (self.venueChangeHandler) {
+        self.venueChangeHandler(self);
+    }
+    return venue;
 }
 @end
