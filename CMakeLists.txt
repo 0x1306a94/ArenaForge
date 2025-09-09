@@ -19,10 +19,12 @@ set(GOOGLE_TEST_ROOT ${ArenaForge_THIRD_PARTY_ROOT_DIR}/tgfx/third_party/googlet
 message(STATUS "BUILD_EDITOR: ${BUILD_EDITOR}")
 message(STATUS "BUILD_CORE_TESTS: ${BUILD_CORE_TESTS}")
 
+
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(third_party/tgfx/third_party/json)
+
 set(TGFX_BUILD_SVG ON)
 set(TGFX_BUILD_LAYERS ON)
-
-add_subdirectory(third_party/tgfx/third_party/json)
 add_subdirectory(third_party/tgfx)
 
 add_subdirectory(src/core)

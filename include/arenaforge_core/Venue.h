@@ -40,6 +40,8 @@ class Venue : public std::enable_shared_from_this<Venue> {
   public:
     static std::shared_ptr<Venue> Make(const std::string &venueId, const std::string &name, const std::string &description);
 
+    static std::shared_ptr<Venue> MakeFromJSONFile(const std::string &jsonFile);
+
     ~Venue();
 
     const std::string name() const {
@@ -82,6 +84,8 @@ class Venue : public std::enable_shared_from_this<Venue> {
     BaseLayer *container() const;
 
     BaseLayer *mask() const;
+
+    std::string toJSON() const;
 
   protected:
     Venue(const std::string &venueId, const std::string &name, const std::string &description);

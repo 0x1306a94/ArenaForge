@@ -49,14 +49,28 @@
     if (self == [super init]) {
         self.fileURL = fileURL;
 
-        _project = arenaforge::Project::Make("test", "");
+        auto rootDir = std::string(fileURL.path.UTF8String);
+        _project = arenaforge::Project::MakeFromJSONFile(rootDir + "/project.json", [=](const std::string &venueId) -> std::shared_ptr<arenaforge::Venue> {
+            auto venueFilePath = rootDir + "/venues/" + venueId + ".json";
+            return arenaforge::Venue::MakeFromJSONFile(venueFilePath);
+        });
         _internalVenues = [NSMutableArray<AFVenue *> array];
+
+        for (auto cppObject : _project->venues()) {
+            AFVenue *venue = [[AFVenue alloc] initWithCppObject:cppObject];
+            [_internalVenues addObject:venue];
+        }
     }
     return self;
 }
 
 - (std::shared_ptr<arenaforge::Project>)cppObject {
     return _project;
+}
+
+- (NSString *)toJSONString {
+    auto json = _project->toJSON();
+    return [NSString stringWithUTF8String:json.c_str()];
 }
 
 - (AFVenue *)createVenue {

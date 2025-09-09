@@ -52,6 +52,7 @@ Renderer::Renderer(std::shared_ptr<RendererState> state, std::shared_ptr<Rendere
 }
 
 Renderer::~Renderer() {
+    purgeResources();
     tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
@@ -158,4 +159,26 @@ void Renderer::draw(bool force) {
     _invalidate = false;
 }
 
+void Renderer::purgeResources() {
+    if (_backend == nullptr) {
+        return;
+    }
+
+    auto window = _backend->getWindow();
+    if (window == nullptr) {
+        return;
+    }
+
+    auto device = window->getDevice();
+    if (device == nullptr) {
+        return;
+    }
+
+    auto context = device->lockContext();
+    if (context == nullptr) {
+        return;
+    }
+    context->purgeResourcesUntilMemoryTo(0);
+    device->unlock();
+}
 };  // namespace arenaforge::editor

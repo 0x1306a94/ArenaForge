@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class AFLayer;
 ARENA_FORGE_EXPORT_API @interface AFVenue : NSObject
+@property (nonatomic, copy, readonly) NSString *venueId;
 @property (nonatomic, copy, readonly) NSString *name;
 @property (nonatomic, assign) NSRect frame;
 @property (nonatomic, strong) NSColor *backgroundColor;
@@ -43,6 +44,8 @@ ARENA_FORGE_EXPORT_API @interface AFVenue : NSObject
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name NS_DESIGNATED_INITIALIZER;
+
+- (NSString *)toJSONString;
 
 - (AFLayer *)createLayerWithName:(NSString *)name;
 

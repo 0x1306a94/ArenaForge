@@ -34,10 +34,42 @@
 #include <tgfx/layers/SolidColor.h>
 #include <tgfx/platform/Print.h>
 
+#include <nlohmann/json.hpp>
+
+#include <fstream>
 namespace arenaforge {
 
 std::shared_ptr<Venue> Venue::Make(const std::string &venueId, const std::string &name, const std::string &description) {
     return std::shared_ptr<Venue>(new Venue(venueId, name, description));
+}
+
+std::shared_ptr<Venue> Venue::MakeFromJSONFile(const std::string &jsonFile) {
+    using namespace nlohmann;
+
+    std::ifstream ifs(jsonFile);
+    json j = json::parse(ifs);
+    auto venueId = j["venueId"].get<std::string>();
+    auto name = j["name"].get<std::string>();
+    auto description = j["description"].get<std::string>();
+    auto venue = Make(venueId, name, description);
+
+    auto jframe = j["frame"];
+    auto x = jframe["x"].get<float>();
+    auto y = jframe["y"].get<float>();
+    auto width = jframe["width"].get<float>();
+    auto height = jframe["height"].get<float>();
+    venue->setFrame(tgfx::Rect::MakeXYWH(x, y, width, height));
+
+    if (j.contains("backgroundColor")) {
+        auto backgroundColor = j["backgroundColor"];
+        auto r = backgroundColor["r"].get<uint8_t>();
+        auto g = backgroundColor["g"].get<uint8_t>();
+        auto b = backgroundColor["b"].get<uint8_t>();
+        auto a = backgroundColor["a"].get<uint8_t>();
+        venue->setBackgroundColor(tgfx::Color::FromRGBA(r, g, b, a));
+    }
+
+    return venue;
 }
 
 Venue::Venue(const std::string &venueId, const std::string &name, const std::string &description)
@@ -87,6 +119,10 @@ void Venue::setFrame(const tgfx::Rect &frame) {
 }
 
 void Venue::setBackgroundColor(const tgfx::Color &color) {
+    if (_backgroundColor == color) {
+        return;
+    }
+    _backgroundColor = color;
     _container->setFillStyle(tgfx::SolidColor::Make(color));
     _mask->setFillStyle(tgfx::SolidColor::Make(color));
 }
@@ -120,6 +156,32 @@ BaseLayer *Venue::container() const {
 
 BaseLayer *Venue::mask() const {
     return _mask.get();
+}
+
+std::string Venue::toJSON() const {
+    using namespace nlohmann;
+    json j;
+    j["venueId"] = _venueId;
+    j["name"] = name();
+    j["description"] = description();
+
+    j["frame"] = json{
+        {"x", _frame.x()},
+        {"y", _frame.y()},
+        {"width", _frame.width()},
+        {"height", _frame.height()},
+    };
+
+    j["backgroundColor"] = json{
+        {"r", static_cast<uint8_t>(_backgroundColor.red * 255.0f)},
+        {"g", static_cast<uint8_t>(_backgroundColor.green * 255.0f)},
+        {"b", static_cast<uint8_t>(_backgroundColor.blue * 255.0f)},
+        {"a", static_cast<uint8_t>(_backgroundColor.alpha * 255.0f)},
+    };
+
+    json jlayers = json::array();
+    j["layers"] = jlayers;
+    return j.dump(4);
 }
 
 };  // namespace arenaforge

@@ -36,7 +36,7 @@
 #import "AFVenue+Private.h"
 
 @interface AFVenue ()
-@property (nonatomic, copy) NSString *name;
+
 @end
 
 @implementation AFVenue {
@@ -50,13 +50,28 @@
 
 - (instancetype)initWithName:(NSString *)name {
     if (self == [super init]) {
-        self.name = name;
         auto uuid = arenaforge::UUID::Instance();
         auto venueId = uuid();
         _venue = arenaforge::Venue::Make(venueId, (name == nil ? "" : std::string(name.UTF8String)), "");
         _venue->setBackgroundColor(tgfx::Color::FromRGBA(0xcc, 0xcc, 0xcc));
     }
     return self;
+}
+
+- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::Venue>)cppObject {
+    if (self == [super init]) {
+        _venue = std::move(cppObject);
+    }
+    return self;
+}
+
+- (std::shared_ptr<arenaforge::Venue>)cppObject {
+    return _venue;
+}
+
+- (NSString *)toJSONString {
+    auto json = _venue->toJSON();
+    return [NSString stringWithUTF8String:json.c_str()];
 }
 
 - (AFLayer *)createLayerWithName:(NSString *)name {
@@ -67,8 +82,15 @@
     return layer;
 }
 
-- (std::shared_ptr<arenaforge::Venue>)cppObject {
-    return _venue;
+#pragma mark - setter getter
+- (NSString *)venueId {
+    auto venueId = _venue->venueId();
+    return [NSString stringWithUTF8String:venueId.c_str()];
+}
+
+- (NSString *)name {
+    auto name = _venue->name();
+    return [NSString stringWithUTF8String:name.c_str()];
 }
 
 - (void)setFrame:(NSRect)frame {

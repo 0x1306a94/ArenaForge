@@ -31,9 +31,33 @@
 
 #include <tgfx/platform/Print.h>
 
+#include <nlohmann/json.hpp>
+
+#include <fstream>
+
 namespace arenaforge {
 std::shared_ptr<Project> Project::Make(const std::string &name, const std::string &description) {
     return std::shared_ptr<Project>(new Project(name, description));
+}
+
+std::shared_ptr<Project> Project::MakeFromJSONFile(const std::string &jsonFile, std::function<std::shared_ptr<Venue>(const std::string &venuedId)> venuedCreater) {
+    using namespace nlohmann;
+
+    std::ifstream ifs(jsonFile);
+    json j = json::parse(ifs);
+    auto name = j["name"].get<std::string>();
+    auto description = j["description"].get<std::string>();
+    auto project = Make(name, description);
+
+    auto venueIds = j["venues"].get<std::vector<std::string>>();
+    for (const auto &venueId : venueIds) {
+        auto venue = venuedCreater(venueId);
+        if (venue) {
+            project->addVenue(venue);
+        }
+    }
+
+    return project;
 }
 
 Project::Project(const std::string &name, const std::string &description)
@@ -120,6 +144,19 @@ bool Project::doContains(const Venue *venue) const {
         }
     }
     return false;
+}
+
+std::string Project::toJSON() const {
+    using namespace nlohmann;
+    json j;
+    j["name"] = name();
+    j["description"] = description();
+    json jvenues = json::array();
+    for (const auto &venue : _venues) {
+        jvenues.push_back(venue->venueId());
+    }
+    j["venues"] = jvenues;
+    return j.dump(4);
 }
 
 };  // namespace arenaforge

@@ -29,5 +29,6 @@
 #import <arenaforge_core/Venue.h>
 
 @interface AFVenue ()
+- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::Venue>)cppObject NS_DESIGNATED_INITIALIZER;
 - (std::shared_ptr<arenaforge::Venue>)cppObject;
 @end

@@ -66,36 +66,50 @@ final class ProjectDocument: NSDocument, ObservableObject {
     // MARK: - FileWrapper API
 
     override func read(from fileWrapper: FileWrapper, ofType typeName: String) throws {
-//        guard let child = fileWrapper.fileWrappers?["project.json"],
-//              let data = child.regularFileContents
-//        else {
-//            throw NSError(domain: "ProjectDocument", code: 1, userInfo: [
-//                NSLocalizedDescriptionKey: "Missing project.json in package"
-//            ])
-//        }
+        guard let fileURL else {
+            throw NSError(domain: "ProjectDocument", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "Missing project.json in package"
+            ])
+        }
         
-        // 用 AFProject 初始化
-        let tmpURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
-//        try data.write(to: tmpURL)
-        self.project = try AFProject(fileURL: tmpURL)
-        
+        self.project = try AFProject(fileURL: fileURL)
         self.displayName = self.fileURL?.lastPathComponent ?? "Untitled"
     }
     
     override func fileWrapper(ofType typeName: String) throws -> FileWrapper {
         let rootWrapper = FileWrapper(directoryWithFileWrappers: [:])
         
-        if let project = self.project {
-//            let data = try project.serialize() // 你需要在 AFProject 里提供方法
-//            let file = FileWrapper(regularFileWithContents: data)
-//            file.preferredFilename = "project.json"
-//            rootWrapper.addFileWrapper(file)
+        guard let project else { return rootWrapper }
+        
+        let projectJSON = project.toJSONString()
+        guard let projectData = projectJSON.data(using: .utf8) else {
+            return rootWrapper
         }
+        
+        let projectFile = FileWrapper(regularFileWithContents: projectData)
+        projectFile.preferredFilename = "project.json"
+        rootWrapper.addFileWrapper(projectFile)
+        
+        let venuesWrapper = FileWrapper(directoryWithFileWrappers: [:])
+        venuesWrapper.preferredFilename = "venues"
+        
+        for venue in project.venues {
+            let venueJSON = venue.toJSONString()
+            guard let venueData = venueJSON.data(using: .utf8) else {
+                continue
+            }
+            
+            let venueFile = FileWrapper(regularFileWithContents: venueData)
+            venueFile.preferredFilename = "\(venue.venueId).json"
+            venuesWrapper.addFileWrapper(venueFile)
+        }
+        
+        rootWrapper.addFileWrapper(venuesWrapper)
         
         return rootWrapper
     }
     
-    // MARK: Close Workspace
+    // MARK: Close Project
 
     override func close() {
         super.close()

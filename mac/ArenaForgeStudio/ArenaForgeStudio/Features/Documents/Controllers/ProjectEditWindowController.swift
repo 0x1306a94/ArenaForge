@@ -84,6 +84,10 @@ final class ProjectEditWindowController: NSWindowController, NSWindowDelegate, O
         let editor = AFEditor(project: project)
         return editor
     }
+    
+    @IBAction func saveDocument(_ sender: Any) {
+        project?.save(sender)
+    }
 
     // MARK: NSWindowDelegate
 

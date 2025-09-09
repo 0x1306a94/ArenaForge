@@ -27,6 +27,7 @@
 #ifndef Project_h_ArenaForge
 #define Project_h_ArenaForge
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -36,6 +37,8 @@ class Venue;
 class Project : public std::enable_shared_from_this<Project> {
   public:
     static std::shared_ptr<Project> Make(const std::string &name, const std::string &description);
+
+    static std::shared_ptr<Project> MakeFromJSONFile(const std::string &jsonFile, std::function<std::shared_ptr<Venue>(const std::string &venuedId)> venuedCreater);
 
     std::shared_ptr<Venue> createVenue(const std::string &name, const std::string &description);
 
@@ -65,6 +68,8 @@ class Project : public std::enable_shared_from_this<Project> {
     bool removeVenue(std::shared_ptr<Venue> venue);
     std::shared_ptr<Venue> removeVenueAt(int index);
     bool contains(std::shared_ptr<Venue> venue) const;
+
+    std::string toJSON() const;
 
   protected:
     Project(const std::string &name, const std::string &description);
