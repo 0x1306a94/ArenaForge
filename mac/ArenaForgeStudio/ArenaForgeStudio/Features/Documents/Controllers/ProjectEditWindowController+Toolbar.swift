@@ -18,7 +18,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  WorkspaceEditWindowController+Toolbar.swift
+//  ProjectEditWindowController+Toolbar.swift
 //  ArenaForgeStudio
 //
 //  Created by KK on 2025/9/7.
@@ -34,7 +34,7 @@ extension NSToolbarItem.Identifier {
     static let editorToolbarViewItem = NSToolbarItem.Identifier("editorToolbarViewItem")
 }
 
-extension WorkspaceEditWindowController: NSToolbarDelegate {
+extension ProjectEditWindowController: NSToolbarDelegate {
     func setupToolbar() {
         let toolbar = NSToolbar(identifier: UUID().uuidString)
         toolbar.delegate = self
@@ -104,12 +104,12 @@ extension WorkspaceEditWindowController: NSToolbarDelegate {
 
             return toolbarItem
         case .editorToolbarViewItem:
-            guard let workspace = self.workspce else { return nil }
+            guard let project = self.project else { return nil }
 
             let toolbarItem = NSToolbarItem(itemIdentifier: .editorToolbarViewItem)
             let view = NSHostingView(
                 rootView: EditorToolbarView()
-                    .environmentObject(workspace)
+                    .environmentObject(project)
             )
             toolbarItem.view = view
 

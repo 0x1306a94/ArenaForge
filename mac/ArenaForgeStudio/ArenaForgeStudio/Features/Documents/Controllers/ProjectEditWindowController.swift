@@ -18,7 +18,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  WorkspaceEditWindowController.swift
+//  ProjectEditWindowController.swift
 //  ArenaForgeStudio
 //
 //  Created by KK on 2025/9/7.
@@ -28,30 +28,30 @@ import AppKit
 import arenaforge_editor
 import Combine
 
-final class WorkspaceEditWindowController: NSWindowController, NSWindowDelegate, ObservableObject {
+final class ProjectEditWindowController: NSWindowController, NSWindowDelegate, ObservableObject {
     @Published var navigatorCollapsed: Bool = false
     @Published var inspectorCollapsed: Bool = false
 
-    var workspce: WorkspaceDocument?
+    var project: ProjectDocument?
     var editor: AFEditor?
 
-    var splitViewController: WorkspaceEditSplitViewController? {
-        contentViewController as? WorkspaceEditSplitViewController
+    var splitViewController: ProjectEditSplitViewController? {
+        contentViewController as? ProjectEditSplitViewController
     }
 
-    init(window: NSWindow?, workspace: WorkspaceDocument?) {
+    init(window: NSWindow?, project: ProjectDocument?) {
         super.init(window: window)
         window?.delegate = self
-        guard let workspace else { return }
-        self.workspce = workspace
+        guard let project else { return }
+        self.project = project
 
-        guard let editor = makeEditor(workspace: workspace) else {
+        guard let editor = makeEditor(project: project) else {
             fatalError("Failed to set up editor.")
         }
 
         self.editor = editor
 
-        guard let splitViewController = setupSplitViewController(workspace: workspace, editor: editor) else {
+        guard let splitViewController = setupSplitViewController(project: project, editor: editor) else {
             fatalError("Failed to set up content view.")
         }
 
@@ -69,16 +69,16 @@ final class WorkspaceEditWindowController: NSWindowController, NSWindowDelegate,
         super.windowDidLoad()
     }
 
-    func setupSplitViewController(workspace: WorkspaceDocument, editor: AFEditor) -> WorkspaceEditSplitViewController? {
+    func setupSplitViewController(project: ProjectDocument, editor: AFEditor) -> ProjectEditSplitViewController? {
         guard let window else {
             assertionFailure("No window found for this controller. Cannot set up content.")
             return nil
         }
-        return WorkspaceEditSplitViewController(windowRef: window, workspace: workspace, editor: editor)
+        return ProjectEditSplitViewController(windowRef: window, project: project, editor: editor)
     }
 
-    private func makeEditor(workspace: WorkspaceDocument) -> AFEditor? {
-        guard let project = workspace.project else {
+    private func makeEditor(project: ProjectDocument) -> AFEditor? {
+        guard let project = project.project else {
             return nil
         }
         let editor = AFEditor(project: project)

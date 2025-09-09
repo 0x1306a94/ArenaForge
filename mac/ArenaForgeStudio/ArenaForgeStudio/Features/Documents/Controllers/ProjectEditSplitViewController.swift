@@ -18,7 +18,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  WorkspaceEditSplitViewController.swift
+//  ProjectEditSplitViewController.swift
 //  ArenaForgeStudio
 //
 //  Created by KK on 2025/9/7.
@@ -28,13 +28,13 @@ import AppKit
 import arenaforge_editor
 import SwiftUI
 
-final class WorkspaceEditSplitViewController: NSSplitViewController {
+final class ProjectEditSplitViewController: NSSplitViewController {
     static let minSidebarWidth: CGFloat = 242
     static let maxSnapWidth: CGFloat = snapWidth + 10
     static let snapWidth: CGFloat = 272
     static let minSnapWidth: CGFloat = snapWidth - 10
 
-    private weak var workspace: WorkspaceDocument?
+    private weak var project: ProjectDocument?
     private weak var editor: AFEditor?
     private weak var windowRef: NSWindow?
     private unowned var hapticPerformer: NSHapticFeedbackPerformer
@@ -43,12 +43,12 @@ final class WorkspaceEditSplitViewController: NSSplitViewController {
 
     init(
         windowRef: NSWindow,
-        workspace: WorkspaceDocument,
+        project: ProjectDocument,
         editor: AFEditor,
         hapticPerformer: NSHapticFeedbackPerformer = NSHapticFeedbackManager.defaultPerformer
     ) {
         self.windowRef = windowRef
-        self.workspace = workspace
+        self.project = project
         self.editor = editor
         self.hapticPerformer = hapticPerformer
         super.init(nibName: nil, bundle: nil)
@@ -67,16 +67,16 @@ final class WorkspaceEditSplitViewController: NSSplitViewController {
             return
         }
 
-        guard let workspace, let editor else {
+        guard let project, let editor else {
             // swiftlint:disable:next line_length
-            assertionFailure("Missing a workspace model: workspace=\(workspace == nil) editor=\(editor == nil)")
+            assertionFailure("Missing a workspace model: project=\(project == nil) editor=\(editor == nil)")
             return
         }
 
         splitView.translatesAutoresizingMaskIntoConstraints = false
 
         let navigator = makeNavigator()
-        let canvas = makeCanvas(workspace: workspace, editor: editor)
+        let canvas = makeCanvas(project: project, editor: editor)
         let inspector = makeInspector(view: InspectorAreaView())
         addSplitViewItem(navigator)
         addSplitViewItem(canvas)
@@ -109,8 +109,8 @@ final class WorkspaceEditSplitViewController: NSSplitViewController {
         return inspector
     }
 
-    private func makeCanvas(workspace: WorkspaceDocument, editor: AFEditor) -> NSSplitViewItem {
-        let canvasViewController = WorkspaceEditCanvasViewController(workspace: workspace, editor: editor)
+    private func makeCanvas(project: ProjectDocument, editor: AFEditor) -> NSSplitViewItem {
+        let canvasViewController = ProjectEditCanvasViewController(project: project, editor: editor)
         let canvas = NSSplitViewItem(viewController: canvasViewController)
         canvas.titlebarSeparatorStyle = .line
         canvas.minimumThickness = 200

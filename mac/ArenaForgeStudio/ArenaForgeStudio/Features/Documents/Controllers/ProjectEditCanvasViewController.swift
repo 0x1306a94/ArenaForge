@@ -18,7 +18,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  WorkspaceEditCanvasViewController.swift
+//  ProjectEditCanvasViewController.swift
 //  ArenaForgeStudio
 //
 //  Created by KK on 2025/9/7.
@@ -27,8 +27,8 @@
 import AppKit
 import arenaforge_editor
 
-final class WorkspaceEditCanvasViewController: NSViewController {
-    weak var workspace: WorkspaceDocument?
+final class ProjectEditCanvasViewController: NSViewController {
+    weak var project: ProjectDocument?
     weak var editor: AFEditor?
     var canvasView: AFMacCanvasView!
 
@@ -43,9 +43,9 @@ final class WorkspaceEditCanvasViewController: NSViewController {
     private var mouseScrollRatio: CGFloat = 0.8
     private var mousePosition: NSPoint = .zero
 
-    init(workspace: WorkspaceDocument, editor: AFEditor) {
+    init(project: ProjectDocument, editor: AFEditor) {
         super.init(nibName: nil, bundle: nil)
-        self.workspace = workspace
+        self.project = project
         self.editor = editor
     }
 
@@ -109,7 +109,7 @@ final class WorkspaceEditCanvasViewController: NSViewController {
     }
 
     override func mouseDown(with event: NSEvent) {
-        guard let workspace, let editor, workspace.activateEditorToolbarItem == .venue else {
+        guard let project, let editor, project.activateEditorToolbarItem == .venue else {
             return
         }
 
@@ -154,7 +154,7 @@ final class WorkspaceEditCanvasViewController: NSViewController {
 
         self.createVenue = nil
 
-        workspace?.activateEditorToolbarItem = .cursors
+        project?.activateEditorToolbarItem = .cursors
     }
 
     override func scrollWheel(with event: NSEvent) {

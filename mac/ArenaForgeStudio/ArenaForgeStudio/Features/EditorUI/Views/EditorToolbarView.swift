@@ -30,13 +30,13 @@ struct EditorToolbarView: View {
     @Environment(\.controlActiveState)
     private var activeState
 
-    @EnvironmentObject var workspace: WorkspaceDocument
+    @EnvironmentObject var project: ProjectDocument
 
     var body: some View {
         HStack(spacing: 4) {
             ForEach(EditorToolbarItem.allCases, id: \.self) { item in
-                EditorToolbarButton(item: item, isSelected: workspace.activateEditorToolbarItem == item) {
-                    workspace.activateEditorToolbarItem = item
+                EditorToolbarButton(item: item, isSelected: project.activateEditorToolbarItem == item) {
+                    project.activateEditorToolbarItem = item
                 }
             }
         }

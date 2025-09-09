@@ -18,37 +18,14 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  OpenFileOrFolderButton.swift
+//  UTType+Extensions.swift
 //  ArenaForgeStudio
 //
-//  Created by KK on 2025/9/7.
+//  Created by king on 2025/9/9.
 //
 
-import SwiftUI
 import UniformTypeIdentifiers
-import WelcomeWindow
 
-struct OpenProjectButton: View {
-    @Environment(\.openWindow)
-    private var openWindow
-
-    var dismissWindow: () -> Void
-
-    var body: some View {
-        WelcomeButton(
-            iconName: "folder",
-            title: "Open Existing Project...",
-            action: {
-                var configuration = DocumentOpenDialogConfiguration(canChooseDirectories: false)
-                configuration.allowedContentTypes = [
-                    .afproject
-                ]
-                NSDocumentController.shared.openDocumentWithDialog(
-                    configuration: configuration,
-                    onDialogPresented: { dismissWindow() },
-                    onCancel: { openWindow(id: DefaultSceneID.welcome) }
-                )
-            }
-        )
-    }
+extension UTType {
+    static let afproject = UTType("com.arenaforge.project")!
 }

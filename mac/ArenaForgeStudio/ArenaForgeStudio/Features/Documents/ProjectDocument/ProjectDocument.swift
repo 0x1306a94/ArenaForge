@@ -18,30 +18,27 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  WorkspaceDocument.swift
+//  ProjectDocument.swift
 //  ArenaForgeStudio
 //
 //  Created by KK on 2025/9/7.
 //
 
 import AppKit
-import SwiftUI
-import Combine
 import arenaforge_editor
+import Combine
+import SwiftUI
 
-final class WorkspaceDocument: NSDocument, ObservableObject {
-    
+final class ProjectDocument: NSDocument, ObservableObject {
     @Published var activateEditorToolbarItem: EditorToolbarItem = .cursors
     
     var project: AFProject?
-
+    
     override static var autosavesInPlace: Bool {
         false
     }
-
-    override var isDocumentEdited: Bool {
-        false
-    }
+    
+    // MARK: - Window setup
 
     override func makeWindowControllers() {
         let window = NSWindow(
@@ -50,47 +47,60 @@ final class WorkspaceDocument: NSDocument, ObservableObject {
             backing: .buffered,
             defer: false
         )
-
+        
         window.minSize = NSSize(width: 1000, height: 600)
-
-        let windowController = WorkspaceEditWindowController(window: window, workspace: self)
-
+        
+        let windowController = ProjectEditWindowController(window: window, project: self)
+        
         window.setFrame(NSRect(x: 0, y: 0, width: 1400, height: 900), display: true, animate: false)
         window.center()
-
-        window.setAccessibilityIdentifier("workspace")
+        
+        window.setAccessibilityIdentifier("project")
         window.setAccessibilityDocument(self.fileURL?.absoluteString)
-
+        
         self.addWindowController(windowController)
-
+        
         window.makeKeyAndOrderFront(nil)
     }
+    
+    // MARK: - FileWrapper API
 
-    private func initWorkspaceState(_ url: URL) throws {
-        var url = url
-        if !url.absoluteString.hasSuffix("/") {
-            url = URL(filePath: url.absoluteURL.path(percentEncoded: false) + "/")
+    override func read(from fileWrapper: FileWrapper, ofType typeName: String) throws {
+//        guard let child = fileWrapper.fileWrappers?["project.json"],
+//              let data = child.regularFileContents
+//        else {
+//            throw NSError(domain: "ProjectDocument", code: 1, userInfo: [
+//                NSLocalizedDescriptionKey: "Missing project.json in package"
+//            ])
+//        }
+        
+        // 用 AFProject 初始化
+        let tmpURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
+//        try data.write(to: tmpURL)
+        self.project = try AFProject(fileURL: tmpURL)
+        
+        self.displayName = self.fileURL?.lastPathComponent ?? "Untitled"
+    }
+    
+    override func fileWrapper(ofType typeName: String) throws -> FileWrapper {
+        let rootWrapper = FileWrapper(directoryWithFileWrappers: [:])
+        
+        if let project = self.project {
+//            let data = try project.serialize() // 你需要在 AFProject 里提供方法
+//            let file = FileWrapper(regularFileWithContents: data)
+//            file.preferredFilename = "project.json"
+//            rootWrapper.addFileWrapper(file)
         }
-
-        self.fileURL = url
-        self.displayName = url.lastPathComponent
-
-        let project = try AFProject(fileURL: url)
-        self.project = project
+        
+        return rootWrapper
     }
-
-    override func read(from url: URL, ofType typeName: String) throws {
-        try self.initWorkspaceState(url)
-    }
-
-    override func write(to url: URL, ofType typeName: String) throws {}
-
+    
     // MARK: Close Workspace
 
     override func close() {
         super.close()
     }
-
+    
     #if DEBUG
         deinit {
             Swift.print("\(type(of: self)) deinit")

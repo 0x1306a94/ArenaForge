@@ -18,7 +18,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  WorkspaceEditWindowController+Panels.swift
+//  ProjectEditWindowController+Panels.swift
 //  ArenaForgeStudio
 //
 //  Created by KK on 2025/9/7.
@@ -26,7 +26,7 @@
 
 import AppKit
 
-extension WorkspaceEditWindowController {
+extension ProjectEditWindowController {
     @objc
     func objcToggleFirstPanel() {
         toggleFirstPanel(shouldAnimate: true)

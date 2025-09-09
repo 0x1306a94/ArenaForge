@@ -2,24 +2,51 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDocumentTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeName</key>
-			<string>Workspace Folder</string>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
-			<key>LSHandlerRank</key>
-			<string>Owner</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>public.folder</string>
-			</array>
-			<key>NSDocumentClass</key>
-			<string>$(PRODUCT_MODULE_NAME).WorkspaceDocument</string>
-		</dict>
-	</array>
-	<key>UTImportedTypeDeclarations</key>
-	<array/>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>ArenaForgeStudio Project</string>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>afproject</string>
+            </array>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>com.arenaforge.project</string>
+            </array>
+            <key>LSTypeIsPackage</key>
+            <true/>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSHandlerRank</key>
+            <string>Default</string>
+            <key>NSDocumentClass</key>
+            <string>$(PRODUCT_MODULE_NAME).ProjectDocument</string>
+        </dict>
+    </array>
+    
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeIdentifier</key>
+            <string>com.arenaforge.project</string>
+            <key>UTTypeDescription</key>
+            <string>ArenaForgeStudio Project File</string>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>com.apple.package</string>
+            </array>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>afproject</string>
+                </array>
+                <key>public.mime-type</key>
+                <string>application/vnd.arenaforge.project</string>
+            </dict>
+        </dict>
+    </array>
 </dict>
 </plist>
