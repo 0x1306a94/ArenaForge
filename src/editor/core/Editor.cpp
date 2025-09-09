@@ -35,6 +35,7 @@
 #include "renderer/RendererState.h"
 
 #include <tgfx/layers/Layer.h>
+#include <tgfx/platform/Print.h>
 
 namespace arenaforge::editor {
 
@@ -48,6 +49,7 @@ Editor::Editor(std::shared_ptr<arenaforge::Project> project)
 }
 
 Editor::~Editor() {
+    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
 void Editor::setRendererBackend(std::shared_ptr<RendererBackend> rendererBackend) {

@@ -78,7 +78,7 @@ bool Project::removeVenue(std::shared_ptr<Venue> venue) {
 
 std::shared_ptr<Venue> Project::removeVenueAt(int index) {
     if (index < 0 || static_cast<size_t>(index) >= _venues.size()) {
-        printf("The supplied index is out of bounds.\n");
+        tgfx::PrintLog("The supplied index is out of bounds.");
         return nullptr;
     }
 

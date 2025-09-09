@@ -33,6 +33,8 @@
 #include "LayerStyleClone.h"
 #include "ShapeStyleClone.h"
 
+#include <tgfx/platform/Print.h>
+
 namespace arenaforge {
 std::shared_ptr<BaseLayer> BaseLayer::Make(const std::string &layerId, ShapeType type) {
     return std::shared_ptr<BaseLayer>(new BaseLayer(layerId, type));
@@ -43,6 +45,10 @@ BaseLayer::BaseLayer(const std::string &layerId, ShapeType type)
     , _layerId(layerId) {
 
     initializePathCommand(type);
+}
+
+BaseLayer::~BaseLayer() {
+    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
 void BaseLayer::setTransient(bool value) {

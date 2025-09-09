@@ -40,7 +40,7 @@ class BaseLayer : public tgfx::ShapeLayer {
   public:
     static std::shared_ptr<BaseLayer> Make(const std::string &layerId, ShapeType type);
 
-    virtual ~BaseLayer() = default;
+    virtual ~BaseLayer();
 
     std::string layerId() const {
         return _layerId;
