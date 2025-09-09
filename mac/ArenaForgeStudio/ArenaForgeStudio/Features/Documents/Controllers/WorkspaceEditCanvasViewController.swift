@@ -39,7 +39,7 @@ final class WorkspaceEditCanvasViewController: NSViewController {
 
     private var minimumZoomScale: CGFloat = 0.1
     private var maximumZoomScale: CGFloat = 30.0
-    private var mouseScaleRatio: CGFloat = 300.0
+    private var mouseScaleRatio: CGFloat = 120.0
     private var mouseScrollRatio: CGFloat = 0.8
     private var mousePosition: NSPoint = .zero
 
@@ -169,24 +169,26 @@ final class WorkspaceEditCanvasViewController: NSViewController {
         let scrollingDeltaY = event.scrollingDeltaY
 
         let modifiers = event.modifierFlags
-        let isShiftPressed = modifiers.contains(.shift)
-        let isControlPressed = modifiers.contains(.control)
-        let isCommandPressed = modifiers.contains(.command)
 
-        if isControlPressed || isCommandPressed {
+        if modifiers.contains(.control) || modifiers.contains(.command) {
             var location = canvasView.convert(event.locationInWindow, from: nil)
             location.x *= density
             location.y *= density
             mousePosition = location
 
-            let scaleFactor = exp(scrollingDeltaY / mouseScaleRatio)
+            let scaleFactor = if event.hasPreciseScrollingDeltas {
+                1.0 + scrollingDeltaY / mouseScaleRatio
+            } else {
+                pow(1.1, event.scrollingDeltaY)
+            }
+
             updateZooming(scaleFactor: scaleFactor)
         } else {
-            var deltaX = scrollingDeltaX * density * mouseScrollRatio
-            var deltaY = scrollingDeltaY * density * mouseScrollRatio
-            if isShiftPressed, deltaX == 0.0, deltaY != 0.0 {
-                deltaX = deltaY
-                deltaY = 0
+            var deltaX = scrollingDeltaX // * density
+            var deltaY = scrollingDeltaY // * density
+            if !event.hasPreciseScrollingDeltas {
+                deltaX *= mouseScrollRatio
+                deltaY *= mouseScrollRatio
             }
             contentOffset.x += deltaX
             contentOffset.y += deltaY

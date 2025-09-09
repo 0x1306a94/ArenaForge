@@ -47,7 +47,6 @@ static CVReturn OnDisplayLinkCallback(CVDisplayLinkRef, const CVTimeStamp *, con
 }
 
 @implementation AFMacCanvasView {
-    std::weak_ptr<arenaforge::editor::Editor> _editor;
 }
 
 - (void)dealloc {
@@ -96,30 +95,11 @@ static CVReturn OnDisplayLinkCallback(CVDisplayLinkRef, const CVTimeStamp *, con
 
 - (void)updateSize {
     [self.delegate AFMacCanvasViewDidUpdateSize:self];
-
-//    [self updateTrackingArea];
 }
 
 - (void)draw {
     [self.delegate AFMacCanvasViewDidDraw:self];
 }
-
-//- (void)updateTrackingArea {
-//    NSRect bounds = self.bounds;
-//    if (self.trackingArea) {
-//        [self removeTrackingArea:self.trackingArea];
-//        self.trackingArea = nil;
-//    }
-//
-//    if (NSIsEmptyRect(bounds)) {
-//        return;
-//    }
-//
-//    NSTrackingAreaOptions options = NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved | NSTrackingActiveAlways;
-//    NSTrackingArea *trackingArea = [[NSTrackingArea alloc] initWithRect:bounds options:options owner:self userInfo:nil];
-//    self.trackingArea = trackingArea;
-//    [self addTrackingArea:trackingArea];
-//}
 
 - (void)clearDisplayLink {
     [self stopDisplayLink];
@@ -172,67 +152,4 @@ static CVReturn OnDisplayLinkCallback(CVDisplayLinkRef, const CVTimeStamp *, con
         }
     }
 }
-
-- (void)setupEditor:(std::shared_ptr<arenaforge::editor::Editor>)editor {
-    if (editor) {
-        _editor = std::move(editor);
-    } else {
-        _editor.reset();
-    }
-}
-
-- (tgfx::Point)toCanvasPoint:(tgfx::Point)source editor:(const arenaforge::editor::Editor *)editor {
-    if (editor == nullptr) {
-        return source;
-    }
-
-    auto currentZoom = editor->zoomScale();
-    auto density = editor->density();
-    float offsetX = 0, offsetY = 0;
-    if (!editor->contentOffset(offsetX, offsetY)) {
-        return source;
-    }
-
-    float px = static_cast<float>(source.x * density);
-    float py = static_cast<float>(source.y * density);
-
-    float x = (px - offsetX) / currentZoom;
-    float y = (py - offsetY) / currentZoom;
-
-    return tgfx::Point::Make(x, y);
-}
-
-//- (void)mouseDown:(NSEvent *)event {
-//    if (_editor.expired()) {
-//        return;
-//    }
-//    auto editor = _editor.lock();
-//    NSPoint location = [self convertPoint:[event locationInWindow] fromView:nil];
-//    auto canvasLocation = [self toCanvasPoint:tgfx::Point::Make(static_cast<float>(location.x), static_cast<float>(location.y)) editor:editor.get()];
-//
-//    NSLog(@"mouseDown location: {%.f, %.f} canvasLocation: {%.f, %.f}", location.x, location.y, canvasLocation.x, canvasLocation.y);
-//}
-//
-//- (void)mouseMoved:(NSEvent *)event {
-//    if (_editor.expired()) {
-//        return;
-//    }
-//    auto editor = _editor.lock();
-//    NSPoint location = [self convertPoint:[event locationInWindow] fromView:nil];
-//    auto canvasLocation = [self toCanvasPoint:tgfx::Point::Make(static_cast<float>(location.x), static_cast<float>(location.y)) editor:editor.get()];
-//
-//    NSLog(@"mouseMoved location: {%.f, %.f} canvasLocation: {%.f, %.f}", location.x, location.y, canvasLocation.x, canvasLocation.y);
-//}
-//
-//- (void)mouseUp:(NSEvent *)event {
-//    if (_editor.expired()) {
-//        return;
-//    }
-//    auto editor = _editor.lock();
-//    NSPoint location = [self convertPoint:[event locationInWindow] fromView:nil];
-//    auto canvasLocation = [self toCanvasPoint:tgfx::Point::Make(static_cast<float>(location.x), static_cast<float>(location.y)) editor:editor.get()];
-//
-//    NSLog(@"mouseUp location: {%.f, %.f} canvasLocation: {%.f, %.f}", location.x, location.y, canvasLocation.x, canvasLocation.y);
-//}
-
 @end

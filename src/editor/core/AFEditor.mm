@@ -88,14 +88,12 @@
     }
 
     _canvasView.delegate = nil;
-    [_canvasView setupEditor:nullptr];
     self.canvasView = canvasView;
 
     if (_editor != nullptr) {
         if (canvasView == nil) {
             _editor->setRendererBackend(nullptr);
         } else {
-            [canvasView setupEditor:_editor];
             canvasView.delegate = self;
             auto rendererBackend = std::make_shared<arenaforge::editor::MacRendererBackend>((NSView *)canvasView);
             _editor->setRendererBackend(std::move(rendererBackend));
