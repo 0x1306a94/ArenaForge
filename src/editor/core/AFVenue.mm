@@ -36,7 +36,7 @@
 #import "AFVenue+Private.h"
 
 @interface AFVenue ()
-
+@property (nonatomic, strong) AFLayer *root;
 @end
 
 @implementation AFVenue {
@@ -54,6 +54,8 @@
         auto venueId = uuid();
         _venue = arenaforge::Venue::Make(venueId, (name == nil ? "" : std::string(name.UTF8String)), "");
         _venue->setBackgroundColor(tgfx::Color::FromRGBA(0xcc, 0xcc, 0xcc));
+
+        _root = [[AFLayer alloc] initWithCppObject:_venue->containerPtr()];
     }
     return self;
 }
@@ -61,6 +63,8 @@
 - (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::Venue>)cppObject {
     if (self == [super init]) {
         _venue = std::move(cppObject);
+
+        _root = [[AFLayer alloc] initWithCppObject:_venue->containerPtr()];
     }
     return self;
 }

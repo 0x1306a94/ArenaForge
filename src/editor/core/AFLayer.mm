@@ -29,8 +29,10 @@
 #import <arenaforge_core/layers/BaseLayer.h>
 #import <arenaforge_core/uuid/UUID.h>
 
+#import "AFLayer+Private.h"
+
 @interface AFLayer ()
-@property (nonatomic, copy) NSString *name;
+@property (nonatomic, strong) NSMutableArray<AFLayer *> *internalLayers;
 @end
 
 @implementation AFLayer {
@@ -50,12 +52,43 @@
 
         _layer = arenaforge::BaseLayer::Make(layerId, arenaforge::ShapeType::Rectangle);
         _layer->setName((name == nil ? "" : std::string(name.UTF8String)));
+        _internalLayers = [NSMutableArray<AFLayer *> array];
+    }
+    return self;
+}
+
+- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::BaseLayer>)cppObject {
+    if (self == [super init]) {
+        _layer = std::move(cppObject);
+        _internalLayers = [NSMutableArray<AFLayer *> array];
     }
     return self;
 }
 
 - (std::shared_ptr<arenaforge::BaseLayer>)cppObject {
     return _layer;
+}
+
+- (NSString *)venueId {
+    auto layerId = _layer->layerId();
+    return [NSString stringWithUTF8String:layerId.c_str()];
+}
+
+- (NSString *)name {
+    auto name = _layer->name();
+    return [NSString stringWithUTF8String:name.c_str()];
+}
+
+- (NSArray<AFLayer *> *)children {
+    return [self.internalLayers copy];
+}
+
+- (BOOL)hasChildren {
+    return self.internalLayers.count > 0;
+}
+
+- (NSInteger)childrenCount {
+    return (NSInteger)self.internalLayers.count;
 }
 
 - (void)setTransient:(BOOL)transient {

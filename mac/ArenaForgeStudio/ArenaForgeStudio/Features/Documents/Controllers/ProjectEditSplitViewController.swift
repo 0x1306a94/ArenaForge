@@ -75,7 +75,7 @@ final class ProjectEditSplitViewController: NSSplitViewController {
 
         splitView.translatesAutoresizingMaskIntoConstraints = false
 
-        let navigator = makeNavigator()
+        let navigator = makeNavigator(project: project)
         let canvas = makeCanvas(project: project, editor: editor)
         let inspector = makeInspector(view: InspectorAreaView())
         addSplitViewItem(navigator)
@@ -89,8 +89,8 @@ final class ProjectEditSplitViewController: NSSplitViewController {
         splitView.setPosition(Self.minSidebarWidth, ofDividerAt: 0)
     }
 
-    private func makeNavigator() -> NSSplitViewItem {
-        let project = LayerNavigatorViewController()
+    private func makeNavigator(project: ProjectDocument) -> NSSplitViewItem {
+        let project = LayerNavigatorViewController(project: project)
         let navigator = NSSplitViewItem(sidebarWithViewController: project)
         navigator.titlebarSeparatorStyle = .none
         navigator.isSpringLoaded = true

@@ -25,32 +25,29 @@
 //
 
 import AppKit
+import arenaforge_editor
 
 extension LayerNavigatorViewController: NSOutlineViewDataSource {
-//    private func getOutlineViewItems(for item: any) -> [any] {
-//        return []
-//    }
-
     func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
-//        if let item = item as? CEWorkspaceFile {
-//            return getOutlineViewItems(for: item).count
-//        }
-//        return content.count
-        return 0
+        if let layer = item as? AFLayer {
+            return layer.childrenCount
+        }
+        return rootLayers.count
     }
 
     func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
-//        if let item = item as? CEWorkspaceFile {
-//            return getOutlineViewItems(for: item)[index]
-//        }
-//        return content[index]
-        return 0
+        if let layer = item as? AFLayer {
+            return layer.children[index]
+        }
+
+        return rootLayers[index]
     }
 
     func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
-//        if let item = item as? CEWorkspaceFile {
-//            return item.isFolder
-//        }
+        if let layer = item as? AFLayer {
+            return layer.hasChildren
+        }
+
         return false
     }
 }

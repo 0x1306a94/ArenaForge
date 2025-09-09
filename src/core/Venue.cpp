@@ -83,6 +83,7 @@ Venue::Venue(const std::string &venueId, const std::string &name, const std::str
 
     _container = BaseLayer::Make(uuid(), ShapeType::Rectangle);
     _container->setPositionRelative(false);
+    _container->setName(name);
 
     _mask = BaseLayer::Make(uuid(), ShapeType::Rectangle);
     _mask->setPositionRelative(false);
@@ -152,6 +153,10 @@ std::shared_ptr<BaseLayer> Venue::rootPtr() const {
 
 BaseLayer *Venue::container() const {
     return _container.get();
+}
+
+std::shared_ptr<BaseLayer> Venue::containerPtr() const {
+    return _container;
 }
 
 BaseLayer *Venue::mask() const {

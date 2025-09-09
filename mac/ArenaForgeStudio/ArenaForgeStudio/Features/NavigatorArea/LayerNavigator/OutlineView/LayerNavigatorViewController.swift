@@ -25,10 +25,15 @@
 //
 
 import AppKit
+import arenaforge_editor
 
 final class LayerNavigatorViewController: NSViewController {
+    weak var project: ProjectDocument?
+
     var scrollView: NSScrollView!
     var outlineView: NSOutlineView!
+
+    var rootLayers: [AFLayer] = []
 
     var rowHeight: Double = 22 {
         willSet {
@@ -37,6 +42,13 @@ final class LayerNavigatorViewController: NSViewController {
                 outlineView.reloadData()
             }
         }
+    }
+
+    init(project: ProjectDocument) {
+        super.init(nibName: nil, bundle: nil)
+        self.project = project
+        let venues = project.project?.venues ?? []
+        self.rootLayers = venues.map { $0.root }
     }
 
     /// Setup the ``scrollView`` and ``outlineView``

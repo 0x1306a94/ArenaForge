@@ -82,6 +82,7 @@ class Venue : public std::enable_shared_from_this<Venue> {
     std::shared_ptr<BaseLayer> rootPtr() const;
 
     BaseLayer *container() const;
+    std::shared_ptr<BaseLayer> containerPtr() const;
 
     BaseLayer *mask() const;
 

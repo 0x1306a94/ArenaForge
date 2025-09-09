@@ -25,7 +25,33 @@
 //
 
 import AppKit
+import arenaforge_editor
 
 extension LayerNavigatorViewController: NSOutlineViewDelegate {
-    
+    func outlineView(
+        _ outlineView: NSOutlineView,
+        shouldShowCellExpansionFor tableColumn: NSTableColumn?,
+        item: Any
+    ) -> Bool {
+        true
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, shouldShowOutlineCellForItem item: Any) -> Bool {
+        true
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, heightOfRowByItem item: Any) -> CGFloat {
+        rowHeight // This can be changed to 20 to match Xcode's row height.
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
+        guard let tableColumn else { return nil }
+
+        let frameRect = NSRect(x: 0, y: 0, width: tableColumn.width, height: rowHeight)
+        let cell = LayerTableViewCell(
+            frame: frameRect,
+            item: item as? AFLayer
+        )
+        return cell
+    }
 }

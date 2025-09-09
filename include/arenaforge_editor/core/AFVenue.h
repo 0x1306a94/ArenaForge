@@ -38,6 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
 ARENA_FORGE_EXPORT_API @interface AFVenue : NSObject
 @property (nonatomic, copy, readonly) NSString *venueId;
 @property (nonatomic, copy, readonly) NSString *name;
+@property (nonatomic, strong, readonly) AFLayer *root;
 @property (nonatomic, assign) NSRect frame;
 @property (nonatomic, strong) NSColor *backgroundColor;
 

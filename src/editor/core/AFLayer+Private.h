@@ -29,5 +29,6 @@
 #import <arenaforge_core/layers/BaseLayer.h>
 
 @interface AFLayer ()
+- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::BaseLayer>)cppObject NS_DESIGNATED_INITIALIZER;
 - (std::shared_ptr<arenaforge::BaseLayer>)cppObject;
 @end

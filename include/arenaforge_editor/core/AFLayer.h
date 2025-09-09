@@ -34,8 +34,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
+@property (nonatomic, copy, readonly) NSString *layerId;
 @property (nonatomic, copy, readonly) NSString *name;
 @property (nonatomic, copy, readonly) NSArray<AFLayer *> *children;
+@property (nonatomic, assign, readonly) NSInteger childrenCount;
+@property (nonatomic, assign, readonly) BOOL hasChildren;
 @property (nonatomic, assign) BOOL transient;
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
