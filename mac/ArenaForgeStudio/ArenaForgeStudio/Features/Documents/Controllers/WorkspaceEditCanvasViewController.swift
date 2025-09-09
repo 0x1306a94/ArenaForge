@@ -78,7 +78,7 @@ final class WorkspaceEditCanvasViewController: NSViewController {
         self.canvasView = canvasView
         NSLayoutConstraint.activate([
             canvasView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            canvasView.topAnchor.constraint(equalTo: view.topAnchor),
+            canvasView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             canvasView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             canvasView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
@@ -90,7 +90,7 @@ final class WorkspaceEditCanvasViewController: NSViewController {
             self.trackingArea = nil
         }
 
-        guard !view.bounds.isEmpty else {
+        guard !self.canvasView.bounds.isEmpty else {
             return
         }
 
@@ -100,7 +100,10 @@ final class WorkspaceEditCanvasViewController: NSViewController {
             .activeAlways,
         ]
 
-        let trackingArea = NSTrackingArea(rect: view.bounds, options: options, owner: self)
+        var frame = self.canvasView.frame
+        frame = self.view.convert(frame, from: self.canvasView)
+
+        let trackingArea = NSTrackingArea(rect: frame, options: options, owner: self)
         self.trackingArea = trackingArea
         view.addTrackingArea(trackingArea)
     }
