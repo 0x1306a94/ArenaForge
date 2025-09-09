@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3CF5CC5E2E6E8BFE00A4D9C9 /* arenaforge_editor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CF5CC5D2E6E8BFE00A4D9C9 /* arenaforge_editor.framework */; };
 		3CF5CC5F2E6E8BFE00A4D9C9 /* arenaforge_editor.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CF5CC5D2E6E8BFE00A4D9C9 /* arenaforge_editor.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		4B3A89E42E6C63F50095AF78 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4B3A89E32E6C63F50095AF78 /* Config.xcconfig */; };
 		4BC04DB82E6D241900EC6B09 /* WelcomeWindow in Frameworks */ = {isa = PBXBuildFile; productRef = 4BC04DB72E6D241900EC6B09 /* WelcomeWindow */; };
 /* End PBXBuildFile section */
 
@@ -266,7 +265,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B3A89E42E6C63F50095AF78 /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
