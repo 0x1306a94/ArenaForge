@@ -147,7 +147,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4B3A891B2E6C61F20095AF78 /* Build configuration list for PBXNativeTarget "ArenaForgeStudio" */;
 			buildPhases = (
-				4B3A89EA2E6C64720095AF78 /* Copy arenaforge_editor framework */,
+				4B3A89EA2E6C64720095AF78 /* Fix arenaforge_editor framework path */,
 				4B3A88F02E6C61F10095AF78 /* Sources */,
 				4B3A88F12E6C61F10095AF78 /* Frameworks */,
 				4B3A88F22E6C61F10095AF78 /* Resources */,
@@ -287,7 +287,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		4B3A89EA2E6C64720095AF78 /* Copy arenaforge_editor framework */ = {
+		4B3A89EA2E6C64720095AF78 /* Fix arenaforge_editor framework path */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -296,14 +296,14 @@
 			);
 			inputPaths = (
 			);
-			name = "Copy arenaforge_editor framework";
+			name = "Fix arenaforge_editor framework path";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -x\nrsync -avP --delete \"$SRCROOT/../gen_xcode/Products/$CONFIGURATION/arenaforge_editor.framework\" \"$CONFIGURATION_BUILD_DIR\"\n";
+			shellScript = "\necho \"ACTION: ${ACTION}\"\n\nif [ \"${ACTION}\" == \"install\" ]; then\n   set -x\n   pushd $CONFIGURATION_BUILD_DIR\n   ln -sf $UNINSTALLED_PRODUCTS_DIR/$PLATFORM_NAME/arenaforge_editor.framework arenaforge_editor.framework\n   popd\n   \n   exit 0 \nfi\n\nset -x\nrsync -avP --delete \"$SRCROOT/../gen_xcode/Products/$CONFIGURATION/arenaforge_editor.framework\" \"$CONFIGURATION_BUILD_DIR\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -348,6 +348,7 @@
 		4B3A891C2E6C61F20095AF78 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "$(SRCROOT)/ArenaForgeStudio/Config/ArenaForgeStudio.entitlements";
@@ -376,6 +377,7 @@
 		4B3A891D2E6C61F20095AF78 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "$(SRCROOT)/ArenaForgeStudio/Config/ArenaForgeStudio.entitlements";
