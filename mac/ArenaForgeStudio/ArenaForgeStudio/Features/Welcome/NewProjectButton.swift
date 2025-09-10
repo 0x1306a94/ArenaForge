@@ -35,8 +35,8 @@ struct NewProjectButton: View {
             iconName: "plus.square",
             title: "Create New Project...",
             action: {
-//                let documentController = NSDocumentController()
-//                documentController.createAndOpenNewDocument(onCompletion: { dismissWindow() })
+                let documentController = ArenaForgeStudioDocumentController.shared as! ArenaForgeStudioDocumentController
+                documentController.createAndOpenNewDocument(onCompletion: { dismissWindow() })
             }
         )
     }

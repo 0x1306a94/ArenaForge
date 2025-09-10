@@ -62,12 +62,14 @@ std::shared_ptr<Project> Project::MakeFromJSONFile(const std::string &jsonFile, 
     project->_version = as::read_value<ProjectVersion>(j, "version", ProjectVersion::Version1);
     project->_venueCounter = as::read_value<uint32_t>(j, "venueCounter", 0);
     project->_rectangleCounter = as::read_value<uint32_t>(j, "rectangleCounter", 0);
-    
-    auto venueIds = j["venues"].get<std::vector<std::string>>();
-    for (const auto &venueId : venueIds) {
-        auto venue = venuedCreater(venueId);
-        if (venue) {
-            project->addVenue(venue);
+
+    if (j.contains("venues")) {
+        auto venueIds = j["venues"].get<std::vector<std::string>>();
+        for (const auto &venueId : venueIds) {
+            auto venue = venuedCreater(venueId);
+            if (venue) {
+                project->addVenue(venue);
+            }
         }
     }
 

@@ -31,6 +31,10 @@ import WelcomeWindow
 struct ArenaForgeStudioApp: App {
     @NSApplicationDelegateAdaptor var appdelegate: AppDelegate
 
+    init() {
+        _ = ArenaForgeStudioDocumentController.shared
+    }
+
     var body: some Scene {
         Group {
             WelcomeWindow(
@@ -48,6 +52,13 @@ struct ArenaForgeStudioApp: App {
             )
         }
         .commands {
+            CommandGroup(replacing: .newItem) {
+                Button("New Project") {
+                    ArenaForgeStudioDocumentController.shared.newDocument(nil)
+                }
+                .keyboardShortcut("n")
+            }
+
             CommandGroup(replacing: .saveItem) {
                 Button("Save") {
                     NSDocumentController.shared.currentDocument?.save(nil)
