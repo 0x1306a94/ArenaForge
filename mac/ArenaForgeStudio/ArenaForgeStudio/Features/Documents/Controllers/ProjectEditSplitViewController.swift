@@ -28,7 +28,7 @@ import AppKit
 import arenaforge_editor
 import SwiftUI
 
-final class ProjectEditSplitViewController: NSSplitViewController {
+final class ProjectEditSplitViewController: NSSplitViewController, ProjectEditCanvasViewControllerDelegate {
     static let minSidebarWidth: CGFloat = 242
     static let maxSnapWidth: CGFloat = snapWidth + 10
     static let snapWidth: CGFloat = 272
@@ -38,6 +38,9 @@ final class ProjectEditSplitViewController: NSSplitViewController {
     private weak var editor: AFEditor?
     private weak var windowRef: NSWindow?
     private unowned var hapticPerformer: NSHapticFeedbackPerformer
+
+    private weak var editCanvas: ProjectEditCanvasViewController?
+    private weak var layerNavigator: LayerNavigatorViewController?
 
     // MARK: - Initialization
 
@@ -81,6 +84,8 @@ final class ProjectEditSplitViewController: NSSplitViewController {
         addSplitViewItem(navigator)
         addSplitViewItem(canvas)
         addSplitViewItem(inspector)
+
+        self.editCanvas?.delegate = self
     }
 
     override func viewWillAppear() {
@@ -90,8 +95,9 @@ final class ProjectEditSplitViewController: NSSplitViewController {
     }
 
     private func makeNavigator(project: ProjectDocument) -> NSSplitViewItem {
-        let project = LayerNavigatorViewController(project: project)
-        let navigator = NSSplitViewItem(sidebarWithViewController: project)
+        let layerNavigator = LayerNavigatorViewController(project: project)
+        self.layerNavigator = layerNavigator
+        let navigator = NSSplitViewItem(sidebarWithViewController: layerNavigator)
         navigator.titlebarSeparatorStyle = .none
         navigator.isSpringLoaded = true
         navigator.minimumThickness = Self.minSidebarWidth
@@ -111,6 +117,7 @@ final class ProjectEditSplitViewController: NSSplitViewController {
 
     private func makeCanvas(project: ProjectDocument, editor: AFEditor) -> NSSplitViewItem {
         let canvasViewController = ProjectEditCanvasViewController(project: project, editor: editor)
+        self.editCanvas = canvasViewController
         let canvas = NSSplitViewItem(viewController: canvasViewController)
         canvas.titlebarSeparatorStyle = .line
         canvas.minimumThickness = 200
@@ -174,6 +181,12 @@ final class ProjectEditSplitViewController: NSSplitViewController {
 //                workspace?.addToWorkspaceState(key: .splitViewWidth, value: width)
             }
         }
+    }
+
+    // MARK: ProjectEditCanvasViewControllerDelegate
+
+    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewVenue venue: AFVenue) {
+        self.layerNavigator?.onNewVeuen(venue)
     }
 
     #if DEBUG

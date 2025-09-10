@@ -86,7 +86,8 @@
 }
 
 - (AFVenue *)createVenue {
-    AFVenue *venue = [[AFVenue alloc] initWithName:@"Venue"];
+    auto counter = _project->genVenueCounter();
+    AFVenue *venue = [[AFVenue alloc] initWithName:[NSString stringWithFormat:@"Venue %u", counter]];
     auto cppVenue = [venue cppObject];
     _project->addVenue(cppVenue);
     [self.internalVenues addObject:venue];

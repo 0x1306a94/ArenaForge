@@ -30,6 +30,8 @@
 #include <arenaforge_core/layers/BaseLayer.h>
 #include <arenaforge_core/uuid/UUID.h>
 
+#include "serialize/BaseLayerJSONHelper.h"
+
 #include <tgfx/layers/Layer.h>
 #include <tgfx/layers/SolidColor.h>
 #include <tgfx/platform/Print.h>
@@ -64,21 +66,30 @@ std::shared_ptr<Venue> Venue::MakeFromJSONFile(const std::string &jsonFile) {
     auto description = j["description"].get<std::string>();
     auto venue = Make(venueId, name, description);
 
-    auto jframe = j["frame"];
-    auto x = jframe["x"].get<float>();
-    auto y = jframe["y"].get<float>();
-    auto width = jframe["width"].get<float>();
-    auto height = jframe["height"].get<float>();
-    venue->setFrame(tgfx::Rect::MakeXYWH(x, y, width, height));
+    auto frame = j["frame"].get<tgfx::Rect>();
+    venue->setFrame(frame);
 
     if (j.contains("backgroundColor")) {
-        auto backgroundColor = j["backgroundColor"];
-        auto r = backgroundColor["r"].get<uint8_t>();
-        auto g = backgroundColor["g"].get<uint8_t>();
-        auto b = backgroundColor["b"].get<uint8_t>();
-        auto a = backgroundColor["a"].get<uint8_t>();
-        venue->setBackgroundColor(tgfx::Color::FromRGBA(r, g, b, a));
+        auto backgroundColor = j["backgroundColor"].get<tgfx::Color>();
+        venue->setBackgroundColor(backgroundColor);
     }
+
+    do {
+        auto layersIt = j.find("layers");
+        if (layersIt == j.end()) {
+            break;
+        }
+
+        auto layers = layersIt->get<std::vector<std::shared_ptr<arenaforge::BaseLayer>>>();
+        if (layers.empty()) {
+            break;
+        }
+
+        auto container = venue->container();
+        for (auto layer : layers) {
+            container->addChild(layer);
+        }
+    } while (0);
 
     return venue;
 }
@@ -183,30 +194,27 @@ BaseLayer *Venue::mask() const {
     return _mask.get();
 }
 
-std::string Venue::toJSON() const {
+std::string Venue::toJSON(bool pretty) const {
     using namespace nlohmann;
     json j;
     j["venueId"] = _venueId;
     j["name"] = name();
     j["description"] = description();
+    j["frame"] = _frame;
 
-    j["frame"] = json{
-        {"x", _frame.x()},
-        {"y", _frame.y()},
-        {"width", _frame.width()},
-        {"height", _frame.height()},
-    };
-
-    j["backgroundColor"] = json{
-        {"r", static_cast<uint8_t>(_backgroundColor.red * 255.0f)},
-        {"g", static_cast<uint8_t>(_backgroundColor.green * 255.0f)},
-        {"b", static_cast<uint8_t>(_backgroundColor.blue * 255.0f)},
-        {"a", static_cast<uint8_t>(_backgroundColor.alpha * 255.0f)},
-    };
+    if (_backgroundColor != tgfx::Color::Transparent()) {
+        j["backgroundColor"] = _backgroundColor;
+    }
 
     json jlayers = json::array();
+    for (auto child : _container->children()) {
+        auto baseLayer = std::static_pointer_cast<BaseLayer>(child);
+        jlayers.push_back(baseLayer);
+    }
+
     j["layers"] = jlayers;
-    return j.dump(4);
+
+    return j.dump(pretty ? 4 : -1);
 }
 
 };  // namespace arenaforge

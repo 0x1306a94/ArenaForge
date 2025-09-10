@@ -81,7 +81,7 @@ class Venue : public std::enable_shared_from_this<Venue> {
 
     BaseLayer *mask() const;
 
-    std::string toJSON() const;
+    std::string toJSON(bool pretty = false) const;
 
   protected:
     Venue(const std::string &venueId, const std::string &name, const std::string &description);

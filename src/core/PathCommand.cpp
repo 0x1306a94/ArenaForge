@@ -28,34 +28,45 @@
 
 namespace arenaforge {
 
+PathCommand Make(PathCommandType type) {
+    PathCommand cmd{};
+    cmd.type = type;
+    return cmd;
+}
+
 PathCommand PathCommand::MakeMoveTo(const tgfx::Point &point) {
     PathCommand cmd{};
     cmd.type = PathCommandType::MoveTo;
-    cmd.cmd.moveTo.p = point;
+    cmd.c1 = point;
+    cmd.c2 = point;
+    cmd.p = point;
     return cmd;
 }
 
 PathCommand PathCommand::MakeLineTo(const tgfx::Point &point) {
     PathCommand cmd{};
     cmd.type = PathCommandType::LineTo;
-    cmd.cmd.lineTo.p = point;
+    cmd.c1 = point;
+    cmd.c2 = point;
+    cmd.p = point;
     return cmd;
 }
 
 PathCommand PathCommand::MakeQuadTo(const tgfx::Point &control, const tgfx::Point &point) {
     PathCommand cmd{};
     cmd.type = PathCommandType::QuadTo;
-    cmd.cmd.quadTo.c = control;
-    cmd.cmd.quadTo.p = point;
+    cmd.c1 = control;
+    cmd.c2 = control;
+    cmd.p = point;
     return cmd;
 }
 
 PathCommand PathCommand::MakeCubicTo(const tgfx::Point &controlStart, const tgfx::Point &controlEnd, const tgfx::Point &point) {
     PathCommand cmd{};
     cmd.type = PathCommandType::CubicTo;
-    cmd.cmd.cubicTo.c1 = controlStart;
-    cmd.cmd.cubicTo.c2 = controlEnd;
-    cmd.cmd.cubicTo.p = point;
+    cmd.c1 = controlStart;
+    cmd.c2 = controlEnd;
+    cmd.p = point;
     return cmd;
 }
 

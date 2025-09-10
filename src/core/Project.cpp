@@ -29,6 +29,8 @@
 #include <arenaforge_core/Venue.h>
 #include <arenaforge_core/uuid/UUID.h>
 
+#include "serialize/JSONSerializeHelper.h"
+
 #include <tgfx/platform/Print.h>
 
 #include <nlohmann/json.hpp>
@@ -42,20 +44,25 @@ std::shared_ptr<Project> Project::Make(const std::string &name, const std::strin
 }
 
 std::shared_ptr<Project> Project::MakeFromJSONFile(const std::string &jsonFile, std::function<std::shared_ptr<Venue>(const std::string &venuedId)> venuedCreater) {
-    using namespace nlohmann;
 
     namespace fs = std::filesystem;
+    namespace as = arenaforge::json;
 
     if (!fs::exists(jsonFile)) {
         throw std::logic_error("The project.json file is missing.");
     }
 
     std::ifstream ifs(jsonFile);
-    json j = json::parse(ifs);
-    auto name = j["name"].get<std::string>();
-    auto description = j["description"].get<std::string>();
+    nlohmann::json j = nlohmann::json::parse(ifs);
+    auto name = as::read_value<std::string>(j, "name", "");
+    auto description = as::read_value<std::string>(j, "description", "");
+
     auto project = Make(name, description);
 
+    project->_version = as::read_value<ProjectVersion>(j, "version", ProjectVersion::Version1);
+    project->_venueCounter = as::read_value<uint32_t>(j, "venueCounter", 0);
+    project->_rectangleCounter = as::read_value<uint32_t>(j, "rectangleCounter", 0);
+    
     auto venueIds = j["venues"].get<std::vector<std::string>>();
     for (const auto &venueId : venueIds) {
         auto venue = venuedCreater(venueId);
@@ -153,17 +160,19 @@ bool Project::doContains(const Venue *venue) const {
     return false;
 }
 
-std::string Project::toJSON() const {
-    using namespace nlohmann;
-    json j;
+std::string Project::toJSON(bool pretty) const {
+    nlohmann::json j;
     j["name"] = name();
     j["description"] = description();
-    json jvenues = json::array();
+    j["version"] = version();
+    j["venueCounter"] = _venueCounter;
+    j["rectangleCounter"] = _rectangleCounter;
+    auto jvenues = nlohmann::json::array();
     for (const auto &venue : _venues) {
         jvenues.push_back(venue->venueId());
     }
     j["venues"] = jvenues;
-    return j.dump(4);
+    return j.dump(pretty ? 4 : -1);
 }
 
 };  // namespace arenaforge

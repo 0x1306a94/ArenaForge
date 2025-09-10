@@ -46,6 +46,14 @@ class BaseLayer : public tgfx::ShapeLayer {
         return _layerId;
     }
 
+    void setLayerId(const std::string &layerId);
+
+    bool locked() const {
+        return _locked;
+    }
+
+    void setLocked(bool value);
+
     bool transient() const {
         return _transient;
     }
@@ -72,9 +80,17 @@ class BaseLayer : public tgfx::ShapeLayer {
 
     void addAttribute(const std::string &key, const std::string &value);
 
+    const std::vector<PathCommand> pathCommands() const {
+        return _pathCommands;
+    }
+
+    void setPathCommands(const std::vector<PathCommand> &commands);
+
     std::shared_ptr<BaseLayer> getChildById(const std::string &layerId);
 
     virtual std::shared_ptr<BaseLayer> clone(bool cloneChildren) const;
+
+    std::string toJSON(bool pretty = false);
 
   protected:
     BaseLayer(const std::string &layerId, ShapeType type);
@@ -91,6 +107,7 @@ class BaseLayer : public tgfx::ShapeLayer {
   private:
     std::string _layerId{""};
     bool _transient{false};
+    bool _locked{false};
     bool _positionRelative{false};
     std::unordered_map<std::string, std::string> _attributes{};
     tgfx::Rect _frame{};

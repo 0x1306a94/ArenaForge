@@ -27,15 +27,21 @@
 import AppKit
 import arenaforge_editor
 
+protocol ProjectEditCanvasViewControllerDelegate: AnyObject {
+    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewVenue venue: AFVenue)
+}
+
 final class ProjectEditCanvasViewController: NSViewController {
-    weak var project: ProjectDocument?
-    weak var editor: AFEditor?
-    var canvasView: AFMacCanvasView!
+    private weak var project: ProjectDocument?
+    private weak var editor: AFEditor?
+    private var canvasView: AFMacCanvasView!
 
-    var trackingArea: NSTrackingArea?
+    private var trackingArea: NSTrackingArea?
 
-    var createVenueStartPoint: NSPoint?
-    var createVenue: AFVenue?
+    private var createVenueStartPoint: NSPoint?
+    private var createVenue: AFVenue?
+
+    weak var delegate: ProjectEditCanvasViewControllerDelegate?
 
     private var minimumZoomScale: CGFloat = 0.1
     private var maximumZoomScale: CGFloat = 30.0
@@ -139,6 +145,8 @@ final class ProjectEditCanvasViewController: NSViewController {
 
     override func mouseUp(with event: NSEvent) {
         guard let createVenueStartPoint, let createVenue else {
+            project?.activateEditorToolbarItem = .cursors
+
             return
         }
         let location = canvasView.convert(event.locationInWindow, from: nil)
@@ -152,9 +160,9 @@ final class ProjectEditCanvasViewController: NSViewController {
         let rect = computeRect(start: createVenueStartPoint, end: canvasLocation)
         createVenue.frame = rect
 
-        self.createVenue = nil
-
         project?.activateEditorToolbarItem = .cursors
+        self.delegate?.projectEditCanvasViewController(self, didNewVenue: createVenue)
+        self.createVenue = nil
     }
 
     override func scrollWheel(with event: NSEvent) {

@@ -18,44 +18,28 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  PathCommand.h
-//  arenaforge_core
+//  SerializeTest.cpp
+//  arenaforge_core_test
 //
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/10.
 //
 
-#ifndef PathCommand_h_ArenaForge
-#define PathCommand_h_ArenaForge
+#include "../base/ArenaForgeTest.h"
 
-#include <string>
+#include <arenaforge_core/layers/BaseLayer.h>
 
-#include <tgfx/core/Point.h>
+#include <tgfx/layers/SolidColor.h>
 
 namespace arenaforge {
-enum class PathCommandType {
-    Unknown,
-    MoveTo,
-    LineTo,
-    QuadTo,
-    CubicTo,
-    ClosePath
+ArenaForge_TEST(SerializeTest, LayerToJSON) {
+    auto layer = arenaforge::BaseLayer::Make("4ACB71E3-740E-45E7-BFEA-F432C98FDEF3", arenaforge::ShapeType::Rectangle);
+    layer->setName("test");
+    layer->setFrame(tgfx::Rect::MakeXYWH(200, 200, 400, 400));
+    layer->setFillStyle(tgfx::SolidColor::Make(tgfx::Color::Red()));
+    layer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::White()));
+    layer->setLineWidth(6);
+
+    std::string json = layer->toJSON(true);
+    printf("%s\n", json.c_str());
 };
-
-struct PathCommand {
-    PathCommandType type;
-    tgfx::Point c1, c2, p;
-
-    static PathCommand Make(PathCommandType type);
-    static PathCommand MakeMoveTo(const tgfx::Point &point);
-    static PathCommand MakeLineTo(const tgfx::Point &point);
-    static PathCommand MakeQuadTo(const tgfx::Point &control, const tgfx::Point &point);
-    static PathCommand MakeCubicTo(const tgfx::Point &controlStart, const tgfx::Point &controlEnd, const tgfx::Point &point);
-    static PathCommand MakeClose();
-};
-
-std::string PathCommandTypeToString(PathCommandType type);
-PathCommandType PathCommandTypeFromString(const std::string &type);
-
 };  // namespace arenaforge
-
-#endif /* PathCommand_h_ArenaForge */

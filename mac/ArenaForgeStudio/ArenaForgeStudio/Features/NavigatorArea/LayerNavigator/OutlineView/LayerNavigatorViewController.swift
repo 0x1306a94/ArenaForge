@@ -28,12 +28,11 @@ import AppKit
 import arenaforge_editor
 
 final class LayerNavigatorViewController: NSViewController {
-    weak var project: ProjectDocument?
+    private weak var project: ProjectDocument?
 
-    var scrollView: NSScrollView!
-    var outlineView: NSOutlineView!
+    private var scrollView: NSScrollView!
+    private var outlineView: NSOutlineView!
 
-    
     var venues: [AFVenue] = []
 
     var rowHeight: Double = 22 {
@@ -99,6 +98,11 @@ final class LayerNavigatorViewController: NSViewController {
 
     @objc
     func onItemDoubleClicked() {}
+
+    func onNewVeuen(_ venue: AFVenue) {
+        self.venues.append(venue)
+        self.outlineView.reloadData()
+    }
 
     #if DEBUG
         deinit {

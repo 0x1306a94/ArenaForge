@@ -33,6 +33,8 @@
 #include "LayerStyleClone.h"
 #include "ShapeStyleClone.h"
 
+#include "serialize/BaseLayerJSONHelper.h"
+
 #include <tgfx/platform/Print.h>
 
 namespace arenaforge {
@@ -42,13 +44,25 @@ std::shared_ptr<BaseLayer> BaseLayer::Make(const std::string &layerId, ShapeType
 
 BaseLayer::BaseLayer(const std::string &layerId, ShapeType type)
     : tgfx::ShapeLayer()
-    , _layerId(layerId) {
+    , _layerId(layerId)
+    , _positionRelative(true) {
 
     initializePathCommand(type);
 }
 
 BaseLayer::~BaseLayer() {
     tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
+}
+
+void BaseLayer::setLayerId(const std::string &layerId) {
+    _layerId = layerId;
+}
+
+void BaseLayer::setLocked(bool value) {
+    if (_locked == value) {
+        return;
+    }
+    _locked = value;
 }
 
 void BaseLayer::setTransient(bool value) {
@@ -81,6 +95,12 @@ void BaseLayer::clearAttributes() {
 
 void BaseLayer::addAttribute(const std::string &key, const std::string &value) {
     _attributes[key] = value;
+}
+
+void BaseLayer::setPathCommands(const std::vector<PathCommand> &commands) {
+    _pathCommands.clear();
+    _pathCommands.reserve(commands.size());
+    _pathCommands.insert(_pathCommands.begin(), commands.begin(), commands.end());
 }
 
 std::shared_ptr<BaseLayer> BaseLayer::getChildById(const std::string &layerId) {
@@ -191,37 +211,41 @@ void BaseLayer::doClone(BaseLayer *target, bool cloneChildren) const {
 void BaseLayer::updatePathCommands() {
 }
 
+std::string BaseLayer::toJSON(bool pretty) {
+    auto ptr = std::static_pointer_cast<BaseLayer>(shared_from_this());
+    nlohmann::json j = ptr;
+    return j.dump(pretty ? 4 : -1);
+}
+
 void BaseLayer::onUpdateContent(tgfx::LayerRecorder *recorder) {
     if (_positionRelative) {
         // rebuild path
         tgfx::Path path;
-        auto size = frame().size();
+        auto frame = this->frame();
+        tgfx::Point position{frame.x(), frame.y()};
+        auto size = frame.size();
         for (const auto &command : _pathCommands) {
             switch (command.type) {
                 case PathCommandType::MoveTo: {
-                    auto moveTo = command.cmd.moveTo;
-                    auto p = moveTo.p * size;
+                    auto p = command.p * size + position;
                     path.moveTo(p);
                     break;
                 }
                 case PathCommandType::LineTo: {
-                    auto lineTo = command.cmd.lineTo;
-                    auto p = lineTo.p * size;
+                    auto p = command.p * size + position;
                     path.lineTo(p);
                     break;
                 }
                 case PathCommandType::QuadTo: {
-                    auto quadTo = command.cmd.quadTo;
-                    auto c = quadTo.c * size;
-                    auto p = quadTo.p * size;
+                    auto c = command.c1 * size + position;
+                    auto p = command.p * size + position;
                     path.quadTo(c, p);
                     break;
                 }
                 case PathCommandType::CubicTo: {
-                    auto cubicTo = command.cmd.cubicTo;
-                    auto c1 = cubicTo.c1 * size;
-                    auto c2 = cubicTo.c2 * size;
-                    auto p = cubicTo.p * size;
+                    auto c1 = command.c1 * size + position;
+                    auto c2 = command.c2 * size + position;
+                    auto p = command.p * size + position;
                     path.cubicTo(c1, c2, p);
                     break;
                 }

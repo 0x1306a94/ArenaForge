@@ -32,6 +32,8 @@
 #include <string>
 #include <vector>
 
+#include <arenaforge_core/ProjectVersion.h>
+
 namespace arenaforge {
 class Venue;
 class Project : public std::enable_shared_from_this<Project> {
@@ -60,8 +62,20 @@ class Project : public std::enable_shared_from_this<Project> {
         _description = description;
     }
 
+    ProjectVersion version() const {
+        return _version;
+    }
+
     const std::vector<std::shared_ptr<Venue>> venues() const {
         return _venues;
+    }
+
+    uint32_t genVenueCounter() {
+        return _venueCounter++;
+    }
+
+    uint32_t genRectangleCounter() {
+        return _rectangleCounter++;
     }
 
     bool addVenue(std::shared_ptr<Venue> venue);
@@ -69,7 +83,7 @@ class Project : public std::enable_shared_from_this<Project> {
     std::shared_ptr<Venue> removeVenueAt(int index);
     bool contains(std::shared_ptr<Venue> venue) const;
 
-    std::string toJSON() const;
+    std::string toJSON(bool pretty = false) const;
 
   protected:
     Project(const std::string &name, const std::string &description);
@@ -81,6 +95,9 @@ class Project : public std::enable_shared_from_this<Project> {
   private:
     std::string _name{""};
     std::string _description{""};
+    ProjectVersion _version{ProjectVersion::Version1};
+    uint32_t _venueCounter{0};
+    uint32_t _rectangleCounter{0};
     std::vector<std::shared_ptr<Venue>> _venues{};
 };
 };  // namespace arenaforge
