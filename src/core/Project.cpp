@@ -33,6 +33,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include <filesystem>
 #include <fstream>
 
 namespace arenaforge {
@@ -42,6 +43,12 @@ std::shared_ptr<Project> Project::Make(const std::string &name, const std::strin
 
 std::shared_ptr<Project> Project::MakeFromJSONFile(const std::string &jsonFile, std::function<std::shared_ptr<Venue>(const std::string &venuedId)> venuedCreater) {
     using namespace nlohmann;
+
+    namespace fs = std::filesystem;
+
+    if (!fs::exists(jsonFile)) {
+        throw std::logic_error("The project.json file is missing.");
+    }
 
     std::ifstream ifs(jsonFile);
     json j = json::parse(ifs);

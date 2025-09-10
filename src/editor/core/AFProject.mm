@@ -46,14 +46,26 @@
 #endif
 
 - (instancetype __nullable)initWithFileURL:(NSURL *)fileURL error:(NSError **)error {
-    if (self == [super init]) {
-        self.fileURL = fileURL;
 
+    std::shared_ptr<arenaforge::Project> project;
+    try {
         auto rootDir = std::string(fileURL.path.UTF8String);
-        _project = arenaforge::Project::MakeFromJSONFile(rootDir + "/project.json", [=](const std::string &venueId) -> std::shared_ptr<arenaforge::Venue> {
+        project = arenaforge::Project::MakeFromJSONFile(rootDir + "/project.json", [=](const std::string &venueId) -> std::shared_ptr<arenaforge::Venue> {
             auto venueFilePath = rootDir + "/venues/" + venueId + ".json";
             return arenaforge::Venue::MakeFromJSONFile(venueFilePath);
         });
+    } catch (const std::exception &e) {
+        if (error) {
+            NSString *msg = [NSString stringWithUTF8String:e.what()];
+            *error = [NSError errorWithDomain:@"AFProject" code:400 userInfo:@{NSLocalizedFailureReasonErrorKey: msg}];
+        }
+        return nil;
+    }
+
+    if (self == [super init]) {
+        self.fileURL = fileURL;
+
+        _project = std::move(project);
         _internalVenues = [NSMutableArray<AFVenue *> array];
 
         for (auto cppObject : _project->venues()) {

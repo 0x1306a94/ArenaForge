@@ -27,6 +27,7 @@ set(TGFX_BUILD_SVG ON)
 set(TGFX_BUILD_LAYERS ON)
 add_subdirectory(third_party/tgfx)
 
+add_subdirectory(third_party/fmt)
 add_subdirectory(src/core)
 
 if(BUILD_EDITOR)

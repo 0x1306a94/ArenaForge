@@ -36,7 +36,10 @@
 
 #include <nlohmann/json.hpp>
 
+#include <filesystem>
+#include <fmt/format.h>
 #include <fstream>
+
 namespace arenaforge {
 
 std::shared_ptr<Venue> Venue::Make(const std::string &venueId, const std::string &name, const std::string &description) {
@@ -45,6 +48,14 @@ std::shared_ptr<Venue> Venue::Make(const std::string &venueId, const std::string
 
 std::shared_ptr<Venue> Venue::MakeFromJSONFile(const std::string &jsonFile) {
     using namespace nlohmann;
+
+    namespace fs = std::filesystem;
+
+    fs::path jsonPath{jsonFile};
+    if (!fs::exists(jsonPath)) {
+        auto filename = jsonPath.filename().string();
+        throw std::logic_error(fmt::format("The {} file is missing.", filename));
+    }
 
     std::ifstream ifs(jsonFile);
     json j = json::parse(ifs);

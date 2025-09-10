@@ -55,6 +55,7 @@ target_link_libraries(${TAGRGET_NAME}
     ${CORE_SHARED_LIBS}
     tgfx
     nlohmann_json::nlohmann_json
+    fmt::fmt
 )
 
 target_include_directories(${TAGRGET_NAME} PRIVATE

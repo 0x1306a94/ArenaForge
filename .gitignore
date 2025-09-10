@@ -50,5 +50,5 @@
 *.qml.autosave
 
 
-/third_party/tgfx
+/third_party/
 /mac/gen_xcode/
