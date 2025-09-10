@@ -44,13 +44,8 @@ class Venue : public std::enable_shared_from_this<Venue> {
 
     ~Venue();
 
-    const std::string name() const {
-        return _name;
-    }
-
-    void setName(const std::string &name) {
-        _name = name;
-    }
+    const std::string name() const;
+    void setName(const std::string &name);
 
     const std::string description() const {
         return _description;
@@ -97,7 +92,6 @@ class Venue : public std::enable_shared_from_this<Venue> {
 
   private:
     std::string _venueId{""};
-    std::string _name{""};
     std::string _description{""};
     tgfx::Rect _frame{};
     tgfx::Color _backgroundColor = tgfx::Color::Transparent();

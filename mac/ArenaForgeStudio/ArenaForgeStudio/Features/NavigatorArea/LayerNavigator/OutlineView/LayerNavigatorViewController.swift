@@ -33,7 +33,8 @@ final class LayerNavigatorViewController: NSViewController {
     var scrollView: NSScrollView!
     var outlineView: NSOutlineView!
 
-    var rootLayers: [AFLayer] = []
+    
+    var venues: [AFVenue] = []
 
     var rowHeight: Double = 22 {
         willSet {
@@ -48,7 +49,7 @@ final class LayerNavigatorViewController: NSViewController {
         super.init(nibName: nil, bundle: nil)
         self.project = project
         let venues = project.project?.venues ?? []
-        self.rootLayers = venues.map { $0.root }
+        self.venues = venues
     }
 
     /// Setup the ``scrollView`` and ``outlineView``

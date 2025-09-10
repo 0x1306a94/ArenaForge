@@ -85,7 +85,6 @@ std::shared_ptr<Venue> Venue::MakeFromJSONFile(const std::string &jsonFile) {
 
 Venue::Venue(const std::string &venueId, const std::string &name, const std::string &description)
     : _venueId(venueId)
-    , _name(name)
     , _description(description) {
 
     auto &uuid = UUID::Instance();
@@ -109,6 +108,14 @@ Venue::~Venue() {
     tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
+const std::string Venue::name() const {
+    return _container->name();
+}
+
+void Venue::setName(const std::string &name) {
+    _container->setName(name);
+}
+
 void Venue::setFrame(const tgfx::Rect &frame) {
     if (_frame == frame) {
         return;
@@ -123,11 +130,13 @@ void Venue::setFrame(const tgfx::Rect &frame) {
     tgfx::Path containerPath;
     containerPath.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
 
+    tgfx::Path maskPath = containerPath;
+
     _root->setPath(rootPath);
     _root->setMatrix(rootMatrix);
 
     _container->setPath(containerPath);
-    _mask->setPath(containerPath);
+    _mask->setPath(maskPath);
 }
 
 void Venue::setBackgroundColor(const tgfx::Color &color) {

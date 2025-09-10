@@ -32,7 +32,7 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
         if let layer = item as? AFLayer {
             return layer.childrenCount
         }
-        return rootLayers.count
+        return venues.count
     }
 
     func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
@@ -40,7 +40,7 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
             return layer.children[index]
         }
 
-        return rootLayers[index]
+        return venues[index].root
     }
 
     func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
