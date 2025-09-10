@@ -50,6 +50,10 @@ ARENA_FORGE_EXPORT_API @interface AFVenue : NSObject
 
 - (AFLayer *)createLayerWithName:(NSString *)name;
 
+- (BOOL)hitTestPoint:(NSPoint)point;
+- (NSPoint)globalToLocal:(NSPoint)point;
+- (NSPoint)localToGlobal:(NSPoint)point;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -29,6 +29,8 @@ import arenaforge_editor
 
 protocol ProjectEditCanvasViewControllerDelegate: AnyObject {
     func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewVenue venue: AFVenue)
+
+    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewShape shape: AFLayer, ownerVenue: AFVenue)
 }
 
 final class ProjectEditCanvasViewController: NSViewController {
@@ -38,8 +40,11 @@ final class ProjectEditCanvasViewController: NSViewController {
 
     private var trackingArea: NSTrackingArea?
 
-    private var createVenueStartPoint: NSPoint?
+    private var createMouseStartPoint: NSPoint?
     private var createVenue: AFVenue?
+
+    private weak var creatShapeInVenue: AFVenue?
+    private weak var createShape: AFLayer?
 
     weak var delegate: ProjectEditCanvasViewControllerDelegate?
 
@@ -115,16 +120,32 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     override func mouseDown(with event: NSEvent) {
-        guard let project, let editor, project.activateEditorToolbarItem == .venue else {
+        guard let project, let editor else {
             return
         }
 
-        let veune = editor.project.createVenue()
-
         let location = canvasView.convert(event.locationInWindow, from: nil)
         let canvasLocation = toCanvasPoint(source: location)
-        createVenueStartPoint = canvasLocation
-        createVenue = veune
+        createMouseStartPoint = canvasLocation
+
+        switch project.activateEditorToolbarItem {
+        case .cursors:
+            break
+        case .venue:
+            let veune = editor.project.createVenue()
+            createVenue = veune
+        case .shape:
+            guard let veune = editor.project.pickVenue(atUnderPoint: canvasLocation) else {
+                return
+            }
+            creatShapeInVenue = veune
+
+            guard let shape = editor.project.createLayer(in: veune) else {
+                return
+            }
+            shape.fillColor = NSColor(calibratedRed: CGFloat.random(in: 0.0...1.0), green: CGFloat.random(in: 0.0...1.0), blue: CGFloat.random(in: 0.0...1.0), alpha: 1.0)
+            createShape = shape
+        }
     }
 
     override func mouseMoved(with event: NSEvent) {
@@ -133,36 +154,88 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     override func mouseDragged(with event: NSEvent) {
-        guard let createVenueStartPoint, let createVenue else {
+        guard let project, project.activateEditorToolbarItem != .cursors else {
             return
         }
+
+        guard let createMouseStartPoint else {
+            return
+        }
+
         let location = canvasView.convert(event.locationInWindow, from: nil)
         let canvasLocation = toCanvasPoint(source: location)
 
-        let rect = computeRect(start: createVenueStartPoint, end: canvasLocation)
-        createVenue.frame = rect
+        switch project.activateEditorToolbarItem {
+        case .cursors:
+            break
+        case .venue:
+            guard let createVenue else {
+                return
+            }
+            let rect = computeRect(start: createMouseStartPoint, end: canvasLocation)
+            createVenue.frame = rect
+        case .shape:
+            guard let creatShapeInVenue, let createShape else {
+                return
+            }
+
+            let startPoint = creatShapeInVenue.global(toLocal: createMouseStartPoint)
+            let endPoint = creatShapeInVenue.global(toLocal: canvasLocation)
+            let rect = computeRect(start: startPoint, end: endPoint)
+            createShape.frame = rect
+        }
     }
 
     override func mouseUp(with event: NSEvent) {
-        guard let createVenueStartPoint, let createVenue else {
-            project?.activateEditorToolbarItem = .cursors
-
+        guard let project, project.activateEditorToolbarItem != .cursors else {
             return
         }
+
+        guard let createMouseStartPoint else {
+            return
+        }
+
         let location = canvasView.convert(event.locationInWindow, from: nil)
         var canvasLocation = toCanvasPoint(source: location)
 
-        if createVenueStartPoint == canvasLocation {
-            canvasLocation.x = createVenueStartPoint.x + 300
-            canvasLocation.y = createVenueStartPoint.y + 300
+        switch project.activateEditorToolbarItem {
+        case .cursors:
+            break
+        case .venue:
+            guard let createVenue else {
+                return
+            }
+            if createMouseStartPoint == canvasLocation {
+                canvasLocation.x = createMouseStartPoint.x + 300
+                canvasLocation.y = createMouseStartPoint.y + 300
+            }
+
+            let rect = computeRect(start: createMouseStartPoint, end: canvasLocation)
+            createVenue.frame = rect
+
+            project.activateEditorToolbarItem = .cursors
+            self.delegate?.projectEditCanvasViewController(self, didNewVenue: createVenue)
+            self.createVenue = nil
+        case .shape:
+            guard let creatShapeInVenue, let createShape else {
+                return
+            }
+
+            if createMouseStartPoint == canvasLocation {
+                canvasLocation.x = createMouseStartPoint.x + 100
+                canvasLocation.y = createMouseStartPoint.y + 100
+            }
+
+            let startPoint = creatShapeInVenue.global(toLocal: createMouseStartPoint)
+            let endPoint = creatShapeInVenue.global(toLocal: canvasLocation)
+            let rect = computeRect(start: startPoint, end: endPoint)
+            createShape.frame = rect
+
+            project.activateEditorToolbarItem = .cursors
+            self.delegate?.projectEditCanvasViewController(self, didNewShape: createShape, ownerVenue: creatShapeInVenue)
+            self.creatShapeInVenue = nil
+            self.createShape = nil
         }
-
-        let rect = computeRect(start: createVenueStartPoint, end: canvasLocation)
-        createVenue.frame = rect
-
-        project?.activateEditorToolbarItem = .cursors
-        self.delegate?.projectEditCanvasViewController(self, didNewVenue: createVenue)
-        self.createVenue = nil
     }
 
     override func scrollWheel(with event: NSEvent) {

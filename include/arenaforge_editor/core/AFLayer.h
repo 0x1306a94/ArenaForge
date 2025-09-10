@@ -27,6 +27,7 @@
 #ifndef AFLayer_h_ArenaForge
 #define AFLayer_h_ArenaForge
 
+#import <AppKit/NSColor.h>
 #import <Foundation/Foundation.h>
 
 #import <arenaforge_editor/core/defines.h>
@@ -40,9 +41,13 @@ ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 @property (nonatomic, assign, readonly) NSInteger childrenCount;
 @property (nonatomic, assign, readonly) BOOL hasChildren;
 @property (nonatomic, assign) BOOL transient;
+@property (nonatomic, assign) NSRect frame;
+@property (nonatomic, strong) NSColor *fillColor;
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name NS_DESIGNATED_INITIALIZER;
+
+- (void)addChild:(AFLayer *)child;
 @end
 
 NS_ASSUME_NONNULL_END

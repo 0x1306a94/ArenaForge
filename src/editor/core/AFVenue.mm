@@ -86,6 +86,26 @@
     return layer;
 }
 
+- (BOOL)hitTestPoint:(NSPoint)point {
+    auto root = _venue->rootPtr();
+    //    auto localPoint = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //    auto container = _venue->container();
+    auto hit = root->hitTestPoint(static_cast<float>(point.x), static_cast<float>(point.y));
+    return hit;
+}
+
+- (NSPoint)globalToLocal:(NSPoint)point {
+    auto root = _venue->root();
+    auto local = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+}
+
+- (NSPoint)localToGlobal:(NSPoint)point {
+    auto root = _venue->root();
+    auto local = root->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+}
+
 #pragma mark - setter getter
 - (NSString *)venueId {
     auto venueId = _venue->venueId();

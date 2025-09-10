@@ -28,6 +28,7 @@
 
 #import <arenaforge_editor/core/AFVenue.h>
 
+#import "AFLayer+Private.h"
 #import "AFProject+Private.h"
 #import "AFVenue+Private.h"
 
@@ -95,6 +96,25 @@
         self.venueChangeHandler(self);
     }
     return venue;
+}
+
+- (AFVenue *_Nullable)pickVenueAtUnderPoint:(NSPoint)point {
+    for (AFVenue *venue in self.internalVenues) {
+        if ([venue hitTestPoint:point]) {
+            return venue;
+        }
+    }
+    return nil;
+}
+
+- (AFLayer *_Nullable)createLayerInVenue:(AFVenue *)venue {
+    if (venue == nil) {
+        return nil;
+    }
+    auto counter = _project->genRectangleCounter();
+    AFLayer *layer = [[AFLayer alloc] initWithName:[NSString stringWithFormat:@"Rectangle %u", counter]];
+    [venue.root addChild:layer];
+    return layer;
 }
 
 #pragma mark - getter

@@ -34,6 +34,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class AFVenue;
+@class AFLayer;
 ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 @property (nonatomic, copy, readonly) NSString *name;
 @property (nonatomic, copy, readonly) NSArray<AFVenue *> *venues;
@@ -44,6 +45,10 @@ ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 - (NSString *)toJSONString;
 
 - (AFVenue *)createVenue;
+
+- (AFVenue *_Nullable)pickVenueAtUnderPoint:(NSPoint)point;
+
+- (AFLayer *_Nullable)createLayerInVenue:(AFVenue *)venue;
 @end
 
 NS_ASSUME_NONNULL_END

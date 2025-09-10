@@ -29,6 +29,8 @@
 #import <arenaforge_core/layers/BaseLayer.h>
 #import <arenaforge_core/uuid/UUID.h>
 
+#include <tgfx/layers/SolidColor.h>
+
 #import "AFLayer+Private.h"
 
 @interface AFLayer ()
@@ -69,6 +71,22 @@
     return self;
 }
 
+- (void)addChild:(AFLayer *)child {
+    if (child == nil) {
+        return;
+    }
+
+    auto cppObject = [child cppObject];
+    if (cppObject->parent() == _layer.get()) {
+        return;
+    }
+
+    _layer->addChild(cppObject);
+    [self.internalLayers addObject:child];
+}
+
+#pragma mark - setter getter
+
 - (std::shared_ptr<arenaforge::BaseLayer>)cppObject {
     return _layer;
 }
@@ -101,5 +119,49 @@
 
 - (BOOL)transient {
     return _layer->transient();
+}
+
+- (void)setFrame:(NSRect)frame {
+    auto cppRect = tgfx::Rect::MakeXYWH(
+        static_cast<float>(frame.origin.x),
+        static_cast<float>(frame.origin.y),
+        static_cast<float>(frame.size.width),
+        static_cast<float>(frame.size.height));
+    _layer->setFrame(cppRect);
+}
+
+- (NSRect)frame {
+    auto cppRect = _layer->frame();
+    return NSRectFromCGRect(CGRectMake(cppRect.x(), cppRect.y(), cppRect.width(), cppRect.height()));
+}
+
+- (void)setFillColor:(NSColor *)fillColor {
+    if (fillColor == nil || fillColor == NSColor.clearColor) {
+        _layer->setFillStyle(nullptr);
+        return;
+    }
+
+    CGFloat red, green, blue, alpha;
+    [fillColor getRed:&red green:&green blue:&blue alpha:&alpha];
+    auto cppColor = tgfx::Color{
+        static_cast<float>(red),
+        static_cast<float>(green),
+        static_cast<float>(blue),
+        static_cast<float>(alpha)};
+
+    _layer->setFillStyle(tgfx::SolidColor::Make(cppColor));
+}
+
+- (NSColor *)fillColor {
+    auto fillStyles = _layer->fillStyles();
+    if (fillStyles.empty()) {
+        return nil;
+    }
+    auto fill = std::static_pointer_cast<tgfx::SolidColor>(fillStyles.front());
+    auto cppColor = fill->color();
+    if (cppColor == tgfx::Color::Transparent()) {
+        return nil;
+    }
+    return [NSColor colorWithRed:cppColor.red green:cppColor.green blue:cppColor.blue alpha:cppColor.alpha];
 }
 @end

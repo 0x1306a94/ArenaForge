@@ -124,9 +124,11 @@ void adl_serializer<std::shared_ptr<arenaforge::BaseLayer>>::to_json(nlohmann::j
     j["positionRelative"] = layer->positionRelative();
 
     auto matrix = layer->matrix();
-    std::array<float, 9> buffer;
-    matrix.get9(buffer.data());
-    j["matrix"] = buffer;
+    if (!matrix.isIdentity()) {
+        std::array<float, 9> buffer;
+        matrix.get9(buffer.data());
+        j["matrix"] = buffer;
+    }
 
     do {
         auto commands = layer->pathCommands();

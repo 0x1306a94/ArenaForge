@@ -104,6 +104,10 @@ final class LayerNavigatorViewController: NSViewController {
         self.outlineView.reloadData()
     }
 
+    func onVeuenAddShape(_ venue: AFVenue, shape: AFLayer) {
+        outlineView.reloadData()
+    }
+
     #if DEBUG
         deinit {
             print("\(type(of: self)) deinit")
