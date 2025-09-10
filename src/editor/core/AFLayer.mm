@@ -61,6 +61,10 @@
     if (self == [super init]) {
         _layer = std::move(cppObject);
         _internalLayers = [NSMutableArray<AFLayer *> array];
+        for (auto &cppChild : _layer->children()) {
+            AFLayer *child = [[AFLayer alloc] initWithCppObject:std::static_pointer_cast<arenaforge::BaseLayer>(cppChild)];
+            [_internalLayers addObject:child];
+        }
     }
     return self;
 }
