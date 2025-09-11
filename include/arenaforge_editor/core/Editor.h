@@ -61,6 +61,8 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
     bool updateZoomAndOffset(float zoomScale, float offsetX, float offsetY);
 
     bool updateSize();
+    
+    void autoAdjustCanvasScaleForContent();
 
     void onVenueChanges();
 

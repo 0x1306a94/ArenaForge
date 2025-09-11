@@ -140,6 +140,13 @@ bool Editor::updateSize() {
     return sizeChanged;
 }
 
+void Editor::autoAdjustCanvasScaleForContent() {
+    if (!_renderer) {
+        return;
+    }
+    _renderer->autoAdjustCanvasScaleForContent();
+}
+
 void Editor::onVenueChanges() {
     auto root = _renderer->designLayerRoot();
     auto existsChildren = root->children();

@@ -36,6 +36,7 @@
 #include <tgfx/core/Surface.h>
 #include <tgfx/gpu/Device.h>
 #include <tgfx/gpu/Window.h>
+#include <tgfx/layers/Layer.h>
 #include <tgfx/platform/Print.h>
 
 namespace arenaforge::editor {
@@ -52,7 +53,6 @@ Renderer::Renderer(std::shared_ptr<RendererState> state, std::shared_ptr<Rendere
 }
 
 Renderer::~Renderer() {
-    purgeResources();
     tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
@@ -82,6 +82,32 @@ bool Renderer::updateSize() {
         window->invalidSize();
     }
     return sizeChanged;
+}
+
+void Renderer::autoAdjustCanvasScaleForContent() {
+    auto viewSize = _state->getBoundsSize();
+    auto contentBounds = _designLayerTree->root()->getBounds();
+    auto contentWidth = contentBounds.width();
+    auto contentHeight = contentBounds.height();
+
+    float padding = 100.0f * _state->density();
+
+    // 如果内容加上 padding 后仍然小于视口，就不缩放
+    if (contentWidth + 2 * padding < viewSize.width &&
+        contentHeight + 2 * padding < viewSize.height) {
+        return;
+    }
+
+    // 缩放比例：在宽和高方向都考虑 padding
+    float scaleX = viewSize.width / (contentWidth + 2 * padding);
+    float scaleY = viewSize.height / (contentHeight + 2 * padding);
+    float scale = std::min(scaleX, scaleY);
+
+    // offset 需要考虑 bounds 的 left/top 和 padding
+    float offsetX = (viewSize.width - (contentWidth + 2 * padding) * scale) / 2.0f - (contentBounds.left - padding) * scale;
+    float offsetY = (viewSize.height - (contentHeight + 2 * padding) * scale) / 2.0f - (contentBounds.top - padding) * scale;
+
+    _state->updateZoomAndOffset(scale, tgfx::Point{offsetX, offsetY});
 }
 
 void Renderer::invalidateContent() {
@@ -133,7 +159,7 @@ void Renderer::draw(bool force) {
     }
 
     auto statePtr = _state.get();
-//    _gridLayer->prepare(canvas, statePtr, force);
+    //    _gridLayer->prepare(canvas, statePtr, force);
     _designLayerTree->prepare(canvas, statePtr, force);
 
     bool hasContentChanged = /*_gridLayer->hasContentChanged() ||*/ _designLayerTree->hasContentChanged();
@@ -146,7 +172,7 @@ void Renderer::draw(bool force) {
     canvas->clear();
     canvas->save();
 
-//    _gridLayer->draw(canvas, statePtr);
+    //    _gridLayer->draw(canvas, statePtr);
     _designLayerTree->draw(canvas, statePtr);
 
     canvas->restore();
@@ -157,28 +183,5 @@ void Renderer::draw(bool force) {
     device->unlock();
 
     _invalidate = false;
-}
-
-void Renderer::purgeResources() {
-    if (_backend == nullptr) {
-        return;
-    }
-
-    auto window = _backend->getWindow();
-    if (window == nullptr) {
-        return;
-    }
-
-    auto device = window->getDevice();
-    if (device == nullptr) {
-        return;
-    }
-
-    auto context = device->lockContext();
-    if (context == nullptr) {
-        return;
-    }
-    context->purgeResourcesUntilMemoryTo(0);
-    device->unlock();
 }
 };  // namespace arenaforge::editor

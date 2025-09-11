@@ -55,6 +55,8 @@ class Renderer : public std::enable_shared_from_this<Renderer> {
 
     bool updateSize();
 
+    void autoAdjustCanvasScaleForContent();
+
     void invalidateContent();
     tgfx::Layer *designLayerRoot() const;
     std::vector<std::shared_ptr<tgfx::Layer>> getDesignLayersUnderPoint(float x, float y) const;
@@ -64,8 +66,6 @@ class Renderer : public std::enable_shared_from_this<Renderer> {
   protected:
     Renderer(std::shared_ptr<RendererState> state, std::shared_ptr<RendererBackend> backend);
 
-    void purgeResources();
-    
   private:
     std::shared_ptr<RendererState> _state;
     std::shared_ptr<RendererBackend> _backend;

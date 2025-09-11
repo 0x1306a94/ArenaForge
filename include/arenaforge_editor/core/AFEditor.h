@@ -50,6 +50,7 @@ ARENA_FORGE_EXPORT_API @interface AFEditor : NSObject
 
 - (CGFloat)density;
 
+- (void)autoAdjustCanvasScaleForContent;
 - (void)updateZoomScale:(CGFloat)zoomScale;
 - (void)updateOffset:(NSPoint)offset;
 - (void)updateZoomScale:(CGFloat)zoomScale offset:(NSPoint)offset;

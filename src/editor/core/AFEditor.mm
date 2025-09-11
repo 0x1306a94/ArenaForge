@@ -125,6 +125,12 @@
     return 1.0;
 }
 
+- (void)autoAdjustCanvasScaleForContent {
+    if (_editor) {
+        _editor->autoAdjustCanvasScaleForContent();
+    }
+}
+
 - (void)updateZoomScale:(CGFloat)zoomScale {
     if (_editor) {
         float offsetX = 0, offsetY = 0;

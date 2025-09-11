@@ -53,6 +53,8 @@ final class ProjectEditCanvasViewController: NSViewController {
     private var mouseScaleRatio: CGFloat = 120.0
     private var mouseScrollRatio: CGFloat = 0.8
     private var mousePosition: NSPoint = .zero
+    
+    private var needAutomaticallyAdjustZoomLevel = true
 
     init(project: ProjectDocument, editor: AFEditor) {
         super.init(nibName: nil, bundle: nil)
@@ -72,6 +74,13 @@ final class ProjectEditCanvasViewController: NSViewController {
 
         if let editor, let canvasView {
             editor.setupCanvasView(canvasView)
+        }
+    }
+    
+    override func viewDidAppear() {
+        super.viewDidAppear()
+        if needAutomaticallyAdjustZoomLevel {
+            automaticallyAdjustZoomLevel()
         }
     }
 
@@ -117,6 +126,11 @@ final class ProjectEditCanvasViewController: NSViewController {
         let trackingArea = NSTrackingArea(rect: frame, options: options, owner: self)
         self.trackingArea = trackingArea
         view.addTrackingArea(trackingArea)
+    }
+    
+    private func automaticallyAdjustZoomLevel() {
+        needAutomaticallyAdjustZoomLevel = false
+        editor?.autoAdjustCanvasScaleForContent()
     }
 
     override func mouseDown(with event: NSEvent) {
