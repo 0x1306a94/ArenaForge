@@ -28,6 +28,7 @@
 #define Renderer_h_ArenaForge
 
 #include <memory>
+#include <vector>
 
 namespace tgfx {
 class Layer;
