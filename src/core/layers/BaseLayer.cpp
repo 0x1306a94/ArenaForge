@@ -78,7 +78,7 @@ void BaseLayer::setPositionRelative(bool value) {
         return;
     }
     _positionRelative = value;
-    invalidateContent();
+    rebuildPath();
 }
 
 #define USE_FRAME_AT_POSITION 1
@@ -87,10 +87,12 @@ void BaseLayer::setFrame(const tgfx::Rect &frame) {
         return;
     }
     _frame = frame;
+    if (_positionRelative) {
 #if USE_FRAME_AT_POSITION
-    setPosition(tgfx::Point{frame.x(), frame.y()});
+        setPosition(tgfx::Point{frame.x(), frame.y()});
 #endif
-    invalidateContent();
+    }
+    rebuildPath();
 }
 
 void BaseLayer::clearAttributes() {
@@ -216,16 +218,7 @@ void BaseLayer::doClone(BaseLayer *target, bool cloneChildren) const {
     }
 }
 
-void BaseLayer::updatePathCommands() {
-}
-
-std::string BaseLayer::toJSON(bool pretty) {
-    auto ptr = std::static_pointer_cast<BaseLayer>(shared_from_this());
-    nlohmann::json j = ptr;
-    return j.dump(pretty ? 4 : -1);
-}
-
-void BaseLayer::onUpdateContent(tgfx::LayerRecorder *recorder) {
+void BaseLayer::rebuildPath() {
     if (_positionRelative) {
         // rebuild path
         tgfx::Path path;
@@ -271,9 +264,21 @@ void BaseLayer::onUpdateContent(tgfx::LayerRecorder *recorder) {
             }
         }
 
-        setPath(path);
+        setPath(std::move(path));
+    } else {
+        tgfx::Path path;
+        path.addRect(frame());
+        setPath(std::move(path));
     }
+}
 
+std::string BaseLayer::toJSON(bool pretty) {
+    auto ptr = std::static_pointer_cast<BaseLayer>(shared_from_this());
+    nlohmann::json j = ptr;
+    return j.dump(pretty ? 4 : -1);
+}
+
+void BaseLayer::onUpdateContent(tgfx::LayerRecorder *recorder) {
     tgfx::ShapeLayer::onUpdateContent(recorder);
 }
 

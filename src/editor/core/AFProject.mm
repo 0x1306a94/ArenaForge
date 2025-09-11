@@ -135,6 +135,13 @@
     return layer;
 }
 
+- (AFLayer *_Nullable)createHoverWireframeLayerInVenue:(AFVenue *)venue targetLayer:(AFLayer *)targetLayer {
+    if (venue == nil || targetLayer == nil) {
+        return nil;
+    }
+    return [venue addHoverWireframeLayer:targetLayer];
+}
+
 #pragma mark - getter
 - (NSArray<AFVenue *> *)venues {
     return [self.internalVenues copy];

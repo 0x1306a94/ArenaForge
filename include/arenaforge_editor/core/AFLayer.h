@@ -44,7 +44,10 @@ ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 @property (nonatomic, assign, readonly) BOOL hasChildren;
 @property (nonatomic, assign) BOOL transient;
 @property (nonatomic, assign) NSRect frame;
+@property (nonatomic, assign) BOOL positionRelative;
 @property (nonatomic, strong) NSColor *fillColor;
+@property (nonatomic, strong) NSColor *strokeColor;
+@property (nonatomic, assign) CGFloat lineWidth;
 /// 根节点有值
 @property (nonatomic, weak, nullable, readonly) AFVenue *venue;
 @property (nonatomic, weak, readonly) AFLayer *parent;

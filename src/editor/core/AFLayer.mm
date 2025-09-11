@@ -106,6 +106,7 @@
 - (void)removeFromParent {
     _layer->removeFromParent();
     [self.parent rebuildCacheChildren];
+    self.parent = nil;
 }
 
 - (void)rebuildCacheChildren {
@@ -176,8 +177,16 @@
     return NSRectFromCGRect(CGRectMake(cppRect.x(), cppRect.y(), cppRect.width(), cppRect.height()));
 }
 
+- (void)setPositionRelative:(BOOL)positionRelative {
+    _layer->setPositionRelative(positionRelative);
+}
+
+- (BOOL)positionRelative {
+    return _layer->positionRelative();
+}
+
 - (void)setFillColor:(NSColor *)fillColor {
-    if (fillColor == nil || fillColor == NSColor.clearColor) {
+    if (fillColor == nil) {
         _layer->setFillStyle(nullptr);
         return;
     }
@@ -202,9 +211,48 @@
     auto fill = std::static_pointer_cast<tgfx::SolidColor>(fillStyles.front());
     auto cppColor = fill->color();
     if (cppColor == tgfx::Color::Transparent()) {
-        return nil;
+        return NSColor.clearColor;
     }
     return [NSColor colorWithRed:cppColor.red green:cppColor.green blue:cppColor.blue alpha:cppColor.alpha];
+}
+
+- (void)setStrokeColor:(NSColor *)strokeColor {
+    if (strokeColor == nil) {
+        _layer->setStrokeStyle(nullptr);
+        return;
+    }
+
+    NSColor *rgbColor = [strokeColor colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
+    CGFloat red, green, blue, alpha;
+    [rgbColor getRed:&red green:&green blue:&blue alpha:&alpha];
+    auto cppColor = tgfx::Color{
+        static_cast<float>(red),
+        static_cast<float>(green),
+        static_cast<float>(blue),
+        static_cast<float>(alpha)};
+
+    _layer->setStrokeStyle(tgfx::SolidColor::Make(cppColor));
+}
+
+- (NSColor *)strokeColor {
+    auto strokeStyles = _layer->strokeStyles();
+    if (strokeStyles.empty()) {
+        return nil;
+    }
+    auto stroke = std::static_pointer_cast<tgfx::SolidColor>(strokeStyles.front());
+    auto cppColor = stroke->color();
+    if (cppColor == tgfx::Color::Transparent()) {
+        return NSColor.clearColor;
+    }
+    return [NSColor colorWithRed:cppColor.red green:cppColor.green blue:cppColor.blue alpha:cppColor.alpha];
+}
+
+- (void)setLineWidth:(CGFloat)lineWidth {
+    _layer->setLineWidth(static_cast<float>(lineWidth));
+}
+
+- (CGFloat)lineWidth {
+    return static_cast<CGFloat>(_layer->lineWidth());
 }
 
 - (AFVenue *)attachVenue {

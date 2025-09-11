@@ -85,6 +85,47 @@
     return _venue;
 }
 
+- (AFLayer *)addHoverWireframeLayer:(AFLayer *)target {
+    if (target == nil) {
+        return nil;
+    }
+
+    auto rootLayer = _venue->rootLayerPtr();
+    auto containerLayer = _venue->containerLayer();
+    auto targetLayer = [target cppObject];
+    auto parent = targetLayer->parent();
+    if (parent == nullptr) {
+        return nil;
+    }
+
+    NSRect globalRect;
+    if (targetLayer.get() == containerLayer) {
+        auto venueFrame = _venue->frame();
+        globalRect = NSRectFromCGRect(CGRectMake(venueFrame.x(), venueFrame.y(), venueFrame.width(), venueFrame.height()));
+    } else {
+        auto targetFrame = targetLayer->frame();
+        auto global = targetLayer->localToGlobal(tgfx::Point{0, 0});
+        auto local = rootLayer->globalToLocal(global);
+        globalRect = NSRectFromCGRect(CGRectMake(local.x, local.y, targetFrame.width(), targetFrame.height()));
+    }
+
+    AFLayer *layer = [[AFLayer alloc] initWithName:@"HoverWireframe" layerMap:self.layerMap];
+    layer.positionRelative = NO;
+    layer.frame = globalRect;
+    // tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)
+    layer.strokeColor = [NSColor colorWithRed:(0x0c / 255.0) green:(0x8c / 255.0) blue:(0xe9 / 255.0) alpha:1.0];
+    layer.lineWidth = 4;
+
+    auto cppLayer = [layer cppObject];
+    if (targetLayer.get() == containerLayer) {
+        rootLayer->parent()->addChild(cppLayer);
+    } else {
+        rootLayer->addChild(cppLayer);
+    }
+
+    return layer;
+}
+
 - (NSString *)toJSONString {
     auto json = _venue->toJSON();
     return [NSString stringWithUTF8String:json.c_str()];
@@ -125,7 +166,7 @@
         return nil;
     }
 
-    if (layers.count == 0) {
+    if (layers.count <= 1) {
         return nil;
     }
 
@@ -138,7 +179,6 @@
 
     auto counter = project->genGroupCounter();
     AFLayer *group = [[AFLayer alloc] initWithName:[NSString stringWithFormat:@"Group %u", counter] layerMap:self.layerMap];
-    group.fillColor = NSColor.systemOrangeColor;
 
     // 计算 group 的外包矩形
     CGFloat minX = CGFLOAT_MAX;
@@ -174,6 +214,30 @@
     }
 
     return group;
+}
+
+- (AFLayer *_Nullable)pickVenueAtUnderPoint:(NSPoint)point {
+    //    auto root = _venue->rootLayer();
+    auto container = _venue->containerLayer();
+    //    auto local = container->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    auto layers = container->getLayersUnderPoint(static_cast<float>(point.x), static_cast<float>(point.y));
+    if (layers.empty()) {
+        return nil;
+    }
+    auto topLayer = layers.front();
+    if (topLayer.get() == container) {
+        return nil;
+    }
+    auto baseLayer = std::dynamic_pointer_cast<arenaforge::BaseLayer>(topLayer);
+    if (!baseLayer) {
+        return nil;
+    }
+    NSString *layerId = [NSString stringWithUTF8String:baseLayer->layerId().c_str()];
+    AFLayer *layer = [self.layerMap getLayerById:layerId];
+    if (layer.parent == nil) {
+        return nil;
+    }
+    return layer;
 }
 
 - (BOOL)hitTestPoint:(NSPoint)point {

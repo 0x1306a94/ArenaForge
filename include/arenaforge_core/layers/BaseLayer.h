@@ -98,7 +98,7 @@ class BaseLayer : public tgfx::ShapeLayer {
 
     virtual void doClone(BaseLayer *target, bool cloneChildren) const;
 
-    void updatePathCommands();
+    void rebuildPath();
 
     void onUpdateContent(tgfx::LayerRecorder *recorder) override;
 
@@ -109,7 +109,7 @@ class BaseLayer : public tgfx::ShapeLayer {
     std::string _layerId{""};
     bool _transient{false};
     bool _locked{false};
-    bool _positionRelative{false};
+    bool _positionRelative{true};
     std::unordered_map<std::string, std::string> _attributes{};
     tgfx::Rect _frame{};
     std::vector<PathCommand> _pathCommands{};

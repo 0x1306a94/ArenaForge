@@ -33,4 +33,6 @@
 @property (nonatomic, strong, readonly) AFLayerMap *layerMap;
 - (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::Venue>)cppObject NS_DESIGNATED_INITIALIZER;
 - (std::shared_ptr<arenaforge::Venue>)cppObject;
+
+- (AFLayer *)addHoverWireframeLayer:(AFLayer *)target;
 @end
