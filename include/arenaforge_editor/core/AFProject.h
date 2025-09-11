@@ -45,6 +45,7 @@ ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 - (NSString *)toJSONString;
 
 - (AFVenue *)createVenue;
+- (void)removeVenue:(AFVenue *)venue;
 
 - (AFVenue *_Nullable)pickVenueAtUnderPoint:(NSPoint)point;
 

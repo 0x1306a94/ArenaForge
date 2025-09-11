@@ -34,20 +34,26 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class AFVenue;
 ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 @property (nonatomic, copy, readonly) NSString *layerId;
-@property (nonatomic, copy, readonly) NSString *name;
+@property (nonatomic, copy) NSString *name;
 @property (nonatomic, copy, readonly) NSArray<AFLayer *> *children;
 @property (nonatomic, assign, readonly) NSInteger childrenCount;
 @property (nonatomic, assign, readonly) BOOL hasChildren;
 @property (nonatomic, assign) BOOL transient;
 @property (nonatomic, assign) NSRect frame;
 @property (nonatomic, strong) NSColor *fillColor;
+@property (nonatomic, weak, readonly) AFVenue *venue;
+@property (nonatomic, weak, readonly) AFLayer *parent;
+
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name NS_DESIGNATED_INITIALIZER;
 
 - (void)addChild:(AFLayer *)child;
+- (void)removeChild:(AFLayer *)child;
+- (void)removeFromParent;
 @end
 
 NS_ASSUME_NONNULL_END

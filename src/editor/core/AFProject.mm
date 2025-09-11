@@ -98,6 +98,21 @@
     return venue;
 }
 
+- (void)removeVenue:(AFVenue *)venue {
+    if (!venue) {
+        return;
+    }
+
+    if ([self.internalVenues containsObject:venue]) {
+        auto cppVenue = [venue cppObject];
+        _project->removeVenue(std::move(cppVenue));
+        [self.internalVenues removeObject:venue];
+        if (self.venueChangeHandler) {
+            self.venueChangeHandler(self);
+        }
+    }
+}
+
 - (AFVenue *_Nullable)pickVenueAtUnderPoint:(NSPoint)point {
     for (AFVenue *venue in self.internalVenues) {
         if ([venue hitTestPoint:point]) {

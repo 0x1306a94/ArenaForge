@@ -34,6 +34,7 @@
 
 #include <tgfx/layers/Layer.h>
 #include <tgfx/layers/SolidColor.h>
+#include <tgfx/layers/TextLayer.h>
 #include <tgfx/platform/Print.h>
 
 #include <nlohmann/json.hpp>
@@ -41,6 +42,10 @@
 #include <filesystem>
 #include <fmt/format.h>
 #include <fstream>
+
+#if __APPLE__
+#include <TargetConditionals.h>
+#endif
 
 namespace arenaforge {
 
@@ -85,7 +90,7 @@ std::shared_ptr<Venue> Venue::MakeFromJSONFile(const std::string &jsonFile) {
             break;
         }
 
-        auto container = venue->container();
+        auto container = venue->containerLayer();
         for (auto layer : layers) {
             container->addChild(layer);
         }
@@ -99,20 +104,40 @@ Venue::Venue(const std::string &venueId, const std::string &name, const std::str
     , _description(description) {
 
     auto &uuid = UUID::Instance();
-    _root = BaseLayer::Make(uuid(), ShapeType::Rectangle);
-    _root->setPositionRelative(false);
+    _rootLayer = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _rootLayer->setPositionRelative(false);
 
-    _container = BaseLayer::Make(uuid(), ShapeType::Rectangle);
-    _container->setPositionRelative(false);
-    _container->setName(name);
+    _nameLayer = tgfx::TextLayer::Make();
+    _nameLayer->setTextColor(tgfx::Color::White());
+    _nameLayer->setText(name);
+    _nameLayer->setTextAlign(tgfx::TextAlign::Left);
 
-    _mask = BaseLayer::Make(uuid(), ShapeType::Rectangle);
-    _mask->setPositionRelative(false);
+#if TARGET_OS_MAC
+    do {
+        auto typeface = tgfx::Typeface::MakeFromName("PingFang SC", "");
+        if (!typeface) {
+            break;
+        }
+        auto font = tgfx::Font(std::move(typeface), 16);
+        const auto fontMetrics = font.getMetrics();
+        auto lineHeight = std::fabs(fontMetrics.ascent) + std::fabs(fontMetrics.descent) + std::fabs(fontMetrics.leading);
+        _nameLayer->setFont(font);
+        _nameLayer->setPosition(tgfx::Point{0, -(lineHeight + 10)});
+    } while (0);
+#endif
 
-    _root->addChild(_container);
-    _root->addChild(_mask);
+    _containerLayer = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _containerLayer->setPositionRelative(false);
+    _containerLayer->setName(name);
 
-    _container->setMask(_mask);
+    _maskLayer = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _maskLayer->setPositionRelative(false);
+
+    _rootLayer->addChild(_containerLayer);
+    _rootLayer->addChild(_maskLayer);
+    _rootLayer->addChild(_nameLayer);
+
+    _containerLayer->setMask(_maskLayer);
 }
 
 Venue::~Venue() {
@@ -120,11 +145,12 @@ Venue::~Venue() {
 }
 
 const std::string Venue::name() const {
-    return _container->name();
+    return _containerLayer->name();
 }
 
 void Venue::setName(const std::string &name) {
-    _container->setName(name);
+    _containerLayer->setName(name);
+    _nameLayer->setText(name);
 }
 
 void Venue::setFrame(const tgfx::Rect &frame) {
@@ -143,11 +169,11 @@ void Venue::setFrame(const tgfx::Rect &frame) {
 
     tgfx::Path maskPath = containerPath;
 
-    _root->setPath(rootPath);
-    _root->setMatrix(rootMatrix);
+    _rootLayer->setPath(rootPath);
+    _rootLayer->setMatrix(rootMatrix);
 
-    _container->setPath(containerPath);
-    _mask->setPath(maskPath);
+    _containerLayer->setPath(containerPath);
+    _maskLayer->setPath(maskPath);
 }
 
 void Venue::setBackgroundColor(const tgfx::Color &color) {
@@ -155,8 +181,8 @@ void Venue::setBackgroundColor(const tgfx::Color &color) {
         return;
     }
     _backgroundColor = color;
-    _container->setFillStyle(tgfx::SolidColor::Make(color));
-    _mask->setFillStyle(tgfx::SolidColor::Make(color));
+    _containerLayer->setFillStyle(tgfx::SolidColor::Make(color));
+    _maskLayer->setFillStyle(tgfx::SolidColor::Make(color));
 }
 
 void Venue::attachProject(std::weak_ptr<Project> project) {
@@ -174,24 +200,24 @@ std::shared_ptr<Project> Venue::project() const {
     return _ownerProject.lock();
 }
 
-const BaseLayer *Venue::root() const {
-    return _root.get();
+const BaseLayer *Venue::rootLayer() const {
+    return _rootLayer.get();
 }
 
-std::shared_ptr<BaseLayer> Venue::rootPtr() const {
-    return _root;
+std::shared_ptr<BaseLayer> Venue::rootLayerPtr() const {
+    return _rootLayer;
 }
 
-BaseLayer *Venue::container() const {
-    return _container.get();
+BaseLayer *Venue::containerLayer() const {
+    return _containerLayer.get();
 }
 
-std::shared_ptr<BaseLayer> Venue::containerPtr() const {
-    return _container;
+std::shared_ptr<BaseLayer> Venue::containerLayerPtr() const {
+    return _containerLayer;
 }
 
-BaseLayer *Venue::mask() const {
-    return _mask.get();
+BaseLayer *Venue::maskLayer() const {
+    return _maskLayer.get();
 }
 
 std::string Venue::toJSON(bool pretty) const {
@@ -207,7 +233,7 @@ std::string Venue::toJSON(bool pretty) const {
     }
 
     json jlayers = json::array();
-    for (auto child : _container->children()) {
+    for (auto child : _containerLayer->children()) {
         auto baseLayer = std::static_pointer_cast<BaseLayer>(child);
         jlayers.push_back(baseLayer);
     }

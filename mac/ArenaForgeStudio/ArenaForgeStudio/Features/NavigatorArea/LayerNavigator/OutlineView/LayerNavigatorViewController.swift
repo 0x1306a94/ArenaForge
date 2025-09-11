@@ -28,12 +28,14 @@ import AppKit
 import arenaforge_editor
 
 final class LayerNavigatorViewController: NSViewController {
-    private weak var project: ProjectDocument?
+    weak var project: ProjectDocument?
 
     private var scrollView: NSScrollView!
-    private var outlineView: NSOutlineView!
+    var outlineView: NSOutlineView!
 
-    var venues: [AFVenue] = []
+    var venues: [AFVenue] {
+        self.project?.project?.venues ?? []
+    }
 
     var rowHeight: Double = 22 {
         willSet {
@@ -47,8 +49,8 @@ final class LayerNavigatorViewController: NSViewController {
     init(project: ProjectDocument) {
         super.init(nibName: nil, bundle: nil)
         self.project = project
-        let venues = project.project?.venues ?? []
-        self.venues = venues
+//        let venues = project.project?.venues ?? []
+//        self.venues = venues
     }
 
     /// Setup the ``scrollView`` and ``outlineView``
@@ -63,6 +65,8 @@ final class LayerNavigatorViewController: NSViewController {
         outlineView.autosaveExpandedItems = true
         outlineView.autosaveName = ""
         outlineView.headerView = nil
+        outlineView.menu = LayerNavigatorMenu(self, document: project)
+        outlineView.menu?.delegate = self
         outlineView.doubleAction = #selector(onItemDoubleClicked)
         outlineView.allowsMultipleSelection = true
 
@@ -74,7 +78,7 @@ final class LayerNavigatorViewController: NSViewController {
         outlineView.addTableColumn(column)
 
         outlineView.setDraggingSourceOperationMask(.move, forLocal: false)
-        outlineView.registerForDraggedTypes([.fileURL])
+//        outlineView.registerForDraggedTypes([.fileURL])
 
         scrollView.documentView = outlineView
         scrollView.contentView.automaticallyAdjustsContentInsets = false
@@ -100,12 +104,16 @@ final class LayerNavigatorViewController: NSViewController {
     func onItemDoubleClicked() {}
 
     func onNewVeuen(_ venue: AFVenue) {
-        self.venues.append(venue)
         self.outlineView.reloadData()
     }
 
     func onVeuenAddShape(_ venue: AFVenue, shape: AFLayer) {
-        outlineView.reloadData()
+        let index = outlineView.row(forItem: venue.root)
+        if index == -1 {
+            return
+        }
+
+        outlineView.reloadItem(venue.root, reloadChildren: true)
     }
 
     #if DEBUG

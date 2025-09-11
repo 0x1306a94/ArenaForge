@@ -55,7 +55,11 @@ class SpecialSelectTextField: NSTextField {
     }
 }
 
-final class LayerTableViewCell: NSTableCellView {
+protocol LayerTableViewCellDelegate: AnyObject {
+    func layerTableViewCellDidFinishEditing(_ cell: LayerTableViewCell)
+}
+
+final class LayerTableViewCell: NSTableCellView, NSTextFieldDelegate {
     private var fontSize: Double {
         switch self.frame.height {
         case 20: return 11
@@ -66,6 +70,7 @@ final class LayerTableViewCell: NSTableCellView {
     }
 
     weak var layerItem: AFLayer?
+    weak var delegate: LayerTableViewCellDelegate?
 
     init(frame frameRect: NSRect, item: AFLayer?, isEditable: Bool = true) {
         super.init(frame: frameRect)
@@ -89,6 +94,7 @@ final class LayerTableViewCell: NSTableCellView {
     func setupViews(frame frameRect: NSRect, isEditable: Bool) {
         let label = createLabel()
         configLabel(label: label, isEditable: isEditable)
+        label.delegate = self
         self.textField = label
 
         addSubview(label)
@@ -139,8 +145,17 @@ final class LayerTableViewCell: NSTableCellView {
         textField.frame = NSRect(
             x: 2,
             y: 2.5,
-            width: newSize.width,
+            width: ceil(newSize.width),
             height: 25
         )
+    }
+
+    // MARK: NSTextFieldDelegate
+
+    func controlTextDidChange(_ obj: Notification) {}
+
+    func controlTextDidEndEditing(_ obj: Notification) {
+        self.layerItem?.name = self.textField?.stringValue.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        self.delegate?.layerTableViewCellDidFinishEditing(self)
     }
 }

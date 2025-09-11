@@ -32,7 +32,6 @@
 #import <arenaforge_core/uuid/UUID.h>
 
 #import "AFLayer+Private.h"
-
 #import "AFVenue+Private.h"
 
 @interface AFVenue ()
@@ -55,7 +54,8 @@
         _venue = arenaforge::Venue::Make(venueId, (name == nil ? "" : std::string(name.UTF8String)), "");
         _venue->setBackgroundColor(tgfx::Color::FromRGBA(0xcc, 0xcc, 0xcc));
 
-        _root = [[AFLayer alloc] initWithCppObject:_venue->containerPtr()];
+        _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr()];
+        _root.venue = self;
     }
     return self;
 }
@@ -64,7 +64,8 @@
     if (self == [super init]) {
         _venue = std::move(cppObject);
 
-        _root = [[AFLayer alloc] initWithCppObject:_venue->containerPtr()];
+        _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr()];
+        _root.venue = self;
     }
     return self;
 }
@@ -80,14 +81,14 @@
 
 - (AFLayer *)createLayerWithName:(NSString *)name {
     AFLayer *layer = [[AFLayer alloc] initWithName:name];
-    auto container = _venue->container();
+    auto container = _venue->containerLayer();
     auto cppLayer = [layer cppObject];
     container->addChild(cppLayer);
     return layer;
 }
 
 - (BOOL)hitTestPoint:(NSPoint)point {
-    auto root = _venue->rootPtr();
+    auto root = _venue->rootLayerPtr();
     //    auto localPoint = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
     //    auto container = _venue->container();
     auto hit = root->hitTestPoint(static_cast<float>(point.x), static_cast<float>(point.y));
@@ -95,13 +96,13 @@
 }
 
 - (NSPoint)globalToLocal:(NSPoint)point {
-    auto root = _venue->root();
+    auto root = _venue->rootLayer();
     auto local = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
     return NSPointFromCGPoint(CGPointMake(local.x, local.y));
 }
 
 - (NSPoint)localToGlobal:(NSPoint)point {
-    auto root = _venue->root();
+    auto root = _venue->rootLayer();
     auto local = root->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
     return NSPointFromCGPoint(CGPointMake(local.x, local.y));
 }

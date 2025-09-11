@@ -52,6 +52,24 @@ extension LayerNavigatorViewController: NSOutlineViewDelegate {
             frame: frameRect,
             item: item as? AFLayer
         )
+        cell.delegate = self
         return cell
+    }
+
+    func outlineViewSelectionDidChange(_ notification: Notification) {
+        guard outlineView.selectedRowIndexes.count == 1 else { return }
+
+//        let selectedIndex = outlineView.selectedRow
+
+//        guard let item = outlineView.item(atRow: selectedIndex) as? AFLayer else { return }
+    }
+}
+
+extension LayerNavigatorViewController: LayerTableViewCellDelegate {
+    func layerTableViewCellDidFinishEditing(_ cell: LayerTableViewCell) {
+        guard let item = cell.layerItem else {
+            return
+        }
+        self.outlineView.reloadItem(item)
     }
 }

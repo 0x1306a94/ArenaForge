@@ -18,22 +18,32 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  arenaforge_editor.h
-//  ArenaForge
+//  LayerNavigatorViewController+MenuDelegate.swift
+//  ArenaForgeStudio
 //
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/11.
 //
 
-#ifndef arenaforge_editor_h_ArenaForge
-#define arenaforge_editor_h_ArenaForge
+import AppKit
 
-#import <Foundation/Foundation.h>
+extension LayerNavigatorViewController: NSMenuDelegate {
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        let row = self.outlineView.clickedRow
+        guard let menu = menu as? LayerNavigatorMenu else {
+            return
+        }
 
-#import <arenaforge_editor/core/AFEditor.h>
-#import <arenaforge_editor/core/AFLayer.h>
-#import <arenaforge_editor/core/AFProject.h>
-#import <arenaforge_editor/core/AFVenue.h>
-#import <arenaforge_editor/core/Platform.h>
-#import <arenaforge_editor/platform/mac/AFMacCanvasView.h>
+        guard row != -1 else {
+            menu.item = nil
+            menu.update()
+            return
+        }
 
-#endif /* arenaforge_editor_h_ArenaForge */
+        if let item = self.outlineView.item(atRow: row) as? AnyObject {
+            menu.item = item
+        } else {
+            menu.item = nil
+        }
+        menu.update()
+    }
+}

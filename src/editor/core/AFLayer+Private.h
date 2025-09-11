@@ -26,9 +26,12 @@
 
 #import <arenaforge_editor/core/AFLayer.h>
 
+#import <arenaforge_editor/core/AFVenue.h>
+
 #import <arenaforge_core/layers/BaseLayer.h>
 
 @interface AFLayer ()
+@property (nonatomic, weak) AFVenue *venue;
 - (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::BaseLayer>)cppObject NS_DESIGNATED_INITIALIZER;
 - (std::shared_ptr<arenaforge::BaseLayer>)cppObject;
 @end

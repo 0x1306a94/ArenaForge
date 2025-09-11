@@ -33,6 +33,10 @@
 #include <tgfx/core/Color.h>
 #include <tgfx/core/Rect.h>
 
+namespace tgfx {
+class TextLayer;
+};
+
 namespace arenaforge {
 class Project;
 class BaseLayer;
@@ -73,13 +77,13 @@ class Venue : public std::enable_shared_from_this<Venue> {
 
     std::shared_ptr<Project> project() const;
 
-    const BaseLayer *root() const;
-    std::shared_ptr<BaseLayer> rootPtr() const;
+    const BaseLayer *rootLayer() const;
+    std::shared_ptr<BaseLayer> rootLayerPtr() const;
 
-    BaseLayer *container() const;
-    std::shared_ptr<BaseLayer> containerPtr() const;
+    BaseLayer *containerLayer() const;
+    std::shared_ptr<BaseLayer> containerLayerPtr() const;
 
-    BaseLayer *mask() const;
+    BaseLayer *maskLayer() const;
 
     std::string toJSON(bool pretty = false) const;
 
@@ -95,9 +99,10 @@ class Venue : public std::enable_shared_from_this<Venue> {
     std::string _description{""};
     tgfx::Rect _frame{};
     tgfx::Color _backgroundColor = tgfx::Color::Transparent();
-    std::shared_ptr<BaseLayer> _root{nullptr};
-    std::shared_ptr<BaseLayer> _container{nullptr};
-    std::shared_ptr<BaseLayer> _mask{nullptr};
+    std::shared_ptr<BaseLayer> _rootLayer{nullptr};
+    std::shared_ptr<tgfx::TextLayer> _nameLayer{nullptr};
+    std::shared_ptr<BaseLayer> _containerLayer{nullptr};
+    std::shared_ptr<BaseLayer> _maskLayer{nullptr};
     std::weak_ptr<Project> _ownerProject;
 
     friend class Project;

@@ -133,10 +133,10 @@ void Renderer::draw(bool force) {
     }
 
     auto statePtr = _state.get();
-    _gridLayer->prepare(canvas, statePtr, force);
+//    _gridLayer->prepare(canvas, statePtr, force);
     _designLayerTree->prepare(canvas, statePtr, force);
 
-    bool hasContentChanged = _gridLayer->hasContentChanged() || _designLayerTree->hasContentChanged();
+    bool hasContentChanged = /*_gridLayer->hasContentChanged() ||*/ _designLayerTree->hasContentChanged();
 
     if (!hasContentChanged && !force && !_invalidate) {
         device->unlock();
@@ -146,7 +146,7 @@ void Renderer::draw(bool force) {
     canvas->clear();
     canvas->save();
 
-    _gridLayer->draw(canvas, statePtr);
+//    _gridLayer->draw(canvas, statePtr);
     _designLayerTree->draw(canvas, statePtr);
 
     canvas->restore();

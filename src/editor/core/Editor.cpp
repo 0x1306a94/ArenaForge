@@ -145,7 +145,7 @@ void Editor::onVenueChanges() {
     auto existsChildren = root->children();
     auto venues = _project->venues();
     for (const auto &venue : venues) {
-        auto venueRoot = venue->rootPtr();
+        auto venueRoot = venue->rootLayerPtr();
         if (!venueRoot) {
             continue;
         }

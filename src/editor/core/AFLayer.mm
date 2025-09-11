@@ -35,6 +35,7 @@
 
 @interface AFLayer ()
 @property (nonatomic, strong) NSMutableArray<AFLayer *> *internalLayers;
+@property (nonatomic, weak) AFLayer *parent;
 @end
 
 @implementation AFLayer {
@@ -65,6 +66,7 @@
         _internalLayers = [NSMutableArray<AFLayer *> array];
         for (auto &cppChild : _layer->children()) {
             AFLayer *child = [[AFLayer alloc] initWithCppObject:std::static_pointer_cast<arenaforge::BaseLayer>(cppChild)];
+            child.parent = self;
             [_internalLayers addObject:child];
         }
     }
@@ -80,9 +82,27 @@
     if (cppObject->parent() == _layer.get()) {
         return;
     }
-
+    child.parent = self;
     _layer->addChild(cppObject);
     [self.internalLayers addObject:child];
+}
+
+- (void)removeChild:(AFLayer *)child {
+    if (!child) {
+        return;
+    }
+
+    auto cppObject = [child cppObject];
+    cppObject->removeFromParent();
+    [self.internalLayers removeObject:child];
+}
+
+- (void)removeFromParent {
+    if (!self.parent) {
+        return;
+    }
+
+    [self.parent removeChild:self];
 }
 
 #pragma mark - setter getter
@@ -99,6 +119,10 @@
 - (NSString *)name {
     auto name = _layer->name();
     return [NSString stringWithUTF8String:name.c_str()];
+}
+
+- (void)setName:(NSString *)name {
+    _layer->setName((name == nil ? "" : name.UTF8String));
 }
 
 - (NSArray<AFLayer *> *)children {
