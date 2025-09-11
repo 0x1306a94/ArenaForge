@@ -35,11 +35,12 @@
 #import "AFLayer+Private.h"
 #import "AFVenue+Private.h"
 
+#import "AFLayerMap.h"
+
 #import <AppKit/NSColorSpace.h>
 
 @interface AFVenue ()
 @property (nonatomic, strong) AFLayer *root;
-@property (nonatomic, strong) NSMapTable<NSString *, AFLayer *> *layerMap;
 @end
 
 @implementation AFVenue {
@@ -53,15 +54,16 @@
 
 - (instancetype)initWithName:(NSString *)name {
     if (self == [super init]) {
+
+        _layerMap = [AFLayerMap new];
+
         auto uuid = arenaforge::UUID::Instance();
         auto venueId = uuid();
         _venue = arenaforge::Venue::Make(venueId, (name == nil ? "" : std::string(name.UTF8String)), "");
         _venue->setBackgroundColor(tgfx::Color::FromRGBA(0xcc, 0xcc, 0xcc));
 
-        _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr()];
+        _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr() layerMap:_layerMap];
         _root.venue = self;
-
-        _layerMap = [NSMapTable<NSString *, AFLayer *> strongToWeakObjectsMapTable];
     }
     return self;
 }
@@ -70,10 +72,10 @@
     if (self == [super init]) {
         _venue = std::move(cppObject);
 
-        _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr()];
-        _root.venue = self;
+        _layerMap = [AFLayerMap new];
 
-        _layerMap = [NSMapTable<NSString *, AFLayer *> strongToWeakObjectsMapTable];
+        _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr() layerMap:_layerMap];
+        _root.venue = self;
     }
     return self;
 }
@@ -88,31 +90,38 @@
 }
 
 - (AFLayer *_Nullable)findLayerById:(NSString *)layerId {
-    AFLayer *cache = [self.layerMap objectForKey:layerId];
+    AFLayer *cache = [self.layerMap getLayerById:layerId];
     if (cache) {
         return cache;
     }
 
-    if (!self.root) {
+    //    if (!self.root) {
+    //        return nil;
+    //    }
+    //
+    //    NSMutableArray<AFLayer *> *stack = [NSMutableArray arrayWithObject:self.root];
+    //
+    //    while (stack.count > 0) {
+    //        AFLayer *current = stack.lastObject;
+    //        [stack removeLastObject];
+    //
+    //        if ([current.layerId isEqualToString:layerId]) {
+    //            [self.layerMap setObject:current forKey:layerId];
+    //            return current;
+    //        }
+    //
+    //        for (AFLayer *child in current.children) {
+    //            [stack addObject:child];
+    //        }
+    //    }
+
+    return nil;
+}
+
+- (AFLayer *_Nullable)upgradeGroup:(NSArray<AFLayer *> *)layers {
+    if (layers.count == 0) {
         return nil;
     }
-
-    NSMutableArray<AFLayer *> *stack = [NSMutableArray arrayWithObject:self.root];
-
-    while (stack.count > 0) {
-        AFLayer *current = stack.lastObject;
-        [stack removeLastObject];
-
-        if ([current.layerId isEqualToString:layerId]) {
-            [self.layerMap setObject:current forKey:layerId];
-            return current;
-        }
-
-        for (AFLayer *child in current.children) {
-            [stack addObject:child];
-        }
-    }
-
     return nil;
 }
 

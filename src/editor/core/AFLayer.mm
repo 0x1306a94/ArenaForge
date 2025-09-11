@@ -32,12 +32,15 @@
 #include <tgfx/layers/SolidColor.h>
 
 #import "AFLayer+Private.h"
+#import "AFLayerMap.h"
+#import "AFVenue+Private.h"
 
 #import <AppKit/NSColorSpace.h>
 
 @interface AFLayer ()
-@property (nonatomic, strong) NSMutableArray<AFLayer *> *internalLayers;
 @property (nonatomic, weak) AFLayer *parent;
+@property (nonatomic, weak) AFLayerMap *layerMap;
+@property (nonatomic, strong) NSArray<AFLayer *> *cacheChildren;
 @end
 
 @implementation AFLayer {
@@ -50,26 +53,25 @@
 }
 #endif
 
-- (instancetype)initWithName:(NSString *)name {
+- (instancetype)initWithName:(NSString *)name layerMap:(AFLayerMap *)layerMap {
     if (self == [super init]) {
         auto uuid = arenaforge::UUID::Instance();
         auto layerId = uuid();
-
+        _layerMap = layerMap;
         _layer = arenaforge::BaseLayer::Make(layerId, arenaforge::ShapeType::Rectangle);
         _layer->setName((name == nil ? "" : std::string(name.UTF8String)));
-        _internalLayers = [NSMutableArray<AFLayer *> array];
     }
     return self;
 }
 
-- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::BaseLayer>)cppObject {
+- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::BaseLayer>)cppObject layerMap:(AFLayerMap *)layerMap {
     if (self == [super init]) {
         _layer = std::move(cppObject);
-        _internalLayers = [NSMutableArray<AFLayer *> array];
+        _layerMap = layerMap;
         for (auto &cppChild : _layer->children()) {
-            AFLayer *child = [[AFLayer alloc] initWithCppObject:std::static_pointer_cast<arenaforge::BaseLayer>(cppChild)];
+            AFLayer *child = [[AFLayer alloc] initWithCppObject:std::static_pointer_cast<arenaforge::BaseLayer>(cppChild) layerMap:layerMap];
             child.parent = self;
-            [_internalLayers addObject:child];
+            [layerMap addLayer:child];
         }
     }
     return self;
@@ -81,12 +83,9 @@
     }
 
     auto cppObject = [child cppObject];
-    if (cppObject->parent() == _layer.get()) {
-        return;
-    }
-    child.parent = self;
     _layer->addChild(cppObject);
-    [self.internalLayers addObject:child];
+
+    [self rebuildCacheChildren];
 }
 
 - (void)removeChild:(AFLayer *)child {
@@ -96,17 +95,26 @@
 
     auto cppObject = [child cppObject];
     cppObject->removeFromParent();
-    [self.internalLayers removeObject:child];
+    [child.parent rebuildCacheChildren];
 }
 
 - (void)removeFromParent {
-    if (!self.parent) {
-        return;
-    }
-
-    [self.parent removeChild:self];
+    _layer->removeFromParent();
+    [self.parent rebuildCacheChildren];
 }
 
+- (void)rebuildCacheChildren {
+    NSMutableArray<AFLayer *> *children = [NSMutableArray<AFLayer *> array];
+    for (const auto &item : _layer->children()) {
+        auto baseLayer = std::static_pointer_cast<arenaforge::BaseLayer>(item);
+        NSString *layerId = [NSString stringWithUTF8String:baseLayer->layerId().c_str()];
+        AFLayer *layer = [self.layerMap getLayerById:layerId];
+        if (layer) {
+            [children addObject:layer];
+        }
+    }
+    self.cacheChildren = [children copy];
+}
 #pragma mark - setter getter
 
 - (std::shared_ptr<arenaforge::BaseLayer>)cppObject {
@@ -128,15 +136,17 @@
 }
 
 - (NSArray<AFLayer *> *)children {
-    return [self.internalLayers copy];
+    return self.cacheChildren;
 }
 
 - (BOOL)hasChildren {
-    return self.internalLayers.count > 0;
+    auto count = self.cacheChildren.count;
+    return count > 0;
 }
 
 - (NSInteger)childrenCount {
-    return (NSInteger)self.internalLayers.count;
+    NSInteger count = (NSInteger)self.cacheChildren.count;
+    return count;
 }
 
 - (void)setTransient:(BOOL)transient {

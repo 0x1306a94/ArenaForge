@@ -30,8 +30,11 @@
 
 #import <arenaforge_core/layers/BaseLayer.h>
 
+@class AFLayerMap;
 @interface AFLayer ()
 @property (nonatomic, weak) AFVenue *venue;
-- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::BaseLayer>)cppObject NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::BaseLayer>)cppObject layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
 - (std::shared_ptr<arenaforge::BaseLayer>)cppObject;
+
+- (void)rebuildCacheChildren;
 @end

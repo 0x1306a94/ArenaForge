@@ -35,6 +35,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class AFVenue;
+@class AFLayerMap;
 ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 @property (nonatomic, copy, readonly) NSString *layerId;
 @property (nonatomic, copy) NSString *name;
@@ -51,7 +52,7 @@ ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithName:(NSString *)name NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithName:(NSString *)name layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
 
 - (void)addChild:(AFLayer *)child;
 - (void)removeChild:(AFLayer *)child;

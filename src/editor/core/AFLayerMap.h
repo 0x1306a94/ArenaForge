@@ -18,46 +18,22 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFVenue.h
-//  arenaforge
+//  AFLayerMap.h
+//  arenaforge_editor
 //
-//  Created by KK on 2025/9/7.
+//  Created by KK on 2025/9/11.
 //
 
-#ifndef AFVenue_h_ArenaForge
-#define AFVenue_h_ArenaForge
-
-#import <AppKit/NSColor.h>
 #import <Foundation/Foundation.h>
-
-#import <arenaforge_editor/core/defines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class AFLayer;
-
-ARENA_FORGE_EXPORT_API @interface AFVenue : NSObject
-@property (nonatomic, copy, readonly) NSString *venueId;
-@property (nonatomic, copy, readonly) NSString *name;
-@property (nonatomic, strong, readonly) AFLayer *root;
-@property (nonatomic, assign) NSRect frame;
-@property (nonatomic, strong) NSColor *backgroundColor;
-
-+ (instancetype)new NS_UNAVAILABLE;
-- (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithName:(NSString *)name NS_DESIGNATED_INITIALIZER;
-
-- (NSString *)toJSONString;
-
-- (AFLayer *_Nullable)findLayerById:(NSString *)layerId;
-- (AFLayer *_Nullable)upgradeGroup:(NSArray<AFLayer *> *)layers;
-
-- (BOOL)hitTestPoint:(NSPoint)point;
-- (NSPoint)globalToLocal:(NSPoint)point;
-- (NSPoint)localToGlobal:(NSPoint)point;
-
+@interface AFLayerMap : NSObject
+- (void)addLayer:(AFLayer *)layer;
+- (void)removeLayer:(AFLayer *)layer;
+- (void)removeLayerById:(NSString *)layerId;
+- (AFLayer *_Nullable)getLayerById:(NSString *)layerId;
 @end
 
 NS_ASSUME_NONNULL_END
-
-#endif /* AFVenue_h_ArenaForge */

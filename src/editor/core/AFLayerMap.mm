@@ -18,41 +18,51 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFProject.h
-//  arenaforge
+//  AFLayerMap.m
+//  arenaforge_editor
 //
-//  Created by KK on 2025/9/7.
+//  Created by KK on 2025/9/11.
 //
 
-#ifndef AFProject_h_ArenaForge
-#define AFProject_h_ArenaForge
+#import "AFLayerMap.h"
 
-#import <Foundation/Foundation.h>
+#import "AFLayer+Private.h"
 
-#import <arenaforge_editor/core/defines.h>
-
-NS_ASSUME_NONNULL_BEGIN
-
-@class AFVenue;
-@class AFLayer;
-ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
-@property (nonatomic, copy, readonly) NSString *name;
-@property (nonatomic, copy, readonly) NSArray<AFVenue *> *venues;
-+ (instancetype)new NS_UNAVAILABLE;
-- (instancetype)init NS_UNAVAILABLE;
-- (instancetype __nullable)initWithFileURL:(NSURL *)fileURL error:(NSError **)error NS_DESIGNATED_INITIALIZER;
-
-- (NSString *)toJSONString;
-
-- (AFVenue *)createVenue;
-
-- (void)removeVenue:(AFVenue *)venue;
-
-- (AFVenue *_Nullable)pickVenueAtUnderPoint:(NSPoint)point;
-
-- (AFLayer *_Nullable)createLayerInVenue:(AFVenue *)venue;
+@interface AFLayerMap ()
+@property (nonatomic, strong) NSMutableDictionary<NSString *, AFLayer *> *layerMap;
 @end
+@implementation AFLayerMap
 
-NS_ASSUME_NONNULL_END
+- (instancetype)init {
+    if (self == [super init]) {
+        _layerMap = [NSMutableDictionary<NSString *, AFLayer *> dictionary];
+    }
+    return self;
+}
 
-#endif /* AFProject_h_ArenaForge */
+- (void)addLayer:(AFLayer *)layer {
+    if (layer) {
+        _layerMap[layer.layerId] = layer;
+    }
+}
+
+- (void)removeLayer:(AFLayer *)layer {
+    if (layer) {
+        _layerMap[layer.layerId] = nil;
+    }
+}
+
+- (void)removeLayerById:(NSString *)layerId {
+    if (layerId.length > 0) {
+        _layerMap[layerId] = nil;
+    }
+}
+
+- (AFLayer *_Nullable)getLayerById:(NSString *)layerId {
+    if (layerId.length == 0) {
+        return nil;
+    }
+    AFLayer *layer = _layerMap[layerId];
+    return layer;
+}
+@end

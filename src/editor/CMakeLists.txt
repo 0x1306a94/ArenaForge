@@ -66,14 +66,14 @@ add_files_by_extension(SRC_FILES ".h;.hpp;.cpp"
 )
 
 if(MACOS)
-    add_files_by_extension(MAC_FILES ".h;.hpp;.cpp;.mm"
+    add_files_by_extension(MAC_FILES ".h;.hpp;.cpp;.m;.mm"
         core
         renderer
         platform/mac
     )
     list(APPEND SRC_FILES ${MAC_FILES})
 
-    add_files_by_extension(MAC_PUBLIC_HEADER_FILES ".h;.hpp;.cpp;.mm"
+    add_files_by_extension(MAC_PUBLIC_HEADER_FILES ".h;.hpp"
         ${PUBLIC_HEADER_ROOT_DIR}/platform/mac
     )
     list(APPEND PUBLIC_HEADER_FILES ${MAC_PUBLIC_HEADER_FILES})
