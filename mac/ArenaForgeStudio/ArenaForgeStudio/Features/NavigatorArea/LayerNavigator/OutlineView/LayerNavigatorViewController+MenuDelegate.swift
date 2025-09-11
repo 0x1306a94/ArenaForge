@@ -40,9 +40,9 @@ extension LayerNavigatorViewController: NSMenuDelegate {
             return
         }
 
-        let selectedLayers = Set(outlineView.selectedRowIndexes.compactMap {
+        let selectedLayers = outlineView.selectedRowIndexes.compactMap {
             outlineView.item(atRow: $0) as? AFLayer
-        })
+        }
 
         guard let item = outlineView.item(atRow: clickedRow) as? AFLayer else {
             menu.update()
@@ -51,7 +51,7 @@ extension LayerNavigatorViewController: NSMenuDelegate {
 
         if selectedLayers.count > 1 {
             if selectedLayers.contains(item) {
-                menu.selectedLayers = Array(selectedLayers)
+                menu.selectedLayers = selectedLayers
                 menu.update()
                 return
             }

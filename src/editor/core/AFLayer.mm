@@ -60,6 +60,8 @@
         _layerMap = layerMap;
         _layer = arenaforge::BaseLayer::Make(layerId, arenaforge::ShapeType::Rectangle);
         _layer->setName((name == nil ? "" : std::string(name.UTF8String)));
+
+        _cacheChildren = @[];
     }
     return self;
 }
@@ -73,6 +75,8 @@
             child.parent = self;
             [layerMap addLayer:child];
         }
+
+        [self rebuildCacheChildren];
     }
     return self;
 }
@@ -84,7 +88,7 @@
 
     auto cppObject = [child cppObject];
     _layer->addChild(cppObject);
-
+    child.parent = self;
     [self rebuildCacheChildren];
 }
 
@@ -96,6 +100,7 @@
     auto cppObject = [child cppObject];
     cppObject->removeFromParent();
     [child.parent rebuildCacheChildren];
+    child.parent = nil;
 }
 
 - (void)removeFromParent {

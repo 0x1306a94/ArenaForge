@@ -81,11 +81,15 @@ void BaseLayer::setPositionRelative(bool value) {
     invalidateContent();
 }
 
+#define USE_FRAME_AT_POSITION 1
 void BaseLayer::setFrame(const tgfx::Rect &frame) {
     if (_frame == frame) {
         return;
     }
     _frame = frame;
+#if USE_FRAME_AT_POSITION
+    setPosition(tgfx::Point{frame.x(), frame.y()});
+#endif
     invalidateContent();
 }
 
@@ -226,7 +230,11 @@ void BaseLayer::onUpdateContent(tgfx::LayerRecorder *recorder) {
         // rebuild path
         tgfx::Path path;
         auto frame = this->frame();
+#if USE_FRAME_AT_POSITION
+        tgfx::Point position{0, 0};
+#else
         tgfx::Point position{frame.x(), frame.y()};
+#endif
         auto size = frame.size();
         for (const auto &command : _pathCommands) {
             switch (command.type) {

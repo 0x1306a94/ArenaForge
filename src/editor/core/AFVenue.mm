@@ -33,6 +33,7 @@
 #import <arenaforge_core/uuid/UUID.h>
 
 #import "AFLayer+Private.h"
+#import "AFProject+Private.h"
 #import "AFVenue+Private.h"
 
 #import "AFLayerMap.h"
@@ -119,10 +120,60 @@
 }
 
 - (AFLayer *_Nullable)upgradeGroup:(NSArray<AFLayer *> *)layers {
+    auto project = _venue->project();
+    if (!project) {
+        return nil;
+    }
+
     if (layers.count == 0) {
         return nil;
     }
-    return nil;
+
+    AFLayer *parent = layers[0].parent;
+    for (AFLayer *layer : layers) {
+        if (layer.parent != parent) {
+            return nil;
+        }
+    }
+
+    auto counter = project->genGroupCounter();
+    AFLayer *group = [[AFLayer alloc] initWithName:[NSString stringWithFormat:@"Group %u", counter] layerMap:self.layerMap];
+    group.fillColor = NSColor.systemOrangeColor;
+
+    // 计算 group 的外包矩形
+    CGFloat minX = CGFLOAT_MAX;
+    CGFloat minY = CGFLOAT_MAX;
+    CGFloat maxX = -CGFLOAT_MAX;
+    CGFloat maxY = -CGFLOAT_MAX;
+
+    for (AFLayer *layer in layers) {
+        NSRect frame = layer.frame;
+        minX = fmin(minX, frame.origin.x);
+        minY = fmin(minY, frame.origin.y);
+        maxX = fmax(maxX, frame.origin.x + frame.size.width);
+        maxY = fmax(maxY, frame.origin.y + frame.size.height);
+    }
+
+    group.frame = NSMakeRect(minX, minY, maxX - minX, maxY - minY);
+
+    [self.layerMap addLayer:group];
+
+    // 将 group 添加到原父节点
+    [parent addChild:group];
+
+    // 添加子图层，并调整子图层 frame 相对于 group
+    for (AFLayer *layer in layers) {
+        // 调整 frame
+        NSRect frame = layer.frame;
+        frame.origin.x -= group.frame.origin.x;
+        frame.origin.y -= group.frame.origin.y;
+        layer.frame = frame;
+        [layer removeFromParent];
+
+        [group addChild:layer];
+    }
+
+    return group;
 }
 
 - (BOOL)hitTestPoint:(NSPoint)point {

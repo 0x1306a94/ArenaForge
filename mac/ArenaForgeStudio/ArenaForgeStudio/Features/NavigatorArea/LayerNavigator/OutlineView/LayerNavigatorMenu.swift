@@ -62,7 +62,7 @@ final class LayerNavigatorMenu: NSMenu {
             return
         }
 
-        if selectedLayers.count > 1 {
+        if selectedLayers.count >= 1 {
             let venues = Set(selectedLayers.compactMap { $0.attachVenue })
             if venues.count == 1 {
                 let groupItem = menuItem("Group", action: #selector(upgradeGroup))
@@ -97,10 +97,10 @@ final class LayerNavigatorMenu: NSMenu {
 extension LayerNavigatorMenu {
     @objc
     func delete() {
-        for layer in self.selectedLayers {
+        for layer in selectedLayers {
             if let veune = layer.venue {
                 // root
-                self.document?.project?.removeVenue(veune)
+                document?.project?.removeVenue(veune)
             } else {
                 layer.removeFromParent()
             }
@@ -119,6 +119,8 @@ extension LayerNavigatorMenu {
             return
         }
 
-       
+        if let _ = veune.upgradeGroup(selectedLayers) {
+            sender?.outlineView.reloadItem(veune.root, reloadChildren: true)
+        }
     }
 }

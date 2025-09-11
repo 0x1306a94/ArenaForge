@@ -45,16 +45,16 @@ std::shared_ptr<arenaforge::BaseLayer> adl_serializer<std::shared_ptr<arenaforge
     layer->setAlpha(as::read_value(j, "alpha", 1.0f));
     layer->setPositionRelative(as::read_value(j, "positionRelative", false));
 
-    do {
-        auto matrixIt = j.find("matrix");
-        if (matrixIt == j.end()) {
-            break;
-        }
-        auto buffer = matrixIt->get<std::array<float, 9>>();
-        auto matrix = tgfx::Matrix::I();
-        matrix.setAll(buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5]);
-        layer->setMatrix(matrix);
-    } while (0);
+//    do {
+//        auto matrixIt = j.find("matrix");
+//        if (matrixIt == j.end()) {
+//            break;
+//        }
+//        auto buffer = matrixIt->get<std::array<float, 9>>();
+//        auto matrix = tgfx::Matrix::I();
+//        matrix.setAll(buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5]);
+//        layer->setMatrix(matrix);
+//    } while (0);
 
     do {
         auto pathsIt = j.find("paths");
@@ -150,12 +150,12 @@ void adl_serializer<std::shared_ptr<arenaforge::BaseLayer>>::to_json(nlohmann::j
     j["alpha"] = layer->alpha();
     j["positionRelative"] = layer->positionRelative();
 
-    auto matrix = layer->matrix();
-    if (!matrix.isIdentity()) {
-        std::array<float, 9> buffer;
-        matrix.get9(buffer.data());
-        j["matrix"] = buffer;
-    }
+//    auto matrix = layer->matrix();
+//    if (!matrix.isIdentity()) {
+//        std::array<float, 9> buffer;
+//        matrix.get9(buffer.data());
+//        j["matrix"] = buffer;
+//    }
 
     do {
         auto commands = layer->pathCommands();
