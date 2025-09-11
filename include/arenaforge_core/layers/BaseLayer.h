@@ -79,6 +79,7 @@ class BaseLayer : public tgfx::ShapeLayer {
     void clearAttributes();
 
     void addAttribute(const std::string &key, const std::string &value);
+    void setAttributes(std::unordered_map<std::string, std::string> attributes);
 
     const std::vector<PathCommand> pathCommands() const {
         return _pathCommands;

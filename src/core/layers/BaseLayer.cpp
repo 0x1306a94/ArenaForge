@@ -97,6 +97,10 @@ void BaseLayer::addAttribute(const std::string &key, const std::string &value) {
     _attributes[key] = value;
 }
 
+void BaseLayer::setAttributes(std::unordered_map<std::string, std::string> attributes) {
+    _attributes = std::move(attributes);
+}
+
 void BaseLayer::setPathCommands(const std::vector<PathCommand> &commands) {
     _pathCommands.clear();
     _pathCommands.reserve(commands.size());

@@ -111,6 +111,33 @@ std::shared_ptr<arenaforge::BaseLayer> adl_serializer<std::shared_ptr<arenaforge
             layer->setStrokeStyles(std::move(strokeStyles));
         } while (0);
     } while (0);
+
+    do {
+        auto childrenIt = j.find("childrens");
+        if (childrenIt == j.end()) {
+            break;
+        }
+
+        auto children = childrenIt->get<std::vector<std::shared_ptr<arenaforge::BaseLayer>>>();
+        if (children.empty()) {
+            break;
+        }
+
+        for (auto it : children) {
+            layer->addChild(it);
+        }
+
+    } while (0);
+
+    do {
+        auto attributesIt = j.find("attributes");
+        if (attributesIt == j.end()) {
+            break;
+        }
+        auto attributes = attributesIt->get<std::unordered_map<std::string, std::string>>();
+        layer->setAttributes(std::move(attributes));
+    } while (0);
+
     return layer;
 }
 
@@ -147,14 +174,18 @@ void adl_serializer<std::shared_ptr<arenaforge::BaseLayer>>::to_json(nlohmann::j
             auto style = std::static_pointer_cast<tgfx::SolidColor>(it);
             fillStyles.push_back(style);
         }
-        style["fills"] = fillStyles;
+        if (!fillStyles.empty()) {
+            style["fills"] = fillStyles;
+        }
 
         auto strokeStyles = nlohmann::json::array();
         for (auto it : layer->strokeStyles()) {
             auto style = std::static_pointer_cast<tgfx::SolidColor>(it);
             strokeStyles.push_back(style);
         }
-        style["strokes"] = strokeStyles;
+        if (!strokeStyles.empty()) {
+            style["strokes"] = strokeStyles;
+        }
 
         style["lineCap"] = static_cast<int>(layer->lineCap());
         style["lineJoin"] = static_cast<int>(layer->lineJoin());
@@ -180,7 +211,18 @@ void adl_serializer<std::shared_ptr<arenaforge::BaseLayer>>::to_json(nlohmann::j
         children.push_back(baseLayer);
     }
 
-    j["childrens"] = children;
+    if (!children.empty()) {
+        j["childrens"] = children;
+    }
+
+    auto attributes = nlohmann::json::object();
+    for (const auto &[key, value] : layer->attributes()) {
+        attributes[key] = value;
+    }
+
+    if (!attributes.empty()) {
+        j["attributes"] = attributes;
+    }
 }
 
 arenaforge::PathCommand adl_serializer<arenaforge::PathCommand>::from_json(const nlohmann::json &j) {
@@ -191,10 +233,16 @@ arenaforge::PathCommand adl_serializer<arenaforge::PathCommand>::from_json(const
         if (cmd.type == arenaforge::PathCommandType::ClosePath || cmd.type == arenaforge::PathCommandType::Unknown) {
             break;
         }
-        as::read_field(cmd.c1, j, "c1");
-        as::read_field(cmd.c2, j, "c2");
+
         as::read_field(cmd.p, j, "p");
+        if (cmd.type == arenaforge::PathCommandType::QuadTo) {
+            as::read_field(cmd.c1, j, "c1");
+        } else if (cmd.type == arenaforge::PathCommandType::CubicTo) {
+            as::read_field(cmd.c1, j, "c1");
+            as::read_field(cmd.c2, j, "c2");
+        }
     } while (0);
+
     return cmd;
 }
 
@@ -204,9 +252,29 @@ void adl_serializer<arenaforge::PathCommand>::to_json(nlohmann::json &j, const a
         return;
     }
 
-    j["c1"] = cmd.c1;
-    j["c2"] = cmd.c2;
-    j["p"] = cmd.p;
+    switch (cmd.type) {
+        case arenaforge::PathCommandType::LineTo: {
+            j["p"] = cmd.p;
+            break;
+        }
+        case arenaforge::PathCommandType::MoveTo: {
+            j["p"] = cmd.p;
+            break;
+        }
+        case arenaforge::PathCommandType::QuadTo: {
+            j["p"] = cmd.p;
+            j["c1"] = cmd.c1;
+            break;
+        }
+        case arenaforge::PathCommandType::CubicTo: {
+            j["c1"] = cmd.c1;
+            j["c2"] = cmd.c2;
+            j["p"] = cmd.p;
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 std::shared_ptr<tgfx::SolidColor> adl_serializer<std::shared_ptr<tgfx::SolidColor>>::from_json(const nlohmann::json &j) {
