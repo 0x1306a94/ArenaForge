@@ -33,6 +33,8 @@
 
 #import "AFLayer+Private.h"
 
+#import <AppKit/NSColorSpace.h>
+
 @interface AFLayer ()
 @property (nonatomic, strong) NSMutableArray<AFLayer *> *internalLayers;
 @property (nonatomic, weak) AFLayer *parent;
@@ -111,7 +113,7 @@
     return _layer;
 }
 
-- (NSString *)venueId {
+- (NSString *)layerId {
     auto layerId = _layer->layerId();
     return [NSString stringWithUTF8String:layerId.c_str()];
 }
@@ -165,8 +167,9 @@
         return;
     }
 
+    NSColor *rgbColor = [fillColor colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
     CGFloat red, green, blue, alpha;
-    [fillColor getRed:&red green:&green blue:&blue alpha:&alpha];
+    [rgbColor getRed:&red green:&green blue:&blue alpha:&alpha];
     auto cppColor = tgfx::Color{
         static_cast<float>(red),
         static_cast<float>(green),
@@ -187,5 +190,17 @@
         return nil;
     }
     return [NSColor colorWithRed:cppColor.red green:cppColor.green blue:cppColor.blue alpha:cppColor.alpha];
+}
+
+- (AFVenue *)attachVenue {
+    AFLayer *current = self;
+    while (current) {
+        AFVenue *venue = current.venue;
+        if (venue) {
+            return venue;
+        }
+        current = current.parent;
+    }
+    return nil;
 }
 @end

@@ -25,25 +25,39 @@
 //
 
 import AppKit
+import arenaforge_editor
 
 extension LayerNavigatorViewController: NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
-        let row = self.outlineView.clickedRow
+        let clickedRow = self.outlineView.clickedRow
         guard let menu = menu as? LayerNavigatorMenu else {
             return
         }
 
-        guard row != -1 else {
-            menu.item = nil
+        menu.reset()
+        guard clickedRow != -1 else {
             menu.update()
             return
         }
 
-        if let item = self.outlineView.item(atRow: row) as? AnyObject {
-            menu.item = item
-        } else {
-            menu.item = nil
+        let selectedLayers = Set(outlineView.selectedRowIndexes.compactMap {
+            outlineView.item(atRow: $0) as? AFLayer
+        })
+
+        guard let item = outlineView.item(atRow: clickedRow) as? AFLayer else {
+            menu.update()
+            return
         }
+
+        if selectedLayers.count > 1 {
+            if selectedLayers.contains(item) {
+                menu.selectedLayers = Array(selectedLayers)
+                menu.update()
+                return
+            }
+        }
+
+        menu.selectedLayers = [item]
         menu.update()
     }
 }

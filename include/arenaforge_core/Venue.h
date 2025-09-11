@@ -29,6 +29,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include <tgfx/core/Color.h>
 #include <tgfx/core/Rect.h>
@@ -77,6 +78,10 @@ class Venue : public std::enable_shared_from_this<Venue> {
 
     std::shared_ptr<Project> project() const;
 
+    std::shared_ptr<BaseLayer> newLayer(const std::string &name);
+
+    std::shared_ptr<BaseLayer> findLayer(const std::string &layerId);
+
     const BaseLayer *rootLayer() const;
     std::shared_ptr<BaseLayer> rootLayerPtr() const;
 
@@ -104,6 +109,7 @@ class Venue : public std::enable_shared_from_this<Venue> {
     std::shared_ptr<BaseLayer> _containerLayer{nullptr};
     std::shared_ptr<BaseLayer> _maskLayer{nullptr};
     std::weak_ptr<Project> _ownerProject;
+    std::unordered_map<std::string, std::weak_ptr<BaseLayer>> _layerMap{};
 
     friend class Project;
 };

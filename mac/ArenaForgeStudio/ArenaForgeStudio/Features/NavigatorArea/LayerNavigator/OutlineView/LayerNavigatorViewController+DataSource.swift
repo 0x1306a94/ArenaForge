@@ -52,4 +52,27 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
 
         return false
     }
+
+    func outlineView(_ outlineView: NSOutlineView, itemForPersistentObject object: Any) -> Any? {
+        guard let layerId = object as? String else { return nil }
+        for venue in self.venues {
+            if layerId == venue.venueId {
+                return venue.root
+            } else {
+                if let layer = venue.findLayer(byId: layerId) {
+                    return layer
+                }
+            }
+        }
+
+        return nil
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, persistentObjectForItem item: Any?) -> Any? {
+        guard let layer = item as? AFLayer else { return nil }
+        if let venue = layer.venue {
+            return venue.venueId
+        }
+        return layer.layerId
+    }
 }

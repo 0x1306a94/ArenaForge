@@ -55,6 +55,7 @@ extension LayerNavigatorViewController: NSOutlineViewDelegate {
         cell.delegate = self
         return cell
     }
+    
 
     func outlineViewSelectionDidChange(_ notification: Notification) {
         guard outlineView.selectedRowIndexes.count == 1 else { return }

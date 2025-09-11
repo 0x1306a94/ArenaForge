@@ -62,6 +62,7 @@ std::shared_ptr<Project> Project::MakeFromJSONFile(const std::string &jsonFile, 
     project->_version = as::read_value<ProjectVersion>(j, "version", ProjectVersion::Version1);
     project->_venueCounter = as::read_value<uint32_t>(j, "venueCounter", 0);
     project->_rectangleCounter = as::read_value<uint32_t>(j, "rectangleCounter", 0);
+    project->_groupCounter = as::read_value<uint32_t>(j, "groupCounter", 0);
 
     if (j.contains("venues")) {
         auto venueIds = j["venues"].get<std::vector<std::string>>();
@@ -169,6 +170,7 @@ std::string Project::toJSON(bool pretty) const {
     j["version"] = version();
     j["venueCounter"] = _venueCounter;
     j["rectangleCounter"] = _rectangleCounter;
+    j["groupCounter"] = _groupCounter;
     auto jvenues = nlohmann::json::array();
     for (const auto &venue : _venues) {
         jvenues.push_back(venue->venueId());

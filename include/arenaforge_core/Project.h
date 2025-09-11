@@ -77,6 +77,10 @@ class Project : public std::enable_shared_from_this<Project> {
     uint32_t genRectangleCounter() {
         return _rectangleCounter++;
     }
+    
+    uint32_t genGroupCounter() {
+        return _groupCounter++;
+    }
 
     bool addVenue(std::shared_ptr<Venue> venue);
     bool removeVenue(std::shared_ptr<Venue> venue);
@@ -98,6 +102,7 @@ class Project : public std::enable_shared_from_this<Project> {
     ProjectVersion _version{ProjectVersion::Version1};
     uint32_t _venueCounter{0};
     uint32_t _rectangleCounter{0};
+    uint32_t _groupCounter{0};
     std::vector<std::shared_ptr<Venue>> _venues{};
 };
 };  // namespace arenaforge

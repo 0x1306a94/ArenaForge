@@ -31,7 +31,7 @@ final class LayerNavigatorMenu: NSMenu {
     private weak var document: ProjectDocument?
     private weak var sender: LayerNavigatorViewController?
 
-    weak var item: AnyObject?
+    var selectedLayers: [AFLayer] = []
 
     init(_ sender: LayerNavigatorViewController, document: ProjectDocument?) {
         self.sender = sender
@@ -54,16 +54,33 @@ final class LayerNavigatorMenu: NSMenu {
     private func setupMenu() {
         removeAllItems()
 
-        guard document != nil, let item else {
+        guard document != nil else {
             return
+        }
+
+        if selectedLayers.isEmpty {
+            return
+        }
+
+        if selectedLayers.count > 1 {
+            let venues = Set(selectedLayers.compactMap { $0.attachVenue })
+            if venues.count == 1 {
+                let groupItem = menuItem("Group", action: #selector(upgradeGroup))
+                items.append(groupItem)
+            }
+        } else {
+            if let layer = selectedLayers.first, layer.venue == nil {
+                let duplicateItem = menuItem("Duplicate", action: #selector(duplicate))
+                items.append(duplicateItem)
+            }
         }
 
         let deleteItem = menuItem("Delete", action: #selector(delete))
         items.append(deleteItem)
-        if let layer = item as? AFLayer, layer.venue == nil {
-            let duplicateItem = menuItem("Duplicate", action: #selector(duplicate))
-            items.append(duplicateItem)
-        }
+    }
+
+    func reset() {
+        selectedLayers = []
     }
 
     override func update() {
@@ -80,13 +97,13 @@ final class LayerNavigatorMenu: NSMenu {
 extension LayerNavigatorMenu {
     @objc
     func delete() {
-        guard let layer = item as? AFLayer else { return }
-
-        if let veune = layer.venue {
-            // root
-            self.document?.project?.removeVenue(veune)
-        } else {
-            layer.removeFromParent()
+        for layer in self.selectedLayers {
+            if let veune = layer.venue {
+                // root
+                self.document?.project?.removeVenue(veune)
+            } else {
+                layer.removeFromParent()
+            }
         }
 
         reloadData()
@@ -94,4 +111,14 @@ extension LayerNavigatorMenu {
 
     @objc
     func duplicate() {}
+
+    @objc
+    func upgradeGroup() {
+        let venues = Set(selectedLayers.compactMap { $0.attachVenue })
+        guard venues.count == 1, let veune = venues.first else {
+            return
+        }
+
+       
+    }
 }

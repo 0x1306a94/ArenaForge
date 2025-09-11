@@ -28,14 +28,18 @@
 
 #import <arenaforge_editor/core/AFLayer.h>
 
+#import <arenaforge_core/Project.h>
 #import <arenaforge_core/Venue.h>
 #import <arenaforge_core/uuid/UUID.h>
 
 #import "AFLayer+Private.h"
 #import "AFVenue+Private.h"
 
+#import <AppKit/NSColorSpace.h>
+
 @interface AFVenue ()
 @property (nonatomic, strong) AFLayer *root;
+@property (nonatomic, strong) NSMapTable<NSString *, AFLayer *> *layerMap;
 @end
 
 @implementation AFVenue {
@@ -56,6 +60,8 @@
 
         _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr()];
         _root.venue = self;
+
+        _layerMap = [NSMapTable<NSString *, AFLayer *> strongToWeakObjectsMapTable];
     }
     return self;
 }
@@ -66,6 +72,8 @@
 
         _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr()];
         _root.venue = self;
+
+        _layerMap = [NSMapTable<NSString *, AFLayer *> strongToWeakObjectsMapTable];
     }
     return self;
 }
@@ -79,12 +87,33 @@
     return [NSString stringWithUTF8String:json.c_str()];
 }
 
-- (AFLayer *)createLayerWithName:(NSString *)name {
-    AFLayer *layer = [[AFLayer alloc] initWithName:name];
-    auto container = _venue->containerLayer();
-    auto cppLayer = [layer cppObject];
-    container->addChild(cppLayer);
-    return layer;
+- (AFLayer *_Nullable)findLayerById:(NSString *)layerId {
+    AFLayer *cache = [self.layerMap objectForKey:layerId];
+    if (cache) {
+        return cache;
+    }
+
+    if (!self.root) {
+        return nil;
+    }
+
+    NSMutableArray<AFLayer *> *stack = [NSMutableArray arrayWithObject:self.root];
+
+    while (stack.count > 0) {
+        AFLayer *current = stack.lastObject;
+        [stack removeLastObject];
+
+        if ([current.layerId isEqualToString:layerId]) {
+            [self.layerMap setObject:current forKey:layerId];
+            return current;
+        }
+
+        for (AFLayer *child in current.children) {
+            [stack addObject:child];
+        }
+    }
+
+    return nil;
 }
 
 - (BOOL)hitTestPoint:(NSPoint)point {
@@ -133,12 +162,13 @@
 }
 
 - (void)setBackgroundColor:(NSColor *)backgroundColor {
-    if (backgroundColor == nil) {
+    if (backgroundColor == nil || backgroundColor == NSColor.clearColor) {
         _venue->setBackgroundColor(tgfx::Color::Transparent());
         return;
     }
+    NSColor *rgbColor = [backgroundColor colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
     CGFloat red, green, blue, alpha;
-    [backgroundColor getRed:&red green:&green blue:&blue alpha:&alpha];
+    [rgbColor getRed:&red green:&green blue:&blue alpha:&alpha];
     auto cppColor = tgfx::Color{
         static_cast<float>(red),
         static_cast<float>(green),

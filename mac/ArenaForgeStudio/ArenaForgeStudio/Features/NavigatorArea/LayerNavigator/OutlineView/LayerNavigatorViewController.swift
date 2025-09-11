@@ -46,6 +46,8 @@ final class LayerNavigatorViewController: NSViewController {
         }
     }
 
+    var expandedItems: NSSet = []
+
     init(project: ProjectDocument) {
         super.init(nibName: nil, bundle: nil)
         self.project = project
@@ -63,7 +65,8 @@ final class LayerNavigatorViewController: NSViewController {
         outlineView.dataSource = self
         outlineView.delegate = self
         outlineView.autosaveExpandedItems = true
-        outlineView.autosaveName = ""
+        outlineView.autosaveName = project?.fileURL?.path() ?? ""
+        outlineView.autosaveExpandedItems = true
         outlineView.headerView = nil
         outlineView.menu = LayerNavigatorMenu(self, document: project)
         outlineView.menu?.delegate = self
@@ -88,7 +91,16 @@ final class LayerNavigatorViewController: NSViewController {
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
 
-        outlineView.expandItem(outlineView.item(atRow: 0))
+//        outlineView.expandItem(outlineView.item(atRow: 0))
+
+        /// Get autosave expanded items.
+//        for row in 0 ..< outlineView.numberOfRows {
+//            if let item = outlineView.item(atRow: row) as? AnyObject {
+//                if outlineView.isItemExpanded(item) {
+//                    expandedItems.adding(item)
+//                }
+//            }
+//        }
     }
 
     init() {

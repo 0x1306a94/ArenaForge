@@ -39,9 +39,11 @@
 
 #include <nlohmann/json.hpp>
 
-#include <filesystem>
 #include <fmt/format.h>
+
+#include <filesystem>
 #include <fstream>
+#include <stack>
 
 #if __APPLE__
 #include <TargetConditionals.h>
@@ -103,8 +105,7 @@ Venue::Venue(const std::string &venueId, const std::string &name, const std::str
     : _venueId(venueId)
     , _description(description) {
 
-    auto &uuid = UUID::Instance();
-    _rootLayer = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _rootLayer = BaseLayer::Make(venueId + "-root", ShapeType::Rectangle);
     _rootLayer->setPositionRelative(false);
 
     _nameLayer = tgfx::TextLayer::Make();
@@ -126,11 +127,11 @@ Venue::Venue(const std::string &venueId, const std::string &name, const std::str
     } while (0);
 #endif
 
-    _containerLayer = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _containerLayer = BaseLayer::Make(venueId + "-container", ShapeType::Rectangle);
     _containerLayer->setPositionRelative(false);
     _containerLayer->setName(name);
 
-    _maskLayer = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    _maskLayer = BaseLayer::Make(venueId + "-mask", ShapeType::Rectangle);
     _maskLayer->setPositionRelative(false);
 
     _rootLayer->addChild(_containerLayer);
@@ -198,6 +199,50 @@ std::shared_ptr<Project> Venue::project() const {
         return nullptr;
     }
     return _ownerProject.lock();
+}
+
+std::shared_ptr<BaseLayer> Venue::newLayer(const std::string &name) {
+    auto &uuid = UUID::Instance();
+    auto layer = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    layer->setName(name);
+    _containerLayer->addChild(layer);
+    _layerMap[layer->layerId()] = layer;
+    return layer;
+}
+
+std::shared_ptr<BaseLayer> Venue::findLayer(const std::string &layerId) {
+    // 先查缓存
+    auto it = _layerMap.find(layerId);
+    if (it != _layerMap.end()) {
+        if (it->second.expired()) {
+            _layerMap.erase(it);
+            return nullptr;
+        }
+        return it->second.lock();
+    }
+
+    if (!_containerLayer) {
+        return nullptr;
+    }
+
+    std::stack<std::shared_ptr<BaseLayer>> stack;
+    stack.push(_containerLayer);
+
+    while (!stack.empty()) {
+        auto current = stack.top();
+        stack.pop();
+
+        if (current->layerId() == layerId) {
+            _layerMap[layerId] = current;
+            return current;
+        }
+
+        for (const auto &child : current->children()) {
+            stack.push(std::static_pointer_cast<BaseLayer>(child));
+        }
+    }
+
+    return nullptr;
 }
 
 const BaseLayer *Venue::rootLayer() const {

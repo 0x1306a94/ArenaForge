@@ -48,7 +48,8 @@ ARENA_FORGE_EXPORT_API @interface AFVenue : NSObject
 
 - (NSString *)toJSONString;
 
-- (AFLayer *)createLayerWithName:(NSString *)name;
+- (AFLayer *_Nullable)findLayerById:(NSString *)layerId;
+//- (AFLayer *_Nullable)upgradeGroup:(NSArray<AFLayer *> *)layers;
 
 - (BOOL)hitTestPoint:(NSPoint)point;
 - (NSPoint)globalToLocal:(NSPoint)point;
