@@ -62,12 +62,17 @@ final class LayerNavigatorMenu: NSMenu {
             return
         }
 
-        if selectedLayers.count >= 1 {
+        let totalParenCount = selectedLayers.filter { $0.parent != nil }.count
+        if selectedLayers.count > 1, totalParenCount == selectedLayers.count {
             let venues = Set(selectedLayers.compactMap { $0.attachVenue })
-            if venues.count == 1 {
+            let parents = Set(selectedLayers.compactMap { $0.parent })
+            if venues.count == 1, parents.count == 1 {
                 let groupItem = menuItem("Group", action: #selector(upgradeGroup))
                 items.append(groupItem)
             }
+        } else if selectedLayers.count == 1, selectedLayers[0].type == .group {
+            let groupItem = menuItem("Undo Group", action: #selector(undoGroup))
+            items.append(groupItem)
         } else {
             if let layer = selectedLayers.first, layer.venue == nil {
                 let duplicateItem = menuItem("Duplicate", action: #selector(duplicate))
@@ -97,14 +102,16 @@ final class LayerNavigatorMenu: NSMenu {
 extension LayerNavigatorMenu {
     @objc
     func delete() {
-        for layer in selectedLayers {
-            if let veune = layer.venue {
-                // root
-                document?.project?.removeVenue(veune)
-            } else {
-                layer.removeFromParent()
+        let allLayers = Set(selectedLayers)
+
+        let venueRoots = selectedLayers.filter { $0.venue != nil }
+        venueRoots.compactMap { $0.venue }
+            .forEach {
+                document?.project?.removeVenue($0)
             }
-        }
+
+        let remainder = allLayers.subtracting(venueRoots)
+        remainder.forEach { $0.removeFromParent() }
 
         reloadData()
     }
@@ -123,4 +130,7 @@ extension LayerNavigatorMenu {
             sender?.outlineView.reloadItem(veune.root, reloadChildren: true)
         }
     }
+
+    @objc
+    func undoGroup() {}
 }
