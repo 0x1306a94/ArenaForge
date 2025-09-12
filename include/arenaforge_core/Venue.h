@@ -81,6 +81,9 @@ class Venue : public std::enable_shared_from_this<Venue> {
     std::shared_ptr<BaseLayer> newLayer(const std::string &name);
 
     std::shared_ptr<BaseLayer> findLayer(const std::string &layerId);
+    
+    void addHoverWireframe(std::vector<std::shared_ptr<BaseLayer>> targets);
+    void resetHoverWireframe();
 
     const BaseLayer *rootLayer() const;
     std::shared_ptr<BaseLayer> rootLayerPtr() const;
@@ -110,6 +113,7 @@ class Venue : public std::enable_shared_from_this<Venue> {
     std::shared_ptr<BaseLayer> _maskLayer{nullptr};
     std::weak_ptr<Project> _ownerProject;
     std::unordered_map<std::string, std::weak_ptr<BaseLayer>> _layerMap{};
+    std::unordered_map<uintptr_t, std::weak_ptr<BaseLayer>> _hoverWireframeLayers{};
 
     friend class Project;
 };

@@ -245,6 +245,66 @@ std::shared_ptr<BaseLayer> Venue::findLayer(const std::string &layerId) {
     return nullptr;
 }
 
+void Venue::addHoverWireframe(std::vector<std::shared_ptr<BaseLayer>> targets) {
+    if (targets.empty()) {
+        return;
+    }
+
+    for (auto &target : targets) {
+        auto key = reinterpret_cast<uintptr_t>(target.get());
+        auto it = _hoverWireframeLayers.find(key);
+        if (it != _hoverWireframeLayers.end()) {
+            continue;
+        }
+
+        auto parent = target->parent();
+        if (parent == nullptr) {
+            continue;
+        }
+
+        auto hoverLayer = target->clone(false);
+        if (hoverLayer == nullptr) {
+            continue;
+        }
+
+        tgfx::Point position{_frame.x(), _frame.y()};
+        if (target != _containerLayer) {
+            auto global = target->localToGlobal(tgfx::Point{0, 0});
+            position = _rootLayer->globalToLocal(global);
+        }
+
+        hoverLayer->setPosition(position);
+        hoverLayer->setFillStyle(nullptr);
+        hoverLayer->setLineWidth(4);
+        hoverLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
+
+        if (target == _containerLayer) {
+            _rootLayer->parent()->addChild(hoverLayer);
+        } else {
+            _rootLayer->addChild(hoverLayer);
+        }
+
+        _hoverWireframeLayers[key] = hoverLayer;
+    }
+}
+
+void Venue::resetHoverWireframe() {
+    if (_hoverWireframeLayers.empty()) {
+        return;
+    }
+
+    std::unordered_map<uintptr_t, std::weak_ptr<BaseLayer>> exists;
+    std::swap(_hoverWireframeLayers, exists);
+    for (auto &[key, value] : exists) {
+        if (value.expired()) {
+            continue;
+        }
+        if (auto layer = value.lock()) {
+            layer->removeFromParent();
+        }
+    }
+}
+
 const BaseLayer *Venue::rootLayer() const {
     return _rootLayer.get();
 }

@@ -40,6 +40,8 @@
 
 #import <AppKit/NSColorSpace.h>
 
+#import <tgfx/layers/SolidColor.h>
+
 @interface AFVenue ()
 @property (nonatomic, strong) AFLayer *root;
 @end
@@ -89,41 +91,53 @@
     if (target == nil) {
         return nil;
     }
-
-    auto rootLayer = _venue->rootLayerPtr();
-    auto containerLayer = _venue->containerLayer();
     auto targetLayer = [target cppObject];
-    auto parent = targetLayer->parent();
-    if (parent == nullptr) {
-        return nil;
-    }
-
-    NSRect globalRect;
-    if (targetLayer.get() == containerLayer) {
-        auto venueFrame = _venue->frame();
-        globalRect = NSRectFromCGRect(CGRectMake(venueFrame.x(), venueFrame.y(), venueFrame.width(), venueFrame.height()));
-    } else {
-        auto targetFrame = targetLayer->frame();
-        auto global = targetLayer->localToGlobal(tgfx::Point{0, 0});
-        auto local = rootLayer->globalToLocal(global);
-        globalRect = NSRectFromCGRect(CGRectMake(local.x, local.y, targetFrame.width(), targetFrame.height()));
-    }
-
-    AFLayer *layer = [[AFLayer alloc] initWithName:@"HoverWireframe" type:AFLayerTypeRectangle layerMap:self.layerMap];
-    layer.positionRelative = NO;
-    layer.frame = globalRect;
+    _venue->addHoverWireframe({targetLayer});
+//    auto rootLayer = _venue->rootLayerPtr();
+//    auto containerLayer = _venue->containerLayer();
+//    auto targetLayer = [target cppObject];
+//    auto parent = targetLayer->parent();
+//    if (parent == nullptr) {
+//        return nil;
+//    }
+//
+//    NSRect globalRect;
+//    if (targetLayer.get() == containerLayer) {
+//        auto venueFrame = _venue->frame();
+//        globalRect = NSRectFromCGRect(CGRectMake(venueFrame.x(), venueFrame.y(), venueFrame.width(), venueFrame.height()));
+//    } else {
+//        auto targetFrame = targetLayer->frame();
+//        auto global = targetLayer->localToGlobal(tgfx::Point{0, 0});
+//        auto local = rootLayer->globalToLocal(global);
+//        globalRect = NSRectFromCGRect(CGRectMake(local.x, local.y, targetFrame.width(), targetFrame.height()));
+//    }
+//
+//    auto hoverLayer = targetLayer->clone(false);
+//    if (hoverLayer == nullptr) {
+//        return nil;
+//    }
+//
+//    hoverLayer->setPosition(tgfx::Point{static_cast<float>(globalRect.origin.x), static_cast<float>(globalRect.origin.y)});
+//    hoverLayer->setFillStyle(nullptr);
+//    hoverLayer->setLineWidth(4);
+//    hoverLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
+//
+//    AFLayer *layer = [[AFLayer alloc] initWithCppObject:hoverLayer layerMap:self.layerMap];
+    //    AFLayer *layer = [[AFLayer alloc] initWithName:@"HoverWireframe" type:AFLayerTypeRectangle layerMap:self.layerMap];
+    //    layer.positionRelative = NO;
+    //    layer.frame = globalRect;
     // tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)
-    layer.strokeColor = [NSColor colorWithRed:(0x0c / 255.0) green:(0x8c / 255.0) blue:(0xe9 / 255.0) alpha:1.0];
-    layer.lineWidth = 4;
+    //    layer.strokeColor = [NSColor colorWithRed:(0x0c / 255.0) green:(0x8c / 255.0) blue:(0xe9 / 255.0) alpha:1.0];
+    //    layer.lineWidth = 4;
 
-    auto cppLayer = [layer cppObject];
-    if (targetLayer.get() == containerLayer) {
-        rootLayer->parent()->addChild(cppLayer);
-    } else {
-        rootLayer->addChild(cppLayer);
-    }
+    //    auto cppLayer = [layer cppObject];
+//    if (targetLayer.get() == containerLayer) {
+//        rootLayer->parent()->addChild(hoverLayer);
+//    } else {
+//        rootLayer->addChild(hoverLayer);
+//    }
 
-    return layer;
+    return nil;
 }
 
 - (NSString *)toJSONString {
@@ -238,6 +252,10 @@
         return nil;
     }
     return layer;
+}
+
+- (void)resetHoverWireframe {
+    _venue->resetHoverWireframe();
 }
 
 - (BOOL)hitTestPoint:(NSPoint)point {

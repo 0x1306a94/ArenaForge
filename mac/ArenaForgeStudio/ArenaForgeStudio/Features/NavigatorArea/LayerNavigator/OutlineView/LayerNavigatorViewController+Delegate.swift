@@ -55,13 +55,17 @@ extension LayerNavigatorViewController: NSOutlineViewDelegate {
         cell.delegate = self
         return cell
     }
-    
 
     func outlineViewSelectionDidChange(_ notification: Notification) {
-        guard outlineView.selectedRowIndexes.count == 1 else { return }
+        guard let outlineView = notification.object as? NSOutlineView, outlineView == self.outlineView else { return }
+        
+        guard let userInfo = notification.userInfo else { return }
+        guard let currentSelectIndexSet = userInfo["NSTableViewCurrentRowSelectionUserInfoKey"] as? IndexSet, let previousSelectIndexSet = userInfo["NSTableViewPreviousRowSelectionUserInfoKey"] as? IndexSet else {
+            return
+        }
 
-//        let selectedIndex = outlineView.selectedRow
-
+        print(previousSelectIndexSet.map { $0 })
+        print(currentSelectIndexSet.map { $0 })
 //        guard let item = outlineView.item(atRow: selectedIndex) as? AFLayer else { return }
     }
 }

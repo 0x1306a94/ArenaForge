@@ -355,18 +355,24 @@ final class ProjectEditCanvasViewController: NSViewController {
         if let hoverTargetLayer, targetLayer == hoverTargetLayer {
             return
         }
+        clearHoverWireframe()
 
-        hoverWireframeLayer?.removeFromParent()
-
+//        hoverWireframeLayer?.removeFromParent()
         hoverTargetLayer = targetLayer
-        hoverWireframeLayer = editor.project.createHoverWireframeLayer(in: veune, targetLayer: targetLayer)
+        editor.project.createHoverWireframeLayer(in: veune, targetLayer: targetLayer)
+//        hoverWireframeLayer = editor.project.createHoverWireframeLayer(in: veune, targetLayer: targetLayer)
     }
 
     private func clearHoverWireframe() {
+//        hoverTargetLayer = nil
+//        if let hoverWireframeLayer {
+//            hoverWireframeLayer.removeFromParent()
+//            self.hoverWireframeLayer = nil
+//        }
+
         hoverTargetLayer = nil
-        if let hoverWireframeLayer {
-            hoverWireframeLayer.removeFromParent()
-            self.hoverWireframeLayer = nil
+        project?.project?.venues.forEach {
+            $0.resetHoverWireframe()
         }
     }
 
