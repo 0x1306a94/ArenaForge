@@ -93,36 +93,36 @@
     }
     auto targetLayer = [target cppObject];
     _venue->addHoverWireframe({targetLayer});
-//    auto rootLayer = _venue->rootLayerPtr();
-//    auto containerLayer = _venue->containerLayer();
-//    auto targetLayer = [target cppObject];
-//    auto parent = targetLayer->parent();
-//    if (parent == nullptr) {
-//        return nil;
-//    }
-//
-//    NSRect globalRect;
-//    if (targetLayer.get() == containerLayer) {
-//        auto venueFrame = _venue->frame();
-//        globalRect = NSRectFromCGRect(CGRectMake(venueFrame.x(), venueFrame.y(), venueFrame.width(), venueFrame.height()));
-//    } else {
-//        auto targetFrame = targetLayer->frame();
-//        auto global = targetLayer->localToGlobal(tgfx::Point{0, 0});
-//        auto local = rootLayer->globalToLocal(global);
-//        globalRect = NSRectFromCGRect(CGRectMake(local.x, local.y, targetFrame.width(), targetFrame.height()));
-//    }
-//
-//    auto hoverLayer = targetLayer->clone(false);
-//    if (hoverLayer == nullptr) {
-//        return nil;
-//    }
-//
-//    hoverLayer->setPosition(tgfx::Point{static_cast<float>(globalRect.origin.x), static_cast<float>(globalRect.origin.y)});
-//    hoverLayer->setFillStyle(nullptr);
-//    hoverLayer->setLineWidth(4);
-//    hoverLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
-//
-//    AFLayer *layer = [[AFLayer alloc] initWithCppObject:hoverLayer layerMap:self.layerMap];
+    //    auto rootLayer = _venue->rootLayerPtr();
+    //    auto containerLayer = _venue->containerLayer();
+    //    auto targetLayer = [target cppObject];
+    //    auto parent = targetLayer->parent();
+    //    if (parent == nullptr) {
+    //        return nil;
+    //    }
+    //
+    //    NSRect globalRect;
+    //    if (targetLayer.get() == containerLayer) {
+    //        auto venueFrame = _venue->frame();
+    //        globalRect = NSRectFromCGRect(CGRectMake(venueFrame.x(), venueFrame.y(), venueFrame.width(), venueFrame.height()));
+    //    } else {
+    //        auto targetFrame = targetLayer->frame();
+    //        auto global = targetLayer->localToGlobal(tgfx::Point{0, 0});
+    //        auto local = rootLayer->globalToLocal(global);
+    //        globalRect = NSRectFromCGRect(CGRectMake(local.x, local.y, targetFrame.width(), targetFrame.height()));
+    //    }
+    //
+    //    auto hoverLayer = targetLayer->clone(false);
+    //    if (hoverLayer == nullptr) {
+    //        return nil;
+    //    }
+    //
+    //    hoverLayer->setPosition(tgfx::Point{static_cast<float>(globalRect.origin.x), static_cast<float>(globalRect.origin.y)});
+    //    hoverLayer->setFillStyle(nullptr);
+    //    hoverLayer->setLineWidth(4);
+    //    hoverLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
+    //
+    //    AFLayer *layer = [[AFLayer alloc] initWithCppObject:hoverLayer layerMap:self.layerMap];
     //    AFLayer *layer = [[AFLayer alloc] initWithName:@"HoverWireframe" type:AFLayerTypeRectangle layerMap:self.layerMap];
     //    layer.positionRelative = NO;
     //    layer.frame = globalRect;
@@ -131,11 +131,11 @@
     //    layer.lineWidth = 4;
 
     //    auto cppLayer = [layer cppObject];
-//    if (targetLayer.get() == containerLayer) {
-//        rootLayer->parent()->addChild(hoverLayer);
-//    } else {
-//        rootLayer->addChild(hoverLayer);
-//    }
+    //    if (targetLayer.get() == containerLayer) {
+    //        rootLayer->parent()->addChild(hoverLayer);
+    //    } else {
+    //        rootLayer->addChild(hoverLayer);
+    //    }
 
     return nil;
 }
@@ -248,6 +248,10 @@
     }
     NSString *layerId = [NSString stringWithUTF8String:baseLayer->layerId().c_str()];
     AFLayer *layer = [self.layerMap getLayerById:layerId];
+    AFLayer *parent = layer.parent;
+    if (parent && parent.type == AFLayerTypeGroup) {
+        layer = parent;
+    }
     if (layer.parent == nil) {
         return nil;
     }
