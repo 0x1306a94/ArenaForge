@@ -231,6 +231,31 @@
     return group;
 }
 
+- (void)undoGroup:(AFLayer *)group {
+    if (group == nil) {
+        return;
+    }
+
+    AFLayer *parent = group.parent;
+    NSArray<AFLayer *> *children = group.children;
+    if (parent == nil) {
+        return;
+    }
+
+    auto index = [parent getChildIndex:group];
+    [group removeFromParent];
+
+    NSRect groupFrame = group.frame;
+    for (AFLayer *child in children) {
+        NSRect childFrame = child.frame;
+        childFrame.origin.x += groupFrame.origin.x;
+        childFrame.origin.y += groupFrame.origin.y;
+        child.frame = childFrame;
+        [parent addChild:child atIndex:index];
+        index++;
+    }
+}
+
 - (AFLayer *_Nullable)pickVenueAtUnderPoint:(NSPoint)point {
     //    auto root = _venue->rootLayer();
     auto container = _venue->containerLayer();

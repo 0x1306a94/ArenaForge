@@ -132,5 +132,17 @@ extension LayerNavigatorMenu {
     }
 
     @objc
-    func undoGroup() {}
+    func undoGroup() {
+        guard selectedLayers.count == 1 else {
+            return
+        }
+        let venues = Set(selectedLayers.compactMap { $0.attachVenue })
+        guard venues.count == 1, let veune = venues.first else {
+            return
+        }
+
+        let group = selectedLayers[0]
+        veune.undoGroup(group)
+        sender?.outlineView.reloadItem(veune.root, reloadChildren: true)
+    }
 }

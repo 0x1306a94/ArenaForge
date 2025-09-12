@@ -51,6 +51,7 @@ ARENA_FORGE_EXPORT_API @interface AFVenue : NSObject
 
 - (AFLayer *_Nullable)findLayerById:(NSString *)layerId;
 - (AFLayer *_Nullable)upgradeGroup:(NSArray<AFLayer *> *)layers;
+- (void)undoGroup:(AFLayer *)group;
 - (AFLayer *_Nullable)pickVenueAtUnderPoint:(NSPoint)point;
 - (void)resetHoverWireframe;
 - (BOOL)hitTestPoint:(NSPoint)point;
