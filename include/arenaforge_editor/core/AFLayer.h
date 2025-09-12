@@ -60,6 +60,8 @@ ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 - (instancetype)initWithName:(NSString *)name type:(AFLayerType)type layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
 
 - (void)addChild:(AFLayer *)child;
+- (void)addChild:(AFLayer *)child atIndex:(int)index;
+- (int)getChildIndex:(AFLayer *)child;
 - (void)removeChild:(AFLayer *)child;
 - (void)removeFromParent;
 @end

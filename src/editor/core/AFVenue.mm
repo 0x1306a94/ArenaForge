@@ -212,8 +212,9 @@
 
     [self.layerMap addLayer:group];
 
+    auto index = [parent getChildIndex:layers.firstObject];
     // 将 group 添加到原父节点
-    [parent addChild:group];
+    [parent addChild:group atIndex:index];
 
     // 添加子图层，并调整子图层 frame 相对于 group
     for (AFLayer *layer in layers) {

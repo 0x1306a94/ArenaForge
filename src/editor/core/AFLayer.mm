@@ -85,11 +85,34 @@
     if (child == nil) {
         return;
     }
-
     auto cppObject = [child cppObject];
-    _layer->addChild(cppObject);
+
+    auto index = _layer->children().size();
+    if (cppObject->parent() == _layer.get()) {
+        index--;
+    }
+
+    [self addChild:child atIndex:static_cast<int>(index)];
+}
+
+- (void)addChild:(AFLayer *)child atIndex:(int)index {
+    if (child == nil) {
+        return;
+    }
+    auto cppObject = [child cppObject];
+
+    _layer->addChildAt(cppObject, index);
     child.parent = self;
     [self rebuildCacheChildren];
+}
+
+- (int)getChildIndex:(AFLayer *)child {
+    if (child == nil) {
+        return -1;
+    }
+    auto cppObject = [child cppObject];
+    auto index = _layer->getChildIndex(cppObject);
+    return index;
 }
 
 - (void)removeChild:(AFLayer *)child {
