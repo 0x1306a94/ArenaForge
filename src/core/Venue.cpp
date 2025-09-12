@@ -105,7 +105,7 @@ Venue::Venue(const std::string &venueId, const std::string &name, const std::str
     : _venueId(venueId)
     , _description(description) {
 
-    _rootLayer = BaseLayer::Make(venueId + "-root", ShapeType::Rectangle);
+    _rootLayer = BaseLayer::Make(venueId + "-root", LayerType::Group);
     _rootLayer->setPositionRelative(false);
 
     _nameLayer = tgfx::TextLayer::Make();
@@ -127,11 +127,11 @@ Venue::Venue(const std::string &venueId, const std::string &name, const std::str
     } while (0);
 #endif
 
-    _containerLayer = BaseLayer::Make(venueId + "-container", ShapeType::Rectangle);
+    _containerLayer = BaseLayer::Make(venueId + "-container", LayerType::Rectangle);
     _containerLayer->setPositionRelative(false);
     _containerLayer->setName(name);
 
-    _maskLayer = BaseLayer::Make(venueId + "-mask", ShapeType::Rectangle);
+    _maskLayer = BaseLayer::Make(venueId + "-mask", LayerType::Rectangle);
     _maskLayer->setPositionRelative(false);
 
     _rootLayer->addChild(_containerLayer);
@@ -203,7 +203,7 @@ std::shared_ptr<Project> Venue::project() const {
 
 std::shared_ptr<BaseLayer> Venue::newLayer(const std::string &name) {
     auto &uuid = UUID::Instance();
-    auto layer = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    auto layer = BaseLayer::Make(uuid(), LayerType::Rectangle);
     layer->setName(name);
     _containerLayer->addChild(layer);
     _layerMap[layer->layerId()] = layer;

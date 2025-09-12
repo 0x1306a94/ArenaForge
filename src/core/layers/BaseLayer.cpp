@@ -38,14 +38,15 @@
 #include <tgfx/platform/Print.h>
 
 namespace arenaforge {
-std::shared_ptr<BaseLayer> BaseLayer::Make(const std::string &layerId, ShapeType type) {
+std::shared_ptr<BaseLayer> BaseLayer::Make(const std::string &layerId, LayerType type) {
     return std::shared_ptr<BaseLayer>(new BaseLayer(layerId, type));
 }
 
-BaseLayer::BaseLayer(const std::string &layerId, ShapeType type)
+BaseLayer::BaseLayer(const std::string &layerId, LayerType type)
     : tgfx::ShapeLayer()
     , _layerId(layerId)
-    , _positionRelative(true) {
+    , _positionRelative(true)
+    , _userType(type) {
 
     initializePathCommand(type);
 }
@@ -107,10 +108,11 @@ void BaseLayer::setAttributes(std::unordered_map<std::string, std::string> attri
     _attributes = std::move(attributes);
 }
 
-void BaseLayer::setPathCommands(const std::vector<PathCommand> &commands) {
-    _pathCommands.clear();
-    _pathCommands.reserve(commands.size());
-    _pathCommands.insert(_pathCommands.begin(), commands.begin(), commands.end());
+void BaseLayer::setPathCommands(std::vector<PathCommand> commands) {
+    //    _pathCommands.clear();
+    //    _pathCommands.reserve(commands.size());
+    //    _pathCommands.insert(_pathCommands.begin(), commands.begin(), commands.end());
+    _pathCommands = std::move(commands);
 }
 
 std::shared_ptr<BaseLayer> BaseLayer::getChildById(const std::string &layerId) {
@@ -124,7 +126,7 @@ std::shared_ptr<BaseLayer> BaseLayer::getChildById(const std::string &layerId) {
 
 std::shared_ptr<BaseLayer> BaseLayer::clone(bool cloneChildren) const {
     auto uuid = UUID::Instance();
-    auto copied = BaseLayer::Make(uuid(), ShapeType::Rectangle);
+    auto copied = BaseLayer::Make(uuid(), userType());
     doClone(copied.get(), cloneChildren);
     return copied;
 }
@@ -282,9 +284,10 @@ void BaseLayer::onUpdateContent(tgfx::LayerRecorder *recorder) {
     tgfx::ShapeLayer::onUpdateContent(recorder);
 }
 
-void BaseLayer::initializePathCommand(ShapeType type) {
+void BaseLayer::initializePathCommand(LayerType type) {
     switch (type) {
-        case ShapeType::Rectangle: {
+        case LayerType::Group:
+        case LayerType::Rectangle: {
             _pathCommands.push_back(PathCommand::MakeMoveTo({0.0, 0.0}));
             _pathCommands.push_back(PathCommand::MakeLineTo({1.0, 0.0}));
             _pathCommands.push_back(PathCommand::MakeLineTo({1.0, 1.0}));
@@ -293,7 +296,7 @@ void BaseLayer::initializePathCommand(ShapeType type) {
             _pathCommands.push_back(PathCommand::MakeClose());
             break;
         }
-        case ShapeType::Triangle: {
+        case LayerType::Triangle: {
             _pathCommands.push_back(PathCommand::MakeMoveTo({0.5, 0.0}));
             _pathCommands.push_back(PathCommand::MakeLineTo({1.0, 1.0}));
             _pathCommands.push_back(PathCommand::MakeLineTo({0.0, 1.0}));

@@ -53,12 +53,12 @@
 }
 #endif
 
-- (instancetype)initWithName:(NSString *)name layerMap:(AFLayerMap *)layerMap {
+- (instancetype)initWithName:(NSString *)name type:(AFLayerType)type layerMap:(AFLayerMap *)layerMap {
     if (self == [super init]) {
         auto uuid = arenaforge::UUID::Instance();
         auto layerId = uuid();
         _layerMap = layerMap;
-        _layer = arenaforge::BaseLayer::Make(layerId, arenaforge::ShapeType::Rectangle);
+        _layer = arenaforge::BaseLayer::Make(layerId, static_cast<arenaforge::LayerType>(type));
         _layer->setName((name == nil ? "" : std::string(name.UTF8String)));
 
         _cacheChildren = @[];
@@ -130,6 +130,11 @@
 - (NSString *)layerId {
     auto layerId = _layer->layerId();
     return [NSString stringWithUTF8String:layerId.c_str()];
+}
+
+- (AFLayerType)type {
+    auto type = static_cast<AFLayerType>(_layer->userType());
+    return type;
 }
 
 - (NSString *)name {

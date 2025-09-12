@@ -129,7 +129,7 @@
         return nil;
     }
     auto counter = _project->genRectangleCounter();
-    AFLayer *layer = [[AFLayer alloc] initWithName:[NSString stringWithFormat:@"Rectangle %u", counter] layerMap:venue.layerMap];
+    AFLayer *layer = [[AFLayer alloc] initWithName:[NSString stringWithFormat:@"Rectangle %u", counter] type:AFLayerTypeRectangle layerMap:venue.layerMap];
     [venue.layerMap addLayer:layer];
     [venue.root addChild:layer];
     return layer;

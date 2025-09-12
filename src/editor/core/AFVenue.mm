@@ -109,7 +109,7 @@
         globalRect = NSRectFromCGRect(CGRectMake(local.x, local.y, targetFrame.width(), targetFrame.height()));
     }
 
-    AFLayer *layer = [[AFLayer alloc] initWithName:@"HoverWireframe" layerMap:self.layerMap];
+    AFLayer *layer = [[AFLayer alloc] initWithName:@"HoverWireframe" type:AFLayerTypeRectangle layerMap:self.layerMap];
     layer.positionRelative = NO;
     layer.frame = globalRect;
     // tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)
@@ -178,7 +178,7 @@
     }
 
     auto counter = project->genGroupCounter();
-    AFLayer *group = [[AFLayer alloc] initWithName:[NSString stringWithFormat:@"Group %u", counter] layerMap:self.layerMap];
+    AFLayer *group = [[AFLayer alloc] initWithName:[NSString stringWithFormat:@"Group %u", counter] type:AFLayerTypeGroup layerMap:self.layerMap];
 
     // 计算 group 的外包矩形
     CGFloat minX = CGFLOAT_MAX;

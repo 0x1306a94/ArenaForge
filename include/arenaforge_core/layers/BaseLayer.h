@@ -28,7 +28,7 @@
 #define BaseLayer_h_ArenaForge
 
 #include <arenaforge_core/PathCommand.h>
-#include <arenaforge_core/layers/ShapeType.h>
+#include <arenaforge_core/layers/LayerType.h>
 
 #include <tgfx/layers/ShapeLayer.h>
 
@@ -38,12 +38,16 @@
 namespace arenaforge {
 class BaseLayer : public tgfx::ShapeLayer {
   public:
-    static std::shared_ptr<BaseLayer> Make(const std::string &layerId, ShapeType type);
+    static std::shared_ptr<BaseLayer> Make(const std::string &layerId, LayerType type);
 
     virtual ~BaseLayer();
 
     std::string layerId() const {
         return _layerId;
+    }
+
+    LayerType userType() const {
+        return _userType;
     }
 
     void setLayerId(const std::string &layerId);
@@ -85,7 +89,7 @@ class BaseLayer : public tgfx::ShapeLayer {
         return _pathCommands;
     }
 
-    void setPathCommands(const std::vector<PathCommand> &commands);
+    void setPathCommands(std::vector<PathCommand> commands);
 
     std::shared_ptr<BaseLayer> getChildById(const std::string &layerId);
 
@@ -94,7 +98,7 @@ class BaseLayer : public tgfx::ShapeLayer {
     std::string toJSON(bool pretty = false);
 
   protected:
-    BaseLayer(const std::string &layerId, ShapeType type);
+    BaseLayer(const std::string &layerId, LayerType type);
 
     virtual void doClone(BaseLayer *target, bool cloneChildren) const;
 
@@ -103,7 +107,7 @@ class BaseLayer : public tgfx::ShapeLayer {
     void onUpdateContent(tgfx::LayerRecorder *recorder) override;
 
   private:
-    void initializePathCommand(ShapeType type);
+    void initializePathCommand(LayerType type);
 
   private:
     std::string _layerId{""};
@@ -112,6 +116,7 @@ class BaseLayer : public tgfx::ShapeLayer {
     bool _positionRelative{true};
     std::unordered_map<std::string, std::string> _attributes{};
     tgfx::Rect _frame{};
+    LayerType _userType;
     std::vector<PathCommand> _pathCommands{};
 };
 };  // namespace arenaforge

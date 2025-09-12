@@ -30,6 +30,7 @@
 #import <AppKit/NSColor.h>
 #import <Foundation/Foundation.h>
 
+#import <arenaforge_editor/core/AFLayerType.h>
 #import <arenaforge_editor/core/defines.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -38,6 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class AFLayerMap;
 ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 @property (nonatomic, copy, readonly) NSString *layerId;
+@property (nonatomic, assign, readonly) AFLayerType type;
 @property (nonatomic, copy) NSString *name;
 @property (nonatomic, copy, readonly) NSArray<AFLayer *> *children;
 @property (nonatomic, assign, readonly) NSInteger childrenCount;
@@ -55,7 +57,7 @@ ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithName:(NSString *)name layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithName:(NSString *)name type:(AFLayerType)type layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
 
 - (void)addChild:(AFLayer *)child;
 - (void)removeChild:(AFLayer *)child;

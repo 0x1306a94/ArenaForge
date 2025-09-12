@@ -18,22 +18,30 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  ShapeType.h
+//  LayerType.h
 //  arenaforge_core
 //
 //  Created by KK on 2025/9/6.
 //
 
-#ifndef ShapeType_h_ArenaForge
-#define ShapeType_h_ArenaForge
+#ifndef LayerType_h_ArenaForge
+#define LayerType_h_ArenaForge
+
+#include <string>
 
 namespace arenaforge {
-enum class ShapeType {
+enum class LayerType {
+    Group,
     Rectangle,
     Ellipse,
     Line,
     Triangle,
-};
+    Vector,
 };
 
-#endif /* ShapeType_h_ArenaForge */
+std::string LayerTypeToString(LayerType type);
+LayerType LayerTypeFromString(const std::string &type);
+
+};  // namespace arenaforge
+
+#endif /* LayerType_h_ArenaForge */
