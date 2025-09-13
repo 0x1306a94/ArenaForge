@@ -320,6 +320,10 @@
     return [NSString stringWithUTF8String:name.c_str()];
 }
 
+- (void)setName:(NSString *)name {
+    _venue->setName((name == nil ? "" : name.UTF8String));
+}
+
 - (void)setFrame:(NSRect)frame {
     auto cppRect = tgfx::Rect::MakeXYWH(
         static_cast<float>(frame.origin.x),

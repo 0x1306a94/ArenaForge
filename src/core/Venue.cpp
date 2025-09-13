@@ -279,6 +279,7 @@ void Venue::addHoverWireframe(std::vector<std::shared_ptr<BaseLayer>> targets) {
         hoverLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
 
         if (target == _containerLayer) {
+            _nameLayer->setTextColor(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9));
             _rootLayer->parent()->addChild(hoverLayer);
         } else {
             _rootLayer->addChild(hoverLayer);
@@ -292,7 +293,7 @@ void Venue::resetHoverWireframe() {
     if (_hoverWireframeLayers.empty()) {
         return;
     }
-
+    _nameLayer->setTextColor(tgfx::Color::White());
     std::unordered_map<uintptr_t, std::weak_ptr<BaseLayer>> exists;
     std::swap(_hoverWireframeLayers, exists);
     for (auto &[key, value] : exists) {

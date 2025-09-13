@@ -61,7 +61,7 @@ protocol LayerTableViewCellDelegate: AnyObject {
 
 final class LayerTableViewCell: NSTableCellView, NSTextFieldDelegate {
     private var fontSize: Double {
-        switch self.frame.height {
+        switch frame.height {
         case 20: return 11
         case 22: return 13
         case 24: return 14
@@ -95,7 +95,7 @@ final class LayerTableViewCell: NSTableCellView, NSTextFieldDelegate {
         let label = createLabel()
         configLabel(label: label, isEditable: isEditable)
         label.delegate = self
-        self.textField = label
+        textField = label
 
         addSubview(label)
     }
@@ -120,7 +120,7 @@ final class LayerTableViewCell: NSTableCellView, NSTextFieldDelegate {
     }
 
     func updateModel() {
-        let layerName = self.layerItem?.name ?? ""
+        let layerName = layerItem?.name ?? ""
         let fontSize = textField?.font?.pointSize ?? 12
 
         let paragraphStyle = NSMutableParagraphStyle()
@@ -132,7 +132,7 @@ final class LayerTableViewCell: NSTableCellView, NSTextFieldDelegate {
             .foregroundColor: NSColor.labelColor
         ])
 
-        self.textField?.attributedStringValue = attributedString
+        textField?.attributedStringValue = attributedString
     }
 
     override func resizeSubviews(withOldSize oldSize: NSSize) {
@@ -155,7 +155,12 @@ final class LayerTableViewCell: NSTableCellView, NSTextFieldDelegate {
     func controlTextDidChange(_ obj: Notification) {}
 
     func controlTextDidEndEditing(_ obj: Notification) {
-        self.layerItem?.name = self.textField?.stringValue.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        self.delegate?.layerTableViewCellDidFinishEditing(self)
+        let newName = textField?.stringValue.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if let veune = layerItem?.venue {
+            veune.name = newName
+        } else {
+            layerItem?.name = newName
+        }
+        delegate?.layerTableViewCellDidFinishEditing(self)
     }
 }
