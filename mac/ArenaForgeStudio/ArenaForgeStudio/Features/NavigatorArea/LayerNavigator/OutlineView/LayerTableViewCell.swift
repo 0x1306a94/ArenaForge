@@ -56,7 +56,7 @@ class SpecialSelectTextField: NSTextField {
 }
 
 protocol LayerTableViewCellDelegate: AnyObject {
-    func layerTableViewCellDidFinishEditing(_ cell: LayerTableViewCell)
+    func layerTableViewCellNameDidFinishEditing(_ cell: LayerTableViewCell, newname: String)
 }
 
 final class LayerTableViewCell: NSTableCellView, NSTextFieldDelegate {
@@ -156,11 +156,6 @@ final class LayerTableViewCell: NSTableCellView, NSTextFieldDelegate {
 
     func controlTextDidEndEditing(_ obj: Notification) {
         let newName = textField?.stringValue.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        if let veune = layerItem?.venue {
-            veune.name = newName
-        } else {
-            layerItem?.name = newName
-        }
-        delegate?.layerTableViewCellDidFinishEditing(self)
+        delegate?.layerTableViewCellNameDidFinishEditing(self, newname: newName)
     }
 }

@@ -58,7 +58,7 @@ extension LayerNavigatorViewController: NSOutlineViewDelegate {
 
     func outlineViewSelectionDidChange(_ notification: Notification) {
         guard let outlineView = notification.object as? NSOutlineView, outlineView == self.outlineView else { return }
-        
+
         guard let userInfo = notification.userInfo else { return }
         guard let currentSelectIndexSet = userInfo["NSTableViewCurrentRowSelectionUserInfoKey"] as? IndexSet, let previousSelectIndexSet = userInfo["NSTableViewPreviousRowSelectionUserInfoKey"] as? IndexSet else {
             return
@@ -71,10 +71,33 @@ extension LayerNavigatorViewController: NSOutlineViewDelegate {
 }
 
 extension LayerNavigatorViewController: LayerTableViewCellDelegate {
-    func layerTableViewCellDidFinishEditing(_ cell: LayerTableViewCell) {
+    func layerTableViewCellNameDidFinishEditing(_ cell: LayerTableViewCell, newname: String) {
         guard let item = cell.layerItem else {
             return
         }
+
+        let oldName: String
+        if let veune = item.venue {
+            oldName = veune.name
+            veune.name = newname
+        } else {
+            oldName = item.name
+            item.name = newname
+        }
+
+        self.project?.undoManager?.registerUndo(withTarget: self) { [weak self, weak item] _ in
+            guard let self, let item else {
+                return
+            }
+
+            if let veune = item.venue {
+                veune.name = oldName
+            } else {
+                item.name = oldName
+            }
+            self.outlineView.reloadItem(item)
+        }
+
         self.outlineView.reloadItem(item)
     }
 }
