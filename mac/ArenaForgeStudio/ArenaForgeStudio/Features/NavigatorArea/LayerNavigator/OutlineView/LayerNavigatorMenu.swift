@@ -102,15 +102,38 @@ final class LayerNavigatorMenu: NSMenu {
 extension LayerNavigatorMenu {
     @objc
     func delete() {
-        let allLayers = Set(selectedLayers)
+        performDelete(layers: selectedLayers)
+    }
 
-        let venueRoots = selectedLayers.filter { $0.venue != nil }
-        venueRoots.compactMap { $0.venue }
-            .forEach {
-                document?.project?.removeVenue($0)
-            }
+    private func performDelete(layers: [AFLayer]) {
+        let allLayers = Set(layers)
 
-        let remainder = allLayers.subtracting(venueRoots)
+        // 先找出涉及到的 venues
+        let venues = Set(allLayers.compactMap { $0.attachVenue })
+
+        // 其中根节点在删除集合中的 venue
+        let venuesToDelete = venues.filter { venue in
+            allLayers.contains { $0 === venue.root }
+        }
+
+        // 删除整个 venue
+        for item in venuesToDelete {
+            document?.project?.removeVenue(item)
+        }
+
+        // 过滤掉已经整体删除 venue 的那些 layer
+        var remainder = allLayers.filter { layer in
+            guard let venue = layer.attachVenue else { return true }
+            return !venuesToDelete.contains(venue)
+        }
+
+        // 只保留没有 parent 在 remainder 中的顶层 layer
+        remainder = remainder.filter { layer in
+            guard let parent = layer.parent else { return true }
+            return !remainder.contains(parent)
+        }
+
+        // 删除剩余的普通 layer
         remainder.forEach { $0.removeFromParent() }
 
         reloadData()
@@ -121,12 +144,25 @@ extension LayerNavigatorMenu {
 
     @objc
     func upgradeGroup() {
-        let venues = Set(selectedLayers.compactMap { $0.attachVenue })
+        performUpgradeGroup(layers: selectedLayers)
+    }
+
+    private func performUpgradeGroup(layers: [AFLayer]) {
+        guard !layers.isEmpty else {
+            return
+        }
+
+        let venues = Set(layers.compactMap { $0.attachVenue })
         guard venues.count == 1, let veune = venues.first else {
             return
         }
 
-        if let _ = veune.upgradeGroup(selectedLayers) {
+        if let group = veune.upgradeGroup(layers) {
+            document?.undoManager?.registerUndo(withTarget: self) { [weak veune, weak group] in
+                guard let veune, let group else { return }
+                $0.performUndoGroup(veune: veune, group: group)
+            }
+
             sender?.outlineView.reloadItem(veune.root, reloadChildren: true)
         }
     }
@@ -142,7 +178,20 @@ extension LayerNavigatorMenu {
         }
 
         let group = selectedLayers[0]
-        veune.undoGroup(group)
+        performUndoGroup(veune: veune, group: group)
+    }
+
+    private func performUndoGroup(veune: AFVenue, group: AFLayer) {
+        guard veune.undoGroup(group) else {
+            return
+        }
+        document?.undoManager?.registerUndo(withTarget: self) { [weak group] in
+            guard let group else {
+                return
+            }
+            $0.performUpgradeGroup(layers: group.children)
+        }
+
         sender?.outlineView.reloadItem(veune.root, reloadChildren: true)
     }
 }

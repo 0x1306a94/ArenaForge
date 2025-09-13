@@ -231,15 +231,15 @@
     return group;
 }
 
-- (void)undoGroup:(AFLayer *)group {
+- (BOOL)undoGroup:(AFLayer *)group {
     if (group == nil) {
-        return;
+        return NO;
     }
 
     AFLayer *parent = group.parent;
     NSArray<AFLayer *> *children = group.children;
     if (parent == nil) {
-        return;
+        return NO;
     }
 
     auto index = [parent getChildIndex:group];
@@ -254,6 +254,7 @@
         [parent addChild:child atIndex:index];
         index++;
     }
+    return YES;
 }
 
 - (AFLayer *_Nullable)pickVenueAtUnderPoint:(NSPoint)point {
