@@ -166,6 +166,7 @@ final class ProjectEditCanvasViewController: NSViewController {
             break
         case .venue:
             let veune = editor.project.createVenue()
+            editor.project.addVenue(veune)
             createVenue = veune
         case .shape:
             guard let veune = editor.project.pickVenue(atUnderPoint: canvasLocation) else {

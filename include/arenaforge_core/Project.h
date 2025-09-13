@@ -77,14 +77,17 @@ class Project : public std::enable_shared_from_this<Project> {
     uint32_t genRectangleCounter() {
         return _rectangleCounter++;
     }
-    
+
     uint32_t genGroupCounter() {
         return _groupCounter++;
     }
 
     bool addVenue(std::shared_ptr<Venue> venue);
+    bool addVenueAt(std::shared_ptr<Venue> venue, int index);
     bool removeVenue(std::shared_ptr<Venue> venue);
     std::shared_ptr<Venue> removeVenueAt(int index);
+    bool setChildIndex(std::shared_ptr<Venue> venue, int index);
+    int getVeuneIndex(std::shared_ptr<Venue> venue) const;
     bool contains(std::shared_ptr<Venue> venue) const;
 
     std::string toJSON(bool pretty = false) const;

@@ -96,14 +96,22 @@ bool Project::addVenue(std::shared_ptr<Venue> venue) {
     if (!venue) {
         return false;
     }
-    auto project = venue->project();
-    if (project && project.get() == this) {
-        return true;
+
+    auto index = _venues.size();
+    return addVenueAt(venue, static_cast<int>(index));
+}
+
+bool Project::addVenueAt(std::shared_ptr<Venue> venue, int index) {
+    if (!venue) {
+        return false;
     }
+
+    if (doContains(venue.get())) {
+        return setChildIndex(venue, index);
+    }
+
     venue->attachProject(weak_from_this());
-    if (!doContains(venue.get())) {
-        _venues.push_back(venue);
-    }
+    _venues.insert(_venues.begin() + index, venue);
     return true;
 }
 
@@ -127,6 +135,34 @@ std::shared_ptr<Venue> Project::removeVenueAt(int index) {
     venue->detachProject();
     _venues.erase(_venues.begin() + index);
     return venue;
+}
+
+bool Project::setChildIndex(std::shared_ptr<Venue> venue, int index) {
+
+    if (index < 0 || static_cast<size_t>(index) > _venues.size()) {
+        index = static_cast<int>(_venues.size()) - 1;
+    }
+
+    auto oldIndex = getVeuneIndex(venue);
+    if (oldIndex < 0) {
+        return false;
+    }
+
+    if (oldIndex == index) {
+        return true;
+    }
+
+    _venues.erase(_venues.begin() + oldIndex);
+    _venues.insert(_venues.begin() + index, venue);
+
+    return true;
+}
+
+int Project::getVeuneIndex(std::shared_ptr<Venue> venue) const {
+    if (venue == nullptr) {
+        return -1;
+    }
+    return doGetVenueIndex(venue.get());
 }
 
 bool Project::contains(std::shared_ptr<Venue> venue) const {

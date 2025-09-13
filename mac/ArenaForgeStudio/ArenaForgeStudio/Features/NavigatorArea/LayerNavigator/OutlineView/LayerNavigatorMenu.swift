@@ -106,6 +106,10 @@ extension LayerNavigatorMenu {
     }
 
     private func performDelete(layers: [AFLayer]) {
+        guard let project = document?.project else {
+            return
+        }
+
         let allLayers = Set(layers)
 
         // 先找出涉及到的 venues
@@ -115,6 +119,11 @@ extension LayerNavigatorMenu {
         let venuesToDelete = venues.filter { venue in
             allLayers.contains { $0 === venue.root }
         }
+
+        let deletedVenueInfo: [(venue: AFVenue, index: Int32)] = venuesToDelete.map {
+            ($0, project.getVenueIndex($0))
+        }
+        .sorted { $0.index < $1.index }
 
         // 删除整个 venue
         for item in venuesToDelete {
@@ -133,8 +142,32 @@ extension LayerNavigatorMenu {
             return !remainder.contains(parent)
         }
 
+        // 删除Layer前记录 parent 和 index
+        let deletedLayerInfo: [(layer: AFLayer, parent: AFLayer, index: Int32)] = remainder.compactMap { layer in
+            guard let parent = layer.parent else { return nil }
+            let idx = parent.getChildIndex(layer)
+            return (layer, parent, idx)
+        }
+        .sorted { $0.index < $1.index }
+
         // 删除剩余的普通 layer
         remainder.forEach { $0.removeFromParent() }
+
+        document?.undoManager?.registerUndo(withTarget: self) { [weak self] _ in
+            guard let document = self?.document, let project = document.project else {
+                return
+            }
+
+            for deletedVenueInfo in deletedVenueInfo {
+                project.addVenue(deletedVenueInfo.venue, at: deletedVenueInfo.index)
+            }
+
+            for deletedLayerInfo in deletedLayerInfo {
+                deletedLayerInfo.parent.addChild(deletedLayerInfo.layer, at: deletedLayerInfo.index)
+            }
+
+            self?.reloadData()
+        }
 
         reloadData()
     }

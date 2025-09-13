@@ -46,7 +46,12 @@ ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 
 - (AFVenue *)createVenue;
 
+- (BOOL)addVenue:(AFVenue *)venue;
+- (BOOL)addVenue:(AFVenue *)venue atIndex:(int)index;
+
 - (void)removeVenue:(AFVenue *)venue;
+
+- (int)getVenueIndex:(AFVenue *)venue;
 
 - (AFVenue *_Nullable)pickVenueAtUnderPoint:(NSPoint)point;
 

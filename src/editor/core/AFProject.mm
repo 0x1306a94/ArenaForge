@@ -36,7 +36,8 @@
 
 @interface AFProject ()
 @property (nonatomic, strong) NSURL *fileURL;
-@property (nonatomic, strong) NSMutableArray<AFVenue *> *internalVenues;
+@property (nonatomic, strong) NSMutableDictionary<NSString *, AFVenue *> *venueMaps;
+@property (nonatomic, strong) NSArray<AFVenue *> *orderVenues;
 @end
 
 @implementation AFProject {
@@ -69,12 +70,15 @@
         self.fileURL = fileURL;
 
         _project = std::move(project);
-        _internalVenues = [NSMutableArray<AFVenue *> array];
+        _venueMaps = [NSMutableDictionary<NSString *, AFVenue *> dictionary];
 
+        NSMutableArray<AFVenue *> *orderVenues = [NSMutableArray<AFVenue *> array];
         for (auto cppObject : _project->venues()) {
             AFVenue *venue = [[AFVenue alloc] initWithCppObject:cppObject];
-            [_internalVenues addObject:venue];
+            _venueMaps[venue.venueId] = venue;
+            [orderVenues addObject:venue];
         }
+        _orderVenues = [orderVenues copy];
     }
     return self;
 }
@@ -83,6 +87,19 @@
     return _project;
 }
 
+- (void)rebuildOrderVenues {
+    NSMutableArray<AFVenue *> *orderVenues = [NSMutableArray<AFVenue *> array];
+    for (auto &item : _project->venues()) {
+        NSString *venueId = [NSString stringWithUTF8String:item->venueId().c_str()];
+        AFVenue *venue = self.venueMaps[venueId];
+        if (venue) {
+            [orderVenues addObject:venue];
+        }
+    }
+    self.orderVenues = [orderVenues copy];
+}
+
+#pragma mark - public
 - (NSString *)toJSONString {
     auto json = _project->toJSON();
     return [NSString stringWithUTF8String:json.c_str()];
@@ -91,13 +108,42 @@
 - (AFVenue *)createVenue {
     auto counter = _project->genVenueCounter();
     AFVenue *venue = [[AFVenue alloc] initWithName:[NSString stringWithFormat:@"Venue %u", counter]];
-    auto cppVenue = [venue cppObject];
-    _project->addVenue(cppVenue);
-    [self.internalVenues addObject:venue];
+    self.venueMaps[venue.venueId] = venue;
+    return venue;
+}
+
+- (BOOL)addVenue:(AFVenue *)venue {
+    if (venue == nil) {
+        return NO;
+    }
+    auto index = _project->venues().size();
+    return [self addVenue:venue atIndex:static_cast<int>(index)];
+}
+
+- (BOOL)addVenue:(AFVenue *)venue atIndex:(int)index {
+    if (venue == nil) {
+        return NO;
+    }
+
+    auto cppObject = [venue cppObject];
+    if (!_project->addVenueAt(cppObject, index)) {
+        return NO;
+    }
+    [self rebuildOrderVenues];
     if (self.venueChangeHandler) {
         self.venueChangeHandler(self);
     }
-    return venue;
+    return NO;
+}
+
+- (int)getVenueIndex:(AFVenue *)venue {
+    if (venue == nil) {
+        return -1;
+    }
+
+    auto cppObject = [venue cppObject];
+    auto index = _project->getVeuneIndex(cppObject);
+    return index;
 }
 
 - (void)removeVenue:(AFVenue *)venue {
@@ -105,18 +151,18 @@
         return;
     }
 
-    if ([self.internalVenues containsObject:venue]) {
-        auto cppVenue = [venue cppObject];
-        _project->removeVenue(std::move(cppVenue));
-        [self.internalVenues removeObject:venue];
-        if (self.venueChangeHandler) {
-            self.venueChangeHandler(self);
-        }
+    auto cppObject = [venue cppObject];
+    if (!_project->removeVenue(cppObject)) {
+        return;
+    }
+    [self rebuildOrderVenues];
+    if (self.venueChangeHandler) {
+        self.venueChangeHandler(self);
     }
 }
 
 - (AFVenue *_Nullable)pickVenueAtUnderPoint:(NSPoint)point {
-    for (AFVenue *venue in self.internalVenues) {
+    for (AFVenue *venue in self.orderVenues) {
         if ([venue hitTestPoint:point]) {
             return venue;
         }
@@ -144,6 +190,6 @@
 
 #pragma mark - getter
 - (NSArray<AFVenue *> *)venues {
-    return [self.internalVenues copy];
+    return self.orderVenues;
 }
 @end
