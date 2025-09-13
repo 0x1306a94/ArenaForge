@@ -62,11 +62,11 @@ final class LayerNavigatorMenu: NSMenu {
             return
         }
 
-        let totalParenCount = selectedLayers.filter { $0.parent != nil }.count
-        if selectedLayers.count > 1, totalParenCount == selectedLayers.count {
+        let parents = selectedLayers.compactMap { $0.parent }
+        if selectedLayers.count > 1, parents.count == selectedLayers.count {
             let venues = Set(selectedLayers.compactMap { $0.attachVenue })
-            let parents = Set(selectedLayers.compactMap { $0.parent })
-            if venues.count == 1, parents.count == 1 {
+            let parentsSet = Set(parents)
+            if venues.count == 1, parentsSet.count == 1 {
                 let groupItem = menuItem("Group", action: #selector(upgradeGroup))
                 items.append(groupItem)
             }

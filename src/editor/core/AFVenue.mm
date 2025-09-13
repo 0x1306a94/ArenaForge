@@ -212,9 +212,14 @@
 
     [self.layerMap addLayer:group];
 
-    auto index = [parent getChildIndex:layers.firstObject];
+    auto insetIndex = [parent getChildIndex:layers.firstObject];
+    for (AFLayer *layer : layers) {
+        auto index = [parent getChildIndex:layer];
+        insetIndex = std::min(insetIndex, index);
+    }
+
     // 将 group 添加到原父节点
-    [parent addChild:group atIndex:index];
+    [parent addChild:group atIndex:insetIndex];
 
     // 添加子图层，并调整子图层 frame 相对于 group
     for (AFLayer *layer in layers) {
