@@ -81,9 +81,9 @@
     return self;
 }
 
-- (void)addChild:(AFLayer *)child {
+- (BOOL)addChild:(AFLayer *)child {
     if (child == nil) {
-        return;
+        return NO;
     }
     auto cppObject = [child cppObject];
 
@@ -92,18 +92,26 @@
         index--;
     }
 
-    [self addChild:child atIndex:static_cast<int>(index)];
+    return [self addChild:child atIndex:static_cast<int>(index)];
 }
 
-- (void)addChild:(AFLayer *)child atIndex:(int)index {
+- (BOOL)addChild:(AFLayer *)child atIndex:(int)index {
     if (child == nil) {
-        return;
+        return NO;
     }
+
     auto cppObject = [child cppObject];
 
-    _layer->addChildAt(cppObject, index);
+    if (!_layer->addChildAt(cppObject, index)) {
+        return NO;
+    }
+
+    [child.parent rebuildCacheChildren];
+
     child.parent = self;
     [self rebuildCacheChildren];
+
+    return YES;
 }
 
 - (int)getChildIndex:(AFLayer *)child {
@@ -130,6 +138,16 @@
     _layer->removeFromParent();
     [self.parent rebuildCacheChildren];
     self.parent = nil;
+}
+
+- (NSPoint)globalToLocal:(NSPoint)point {
+    auto local = _layer->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+}
+
+- (NSPoint)localToGlobal:(NSPoint)point {
+    auto global = _layer->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
 }
 
 - (void)rebuildCacheChildren {

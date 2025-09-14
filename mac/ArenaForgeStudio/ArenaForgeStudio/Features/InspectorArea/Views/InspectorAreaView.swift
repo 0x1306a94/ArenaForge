@@ -28,28 +28,40 @@ import SwiftUI
 
 struct InspectorAreaView: View {
     var body: some View {
-        VStack(spacing: 0) {
-            Text("Hello, World!")
+        VStack(alignment: .leading, spacing: 0) {
+            Group {
+                Alignment()
+            }
+            
+            Spacer()
         }
-        .safeAreaInset(edge: .leading, spacing: 0) {
-//            if sidebarPosition == .side {
-//                HStack(spacing: 0) {
-//                    WorkspacePanelTabBar(items: $tabItems, selection: $selectedTab, position: sidebarPosition)
-//                    Divider()
-//                        .overlay(Color(nsColor: darkDivider && colorScheme == .dark ? .black : .clear))
-//                }
-//            }
+        .safeAreaInset(edge: .top) {
+            VStack(spacing: 0) {
+                Divider()
+                Rectangle()
+                    .frame(height: 32)
+                    .frame(maxWidth: .infinity)
+                    .foregroundStyle(.brown)
+                Divider()
+            }
         }
-        .safeAreaInset(edge: .top, spacing: 0) {
-//            if sidebarPosition == .top {
-//                VStack(spacing: 0) {
-//                    Divider()
-//                    WorkspacePanelTabBar(items: $tabItems, selection: $selectedTab, position: sidebarPosition)
-//                    Divider()
-//                }
-//            } else if !darkDivider {
-//                Divider()
-//            }
+    }
+    
+    func Alignment() -> some View {
+        Section("Alignment") {
+            HStack {
+                Button("Left") {}
+                
+                Button("中") {}
+                
+                Button("Right") {}
+                
+                Button("Top") {}
+                
+                Button("中") {}
+                
+                Button("Bottom") {}
+            }
         }
     }
 }

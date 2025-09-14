@@ -59,11 +59,13 @@ ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name type:(AFLayerType)type layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
 
-- (void)addChild:(AFLayer *)child;
-- (void)addChild:(AFLayer *)child atIndex:(int)index;
+- (BOOL)addChild:(AFLayer *)child;
+- (BOOL)addChild:(AFLayer *)child atIndex:(int)index;
 - (int)getChildIndex:(AFLayer *)child;
 - (void)removeChild:(AFLayer *)child;
 - (void)removeFromParent;
+- (NSPoint)globalToLocal:(NSPoint)point;
+- (NSPoint)localToGlobal:(NSPoint)point;
 @end
 
 NS_ASSUME_NONNULL_END

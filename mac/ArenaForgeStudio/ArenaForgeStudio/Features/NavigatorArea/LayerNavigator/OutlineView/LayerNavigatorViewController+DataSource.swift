@@ -75,4 +75,85 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
         }
         return layer.layerId
     }
+
+    func outlineView(_ outlineView: NSOutlineView, pasteboardWriterForItem item: Any) -> NSPasteboardWriting? {
+        guard let layer = item as? AFLayer else { return nil }
+        let pbItem = NSPasteboardItem()
+        pbItem.setString(layer.layerId, forType: .string) // 用 layerId 作为唯一标识
+        return pbItem
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, validateDrop info: any NSDraggingInfo, proposedItem item: Any?, proposedChildIndex index: Int) -> NSDragOperation {
+        guard item is AFLayer else {
+            return []
+        }
+
+        // 如果 index == -1，表示要放到 parent 节点本身
+        guard index != -1 else { return [] }
+
+        return .move
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
+        guard let destination = item as? AFLayer else { return false }
+        let pb = info.draggingPasteboard
+        guard let layerId = pb.string(forType: .string) else { return false }
+
+        // 找到拖动的 layer
+        guard let source = project?.project?.findLayer(byId: layerId), let sourceParent = source.parent else { return false }
+
+        // 只允许同一个场馆内拖动
+        let venues = Set([destination, source].compactMap { $0.attachVenue })
+        if venues.count != 1 {
+            return false
+        }
+
+        // 只允许同级内
+//        if source.parent != destination {
+//            return false
+//        }
+
+        let oldIndex = sourceParent.getChildIndex(source)
+        let oldFrame = source.frame
+        let oldGlobal = source.local(toGlobal: .zero)
+
+        // 显示是按照倒序
+        var reversedIndex = destination.childrenCount - index
+        if reversedIndex < 0 {
+            reversedIndex = 0
+        } else if index == 0 {
+            reversedIndex = destination.childrenCount
+        }
+
+        guard destination.addChild(source, at: Int32(reversedIndex)) else {
+            return false
+        }
+
+        if sourceParent != destination {
+            let newLocal = destination.global(toLocal: oldGlobal)
+            var newFrame = oldFrame
+            newFrame.origin = newLocal
+            source.frame = newFrame
+        }
+
+        self.project?.undoManager?.registerUndo(withTarget: self) { [weak sourceParent, weak source, weak self] _ in
+            guard let sourceParent, let source, let self else {
+                return
+            }
+
+            guard sourceParent.addChild(source, at: oldIndex) else {
+                return
+            }
+            source.frame = oldFrame
+//            self.outlineView.reloadItem(destination, reloadChildren: true)
+            self.outlineView.reloadData()
+        }
+
+        outlineView.reloadData()
+//        outlineView.reloadItem(destination, reloadChildren: true)
+//        for parent in parents {
+//            outlineView.reloadItem(parent, reloadChildren: true)
+//        }
+        return false
+    }
 }

@@ -55,6 +55,8 @@ ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 
 - (AFVenue *_Nullable)pickVenueAtUnderPoint:(NSPoint)point;
 
+- (AFLayer *_Nullable)findLayerById:(NSString *)layerId;
+
 - (AFLayer *_Nullable)createLayerInVenue:(AFVenue *)venue;
 
 - (AFLayer *_Nullable)createHoverWireframeLayerInVenue:(AFVenue *)venue targetLayer:(AFLayer *)targetLayer;

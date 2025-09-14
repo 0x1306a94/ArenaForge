@@ -34,7 +34,7 @@ final class LayerNavigatorViewController: NSViewController {
     var outlineView: NSOutlineView!
 
     var venues: [AFVenue] {
-        self.project?.project?.venues ?? []
+        project?.project?.venues ?? []
     }
 
     var rowHeight: Double = 22 {
@@ -80,8 +80,8 @@ final class LayerNavigatorViewController: NSViewController {
         column.title = "Cell"
         outlineView.addTableColumn(column)
 
+        outlineView.registerForDraggedTypes([.string])
         outlineView.setDraggingSourceOperationMask(.move, forLocal: false)
-//        outlineView.registerForDraggedTypes([.fileURL])
 
         scrollView.documentView = outlineView
         scrollView.contentView.automaticallyAdjustsContentInsets = false
@@ -116,7 +116,7 @@ final class LayerNavigatorViewController: NSViewController {
     func onItemDoubleClicked() {}
 
     func onNewVeuen(_ venue: AFVenue) {
-        self.outlineView.reloadData()
+        outlineView.reloadData()
     }
 
     func onVeuenAddShape(_ venue: AFVenue, shape: AFLayer) {

@@ -170,6 +170,16 @@
     return nil;
 }
 
+- (AFLayer *_Nullable)findLayerById:(NSString *)layerId {
+    for (AFVenue *venue in self.orderVenues) {
+        AFLayer *layer = [venue findLayerById:layerId];
+        if (layer) {
+            return layer;
+        }
+    }
+    return nil;
+}
+
 - (AFLayer *_Nullable)createLayerInVenue:(AFVenue *)venue {
     if (venue == nil) {
         return nil;

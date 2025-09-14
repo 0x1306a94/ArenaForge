@@ -310,8 +310,8 @@
 
 - (NSPoint)localToGlobal:(NSPoint)point {
     auto root = _venue->rootLayer();
-    auto local = root->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+    auto global = root->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
 }
 
 #pragma mark - setter getter
