@@ -47,11 +47,11 @@
     std::shared_ptr<arenaforge::BaseLayer> _layer;
 }
 
-#if DEBUG
-- (void)dealloc {
-    NSLog(@"[%@ dealloc]", NSStringFromClass(self.class));
-}
-#endif
+//#if DEBUG
+//- (void)dealloc {
+//    NSLog(@"[%@ dealloc]", NSStringFromClass(self.class));
+//}
+//#endif
 
 - (instancetype)initWithName:(NSString *)name type:(AFLayerType)type layerMap:(AFLayerMap *)layerMap {
     if (self == [super init]) {

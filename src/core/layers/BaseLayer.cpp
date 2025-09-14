@@ -52,7 +52,7 @@ BaseLayer::BaseLayer(const std::string &layerId, LayerType type)
 }
 
 BaseLayer::~BaseLayer() {
-    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
+//    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
 void BaseLayer::setLayerId(const std::string &layerId) {
