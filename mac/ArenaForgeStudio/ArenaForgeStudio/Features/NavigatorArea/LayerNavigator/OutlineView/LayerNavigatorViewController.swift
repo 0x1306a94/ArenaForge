@@ -116,6 +116,11 @@ final class LayerNavigatorViewController: NSViewController {
     func onItemDoubleClicked() {}
 
     func onNewVeuen(_ venue: AFVenue) {
+        project?.undoManager?.registerUndo(withTarget: self) {
+            $0.project?.project?.removeVenue(venue)
+            $0.outlineView.reloadData()
+        }
+
         outlineView.reloadData()
     }
 
@@ -123,6 +128,11 @@ final class LayerNavigatorViewController: NSViewController {
         let index = outlineView.row(forItem: venue.root)
         if index == -1 {
             return
+        }
+
+        project?.undoManager?.registerUndo(withTarget: self) {
+            shape.removeFromParent()
+            $0.outlineView.reloadItem(venue.root, reloadChildren: true)
         }
 
         outlineView.reloadItem(venue.root, reloadChildren: true)
