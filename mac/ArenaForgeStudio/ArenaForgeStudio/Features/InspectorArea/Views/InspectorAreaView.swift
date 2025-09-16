@@ -28,40 +28,29 @@ import SwiftUI
 
 struct InspectorAreaView: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Group {
-                Alignment()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 8) {
+                InspectorAlignmentView()
+
+                InspectorFrameView()
             }
-            
-            Spacer()
         }
+        .frame(maxWidth: .infinity)
         .safeAreaInset(edge: .top) {
-            VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
                 Divider()
-                Rectangle()
-                    .frame(height: 32)
-                    .frame(maxWidth: .infinity)
-                    .foregroundStyle(.brown)
+
+                HStack {
+                    Text("Venue")
+
+                    Spacer()
+                }
+                .padding(.leading, 10)
+                .frame(height: 32)
+                .frame(maxWidth: .infinity)
                 Divider()
             }
-        }
-    }
-    
-    func Alignment() -> some View {
-        Section("Alignment") {
-            HStack {
-                Button("Left") {}
-                
-                Button("中") {}
-                
-                Button("Right") {}
-                
-                Button("Top") {}
-                
-                Button("中") {}
-                
-                Button("Bottom") {}
-            }
+            .frame(maxWidth: .infinity)
         }
     }
 }

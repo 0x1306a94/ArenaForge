@@ -109,8 +109,8 @@ final class ProjectEditSplitViewController: NSSplitViewController, ProjectEditCa
         let inspector = NSSplitViewItem(inspectorWithViewController: NSHostingController(rootView: view))
         inspector.titlebarSeparatorStyle = .none
         inspector.minimumThickness = Self.minSidebarWidth
-        inspector.maximumThickness = .greatestFiniteMagnitude
-        inspector.collapseBehavior = .useConstraints
+        inspector.maximumThickness = 400
+//        inspector.collapseBehavior = .useConstraints
         inspector.isSpringLoaded = true
         return inspector
     }
