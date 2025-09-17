@@ -18,33 +18,25 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  LayerType.h
+//  Print.h
 //  arenaforge_core
 //
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/17.
 //
 
-#ifndef LayerType_h_ArenaForge
-#define LayerType_h_ArenaForge
-
-#include <string>
+#ifndef Print_h_ArenaForge
+#define Print_h_ArenaForge
 
 namespace arenaforge {
-enum class LayerType {
-    Group,
-    Shape,
-    Boolean,
-    Text,
-    Rectangle,
-    Ellipse,
-    Line,
-    Triangle,
-    Vector,
-};
+/**
+ * Writes an output message pointed by format to the log facility of native platform.
+ */
+void PrintLog(const char format[], ...);
 
-std::string LayerTypeToString(LayerType type);
-LayerType LayerTypeFromString(const std::string &type);
-
+/**
+ * Writes an error message pointed by format to the log facility of native platform.
+ */
+void PrintError(const char format[], ...);
 };  // namespace arenaforge
 
-#endif /* LayerType_h_ArenaForge */
+#endif /* Print_h_ArenaForge */

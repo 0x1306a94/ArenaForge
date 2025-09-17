@@ -18,33 +18,22 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  LayerType.h
-//  arenaforge_core
+//  BooleanOp.h
+//  ArenaForge
 //
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/17.
 //
 
-#ifndef LayerType_h_ArenaForge
-#define LayerType_h_ArenaForge
-
-#include <string>
+#ifndef BooleanOp_h_ArenaForge
+#define BooleanOp_h_ArenaForge
 
 namespace arenaforge {
-enum class LayerType {
-    Group,
-    Shape,
-    Boolean,
-    Text,
-    Rectangle,
-    Ellipse,
-    Line,
-    Triangle,
-    Vector,
+enum class BooleanOp {
+    Union,
+    Subtract,
+    Intersect,
+    Exclude,
+};
 };
 
-std::string LayerTypeToString(LayerType type);
-LayerType LayerTypeFromString(const std::string &type);
-
-};  // namespace arenaforge
-
-#endif /* LayerType_h_ArenaForge */
+#endif /* BooleanOp_h_ArenaForge */

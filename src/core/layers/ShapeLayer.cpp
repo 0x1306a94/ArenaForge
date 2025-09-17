@@ -18,33 +18,46 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  LayerType.h
+//  ShapeLayer.cpp
 //  arenaforge_core
 //
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/17.
 //
 
-#ifndef LayerType_h_ArenaForge
-#define LayerType_h_ArenaForge
-
-#include <string>
+#include <arenaforge_core/layers/ShapeLayer.h>
 
 namespace arenaforge {
-enum class LayerType {
-    Group,
-    Shape,
-    Boolean,
-    Text,
-    Rectangle,
-    Ellipse,
-    Line,
-    Triangle,
-    Vector,
-};
+std::shared_ptr<ShapeLayer> ShapeLayer::Make(const std::string &layerId) {
+    return std::shared_ptr<ShapeLayer>(new ShapeLayer(layerId));
+}
 
-std::string LayerTypeToString(LayerType type);
-LayerType LayerTypeFromString(const std::string &type);
+ShapeLayer::ShapeLayer(const std::string &layerId)
+    : Layer(layerId)
+    , _fill(std::nullopt)
+    , _stroke(std::nullopt) {
+}
 
+void ShapeLayer::setLineWidth(float width) {
+    _lineWidth = width;
+}
+
+void ShapeLayer::setStrokeAlign(StrokeAlign align) {
+    _strokeAlign = align;
+}
+
+void ShapeLayer::setLineCap(LineCap cap) {
+    _lineCap = cap;
+}
+
+void ShapeLayer::setLineJoin(LineJoin join) {
+    _lineJoin = join;
+}
+
+void ShapeLayer::setFill(std::optional<Color> fill) {
+    _fill = std::move(fill);
+}
+
+void ShapeLayer::setStroke(std::optional<Color> stroke) {
+    _stroke = std::move(stroke);
+}
 };  // namespace arenaforge
-
-#endif /* LayerType_h_ArenaForge */

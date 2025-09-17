@@ -18,33 +18,25 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  LayerType.h
+//  BooleanLayer.cpp
 //  arenaforge_core
 //
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/17.
 //
 
-#ifndef LayerType_h_ArenaForge
-#define LayerType_h_ArenaForge
-
-#include <string>
+#include <arenaforge_core/layers/BooleanLayer.h>
 
 namespace arenaforge {
-enum class LayerType {
-    Group,
-    Shape,
-    Boolean,
-    Text,
-    Rectangle,
-    Ellipse,
-    Line,
-    Triangle,
-    Vector,
-};
+std::shared_ptr<BooleanLayer> BooleanLayer::Make(const std::string &layerId) {
+    return std::shared_ptr<BooleanLayer>(new BooleanLayer(layerId));
+}
 
-std::string LayerTypeToString(LayerType type);
-LayerType LayerTypeFromString(const std::string &type);
+BooleanLayer::BooleanLayer(const std::string &layerId)
+    : Layer(layerId) {
+}
+
+void BooleanLayer::setOp(BooleanOp op) {
+    _op = op;
+}
 
 };  // namespace arenaforge
-
-#endif /* LayerType_h_ArenaForge */
