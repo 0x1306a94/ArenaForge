@@ -65,8 +65,8 @@
         _venue = arenaforge::Venue::Make(venueId, (name == nil ? "" : std::string(name.UTF8String)), "");
         _venue->setBackgroundColor(tgfx::Color::FromRGBA(0xcc, 0xcc, 0xcc));
 
-        _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr() layerMap:_layerMap];
-        _root.venue = self;
+        //        _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr() layerMap:_layerMap];
+        //        _root.venue = self;
     }
     return self;
 }
@@ -77,8 +77,8 @@
 
         _layerMap = [AFLayerMap new];
 
-        _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr() layerMap:_layerMap];
-        _root.venue = self;
+        //        _root = [[AFLayer alloc] initWithCppObject:_venue->containerLayerPtr() layerMap:_layerMap];
+        //        _root.venue = self;
     }
     return self;
 }
@@ -91,8 +91,8 @@
     if (target == nil) {
         return nil;
     }
-    auto targetLayer = [target cppObject];
-    _venue->addHoverWireframe({targetLayer});
+    //    auto targetLayer = [target cppObject];
+    //    _venue->addHoverWireframe({targetLayer});
     //    auto rootLayer = _venue->rootLayerPtr();
     //    auto containerLayer = _venue->containerLayer();
     //    auto targetLayer = [target cppObject];
@@ -192,7 +192,7 @@
     }
 
     auto counter = project->genGroupCounter();
-    AFLayer *group = [[AFLayer alloc] initWithName:[NSString stringWithFormat:@"Group %u", counter] type:AFLayerTypeGroup layerMap:self.layerMap];
+    AFLayer *group = [[AFLayer alloc] initWithName:[NSString stringWithFormat:@"Group %u", counter] layerMap:self.layerMap];
 
     // 计算 group 的外包矩形
     CGFloat minX = CGFLOAT_MAX;
@@ -264,30 +264,32 @@
 
 - (AFLayer *_Nullable)pickVenueAtUnderPoint:(NSPoint)point {
     //    auto root = _venue->rootLayer();
-    auto container = _venue->containerLayer();
-    //    auto local = container->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    auto layers = container->getLayersUnderPoint(static_cast<float>(point.x), static_cast<float>(point.y));
-    if (layers.empty()) {
-        return nil;
-    }
-    auto topLayer = layers.front();
-    if (topLayer.get() == container) {
-        return nil;
-    }
-    auto baseLayer = std::dynamic_pointer_cast<arenaforge::BaseLayer>(topLayer);
-    if (!baseLayer) {
-        return nil;
-    }
-    NSString *layerId = [NSString stringWithUTF8String:baseLayer->layerId().c_str()];
-    AFLayer *layer = [self.layerMap getLayerById:layerId];
-    AFLayer *parent = layer.parent;
-    if (parent && parent.type == AFLayerTypeGroup) {
-        layer = parent;
-    }
-    if (layer.parent == nil) {
-        return nil;
-    }
-    return layer;
+    //    auto container = _venue->containerLayer();
+    //    //    auto local = container->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //    auto layers = container->getLayersUnderPoint(static_cast<float>(point.x), static_cast<float>(point.y));
+    //    if (layers.empty()) {
+    //        return nil;
+    //    }
+    //    auto topLayer = layers.front();
+    //    if (topLayer.get() == container) {
+    //        return nil;
+    //    }
+    //    auto baseLayer = std::dynamic_pointer_cast<arenaforge::BaseLayer>(topLayer);
+    //    if (!baseLayer) {
+    //        return nil;
+    //    }
+    //    NSString *layerId = [NSString stringWithUTF8String:baseLayer->layerId().c_str()];
+    //    AFLayer *layer = [self.layerMap getLayerById:layerId];
+    //    AFLayer *parent = layer.parent;
+    //    if (parent && parent.type == AFLayerTypeGroup) {
+    //        layer = parent;
+    //    }
+    //    if (layer.parent == nil) {
+    //        return nil;
+    //    }
+    //    return layer;
+    (void)point;
+    return nil;
 }
 
 - (void)resetHoverWireframe {
@@ -295,23 +297,26 @@
 }
 
 - (BOOL)hitTestPoint:(NSPoint)point {
-    auto root = _venue->rootLayerPtr();
-    //    auto localPoint = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    //    auto container = _venue->container();
-    auto hit = root->hitTestPoint(static_cast<float>(point.x), static_cast<float>(point.y));
-    return hit;
+    //    auto root = _venue->rootLayerPtr();
+    //    //    auto localPoint = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //    //    auto container = _venue->container();
+    //    auto hit = root->hitTestPoint(static_cast<float>(point.x), static_cast<float>(point.y));
+    //    return hit;
+    return point.x > 0;
 }
 
 - (NSPoint)globalToLocal:(NSPoint)point {
-    auto root = _venue->rootLayer();
-    auto local = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+    //    auto root = _venue->rootLayer();
+    //    auto local = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+    return point;
 }
 
 - (NSPoint)localToGlobal:(NSPoint)point {
-    auto root = _venue->rootLayer();
-    auto global = root->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
+    //    auto root = _venue->rootLayer();
+    //    auto global = root->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
+    return point;
 }
 
 #pragma mark - setter getter

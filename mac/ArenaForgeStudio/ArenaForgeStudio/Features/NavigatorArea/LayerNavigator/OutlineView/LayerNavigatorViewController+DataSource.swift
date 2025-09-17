@@ -32,7 +32,7 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
         if let layer = item as? AFLayer {
             return layer.childrenCount
         }
-        return venues.count
+        return layers.count
     }
 
     func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
@@ -41,8 +41,8 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
             return layer.children[reversedIndex]
         }
 
-        let reversedIndex = venues.count - 1 - index
-        return venues[reversedIndex].root
+        let reversedIndex = layers.count - 1 - index
+        return layers[reversedIndex]
     }
 
     func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
@@ -54,15 +54,9 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
     }
 
     func outlineView(_ outlineView: NSOutlineView, itemForPersistentObject object: Any) -> Any? {
-        guard let layerId = object as? String else { return nil }
-        for venue in self.venues {
-            if layerId == venue.venueId {
-                return venue.root
-            } else {
-                if let layer = venue.findLayer(byId: layerId) {
-                    return layer
-                }
-            }
+        guard let project, let layerId = object as? String else { return nil }
+        if let layer = project.project?.findLayer(byId: layerId) {
+            return layer
         }
 
         return nil
@@ -70,9 +64,6 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
 
     func outlineView(_ outlineView: NSOutlineView, persistentObjectForItem item: Any?) -> Any? {
         guard let layer = item as? AFLayer else { return nil }
-        if let venue = layer.venue {
-            return venue.venueId
-        }
         return layer.layerId
     }
 
@@ -102,16 +93,11 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
         // 找到拖动的 layer
         guard let source = project?.project?.findLayer(byId: layerId), let sourceParent = source.parent else { return false }
 
-        // 只允许同一个场馆内拖动
-        let venues = Set([destination, source].compactMap { $0.attachVenue })
-        if venues.count != 1 {
+        // 只允许同级内
+        let parents = Set([destination, source].compactMap { $0.parent })
+        if parents.count != 1 {
             return false
         }
-
-        // 只允许同级内
-//        if source.parent != destination {
-//            return false
-//        }
 
         let oldIndex = sourceParent.getChildIndex(source)
         let oldFrame = source.frame
@@ -145,15 +131,10 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
                 return
             }
             source.frame = oldFrame
-//            self.outlineView.reloadItem(destination, reloadChildren: true)
             self.outlineView.reloadData()
         }
 
         outlineView.reloadData()
-//        outlineView.reloadItem(destination, reloadChildren: true)
-//        for parent in parents {
-//            outlineView.reloadItem(parent, reloadChildren: true)
-//        }
         return false
     }
 }

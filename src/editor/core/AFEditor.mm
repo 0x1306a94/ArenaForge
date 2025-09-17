@@ -66,22 +66,8 @@
 - (void)commonInit {
     auto cppProject = [self.project cppObject];
     _editor = arenaforge::editor::Editor::Make(std::move(cppProject));
-
-    [self onVenueChanges];
-
-    __weak AFEditor *weakSelf = self;
-    self.project.venueChangeHandler = ^(AFProject *_Nonnull project) {
-        UNUSED_PARAM(project);
-        if (weakSelf == nil) {
-            return;
-        }
-        [weakSelf onVenueChanges];
-    };
 }
 
-- (void)onVenueChanges {
-    _editor->onVenueChanges();
-}
 #pragma mark - public
 
 - (void)setupCanvasView:(AFMacCanvasView *)canvasView {

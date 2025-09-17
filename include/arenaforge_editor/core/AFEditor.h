@@ -36,7 +36,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class AFMacCanvasView;
 @class AFLayer;
 @class AFProject;
-@class AFVenue;
 ARENA_FORGE_EXPORT_API @interface AFEditor : NSObject
 @property (nonatomic, strong, readonly) AFProject *project;
 + (instancetype)new NS_UNAVAILABLE;

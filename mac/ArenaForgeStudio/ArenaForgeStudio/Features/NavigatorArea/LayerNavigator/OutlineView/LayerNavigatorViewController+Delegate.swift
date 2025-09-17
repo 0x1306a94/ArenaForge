@@ -76,25 +76,15 @@ extension LayerNavigatorViewController: LayerTableViewCellDelegate {
             return
         }
 
-        let oldName: String
-        if let veune = item.venue {
-            oldName = veune.name
-            veune.name = newname
-        } else {
-            oldName = item.name
-            item.name = newname
-        }
+        let oldName = item.name
+        item.name = newname
 
         self.project?.undoManager?.registerUndo(withTarget: self) { [weak self, weak item] _ in
             guard let self, let item else {
                 return
             }
 
-            if let veune = item.venue {
-                veune.name = oldName
-            } else {
-                item.name = oldName
-            }
+            item.name = oldName
             self.outlineView.reloadItem(item)
         }
 

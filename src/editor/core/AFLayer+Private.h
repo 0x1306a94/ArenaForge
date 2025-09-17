@@ -26,15 +26,15 @@
 
 #import <arenaforge_editor/core/AFLayer.h>
 
-#import <arenaforge_editor/core/AFVenue.h>
+#import <arenaforge_core/layers/Layer.h>
 
-#import <arenaforge_core/layers/BaseLayer.h>
-
+NS_ASSUME_NONNULL_BEGIN
 @class AFLayerMap;
 @interface AFLayer ()
-@property (nonatomic, weak) AFVenue *venue;
-- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::BaseLayer>)cppObject layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
-- (std::shared_ptr<arenaforge::BaseLayer>)cppObject;
+- (std::shared_ptr<arenaforge::Layer>)createCppObject:(NSString *_Nullable)name;
+- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::Layer>)cppObject layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
+- (std::shared_ptr<arenaforge::Layer>)cppObject;
 
 - (void)rebuildCacheChildren;
 @end
+NS_ASSUME_NONNULL_END

@@ -18,24 +18,20 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  arenaforge_editor.h
-//  ArenaForge
+//  AFBooleanLayer.h
+//  arenaforge_editor
 //
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/17.
 //
 
-#ifndef arenaforge_editor_h_ArenaForge
-#define arenaforge_editor_h_ArenaForge
+#ifndef AFBooleanLayer_h_ArenaForge
+#define AFBooleanLayer_h_ArenaForge
 
-#import <Foundation/Foundation.h>
-
-#import <arenaforge_editor/core/AFEditor.h>
 #import <arenaforge_editor/core/AFLayer.h>
-#import <arenaforge_editor/core/AFShapeLayer.h>
-#import <arenaforge_editor/core/AFBooleanLayer.h>
-#import <arenaforge_editor/core/AFProject.h>
-#import <arenaforge_editor/core/AFVenue.h>
-#import <arenaforge_editor/core/Platform.h>
-#import <arenaforge_editor/platform/mac/AFMacCanvasView.h>
+#import <arenaforge_editor/core/defines.h>
 
-#endif /* arenaforge_editor_h_ArenaForge */
+ARENA_FORGE_EXPORT_API @interface AFBooleanLayer : AFLayer
+
+@end
+
+#endif /* AFBooleanLayer_h_ArenaForge */

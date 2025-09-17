@@ -185,12 +185,10 @@ final class ProjectEditSplitViewController: NSSplitViewController, ProjectEditCa
 
     // MARK: ProjectEditCanvasViewControllerDelegate
 
-    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewVenue venue: AFVenue) {
-        self.layerNavigator?.onNewVeuen(venue)
-    }
+  
 
-    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewShape shape: AFLayer, ownerVenue: AFVenue) {
-        self.layerNavigator?.onVeuenAddShape(ownerVenue, shape: shape)
+    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewShape shape: AFLayer) {
+        self.layerNavigator?.onAddShape(shape: shape)
     }
 
     #if DEBUG

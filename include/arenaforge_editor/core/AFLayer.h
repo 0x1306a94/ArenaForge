@@ -27,7 +27,6 @@
 #ifndef AFLayer_h_ArenaForge
 #define AFLayer_h_ArenaForge
 
-#import <AppKit/NSColor.h>
 #import <Foundation/Foundation.h>
 
 #import <arenaforge_editor/core/AFLayerType.h>
@@ -46,18 +45,11 @@ ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 @property (nonatomic, assign, readonly) BOOL hasChildren;
 @property (nonatomic, assign) BOOL transient;
 @property (nonatomic, assign) NSRect frame;
-@property (nonatomic, assign) BOOL positionRelative;
-@property (nonatomic, strong) NSColor *fillColor;
-@property (nonatomic, strong) NSColor *strokeColor;
-@property (nonatomic, assign) CGFloat lineWidth;
-/// 根节点有值
-@property (nonatomic, weak, nullable, readonly) AFVenue *venue;
 @property (nonatomic, weak, readonly) AFLayer *parent;
-@property (nonatomic, strong, nullable, readonly) AFVenue *attachVenue;
 
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithName:(NSString *)name type:(AFLayerType)type layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithName:(NSString *)name layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
 
 - (BOOL)addChild:(AFLayer *)child;
 - (BOOL)addChild:(AFLayer *)child atIndex:(int)index;

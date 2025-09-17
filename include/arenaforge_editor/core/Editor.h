@@ -33,6 +33,11 @@
 #include <memory>
 #include <vector>
 
+namespace tgfx {
+class ShapeLayer;
+class TextLayer;
+}  // namespace tgfx
+
 namespace arenaforge {
 class Project;
 class Venue;
@@ -61,10 +66,8 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
     bool updateZoomAndOffset(float zoomScale, float offsetX, float offsetY);
 
     bool updateSize();
-    
-    void autoAdjustCanvasScaleForContent();
 
-    void onVenueChanges();
+    void autoAdjustCanvasScaleForContent();
 
     void invalidateContent();
 
@@ -74,8 +77,15 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
     Editor(std::shared_ptr<arenaforge::Project> project);
 
   private:
+    void setupRootLayer();
+
+  private:
     std::shared_ptr<arenaforge::Project> _project{nullptr};
     std::shared_ptr<Renderer> _renderer{nullptr};
+    std::shared_ptr<tgfx::ShapeLayer> _rootLayer{nullptr};
+    std::shared_ptr<tgfx::TextLayer> _nameLayer{nullptr};
+    std::shared_ptr<tgfx::ShapeLayer> _containerLayer{nullptr};
+    std::shared_ptr<tgfx::ShapeLayer> _maskLayer{nullptr};
 };
 };  // namespace arenaforge::editor
 

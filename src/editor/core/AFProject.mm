@@ -28,16 +28,15 @@
 
 #import <arenaforge_editor/core/AFVenue.h>
 
+#import <arenaforge_editor/core/AFShapeLayer.h>
+
 #import "AFLayer+Private.h"
 #import "AFProject+Private.h"
-#import "AFVenue+Private.h"
 
 #import "AFLayerMap.h"
 
 @interface AFProject ()
 @property (nonatomic, strong) NSURL *fileURL;
-@property (nonatomic, strong) NSMutableDictionary<NSString *, AFVenue *> *venueMaps;
-@property (nonatomic, strong) NSArray<AFVenue *> *orderVenues;
 @end
 
 @implementation AFProject {
@@ -54,10 +53,7 @@
     std::shared_ptr<arenaforge::Project> project;
     try {
         auto rootDir = std::string(fileURL.path.UTF8String);
-        project = arenaforge::Project::MakeFromJSONFile(rootDir + "/project.json", [=](const std::string &venueId) -> std::shared_ptr<arenaforge::Venue> {
-            auto venueFilePath = rootDir + "/venues/" + venueId + ".json";
-            return arenaforge::Venue::MakeFromJSONFile(venueFilePath);
-        });
+        project = arenaforge::Project::MakeFromJSONFile(rootDir);
     } catch (const std::exception &e) {
         if (error) {
             NSString *msg = [NSString stringWithUTF8String:e.what()];
@@ -68,17 +64,8 @@
 
     if (self == [super init]) {
         self.fileURL = fileURL;
-
+        _layerMap = [AFLayerMap new];
         _project = std::move(project);
-        _venueMaps = [NSMutableDictionary<NSString *, AFVenue *> dictionary];
-
-        NSMutableArray<AFVenue *> *orderVenues = [NSMutableArray<AFVenue *> array];
-        for (auto cppObject : _project->venues()) {
-            AFVenue *venue = [[AFVenue alloc] initWithCppObject:cppObject];
-            _venueMaps[venue.venueId] = venue;
-            [orderVenues addObject:venue];
-        }
-        _orderVenues = [orderVenues copy];
     }
     return self;
 }
@@ -87,119 +74,89 @@
     return _project;
 }
 
-- (void)rebuildOrderVenues {
-    NSMutableArray<AFVenue *> *orderVenues = [NSMutableArray<AFVenue *> array];
-    for (auto &item : _project->venues()) {
-        NSString *venueId = [NSString stringWithUTF8String:item->venueId().c_str()];
-        AFVenue *venue = self.venueMaps[venueId];
-        if (venue) {
-            [orderVenues addObject:venue];
-        }
-    }
-    self.orderVenues = [orderVenues copy];
-}
-
 #pragma mark - public
 - (NSString *)toJSONString {
     auto json = _project->toJSON();
     return [NSString stringWithUTF8String:json.c_str()];
 }
 
-- (AFVenue *)createVenue {
-    auto counter = _project->genVenueCounter();
-    AFVenue *venue = [[AFVenue alloc] initWithName:[NSString stringWithFormat:@"Venue %u", counter]];
-    self.venueMaps[venue.venueId] = venue;
-    return venue;
-}
-
-- (BOOL)addVenue:(AFVenue *)venue {
-    if (venue == nil) {
-        return NO;
-    }
-    auto index = _project->venues().size();
-    return [self addVenue:venue atIndex:static_cast<int>(index)];
-}
-
-- (BOOL)addVenue:(AFVenue *)venue atIndex:(int)index {
-    if (venue == nil) {
-        return NO;
-    }
-
-    auto cppObject = [venue cppObject];
-    if (!_project->addVenueAt(cppObject, index)) {
-        return NO;
-    }
-    [self rebuildOrderVenues];
-    if (self.venueChangeHandler) {
-        self.venueChangeHandler(self);
-    }
-    return NO;
-}
-
-- (int)getVenueIndex:(AFVenue *)venue {
-    if (venue == nil) {
-        return -1;
-    }
-
-    auto cppObject = [venue cppObject];
-    auto index = _project->getVeuneIndex(cppObject);
-    return index;
-}
-
-- (void)removeVenue:(AFVenue *)venue {
-    if (!venue) {
-        return;
-    }
-
-    auto cppObject = [venue cppObject];
-    if (!_project->removeVenue(cppObject)) {
-        return;
-    }
-    [self rebuildOrderVenues];
-    if (self.venueChangeHandler) {
-        self.venueChangeHandler(self);
-    }
-}
-
-- (AFVenue *_Nullable)pickVenueAtUnderPoint:(NSPoint)point {
-    for (AFVenue *venue in self.orderVenues) {
-        if ([venue hitTestPoint:point]) {
-            return venue;
-        }
-    }
+- (AFLayer *_Nullable)createLayer {
     return nil;
 }
 
-- (AFLayer *_Nullable)findLayerById:(NSString *)layerId {
-    for (AFVenue *venue in self.orderVenues) {
-        AFLayer *layer = [venue findLayerById:layerId];
-        if (layer) {
-            return layer;
-        }
-    }
-    return nil;
-}
-
-- (AFLayer *_Nullable)createLayerInVenue:(AFVenue *)venue {
-    if (venue == nil) {
-        return nil;
-    }
-    auto counter = _project->genRectangleCounter();
-    AFLayer *layer = [[AFLayer alloc] initWithName:[NSString stringWithFormat:@"Rectangle %u", counter] type:AFLayerTypeRectangle layerMap:venue.layerMap];
-    [venue.layerMap addLayer:layer];
-    [venue.root addChild:layer];
+- (AFShapeLayer *_Nullable)createShapeLayer {
+    AFShapeLayer *layer = [[AFShapeLayer alloc] initWithName:@"Shape" layerMap:self.layerMap];
     return layer;
 }
 
-- (AFLayer *_Nullable)createHoverWireframeLayerInVenue:(AFVenue *)venue targetLayer:(AFLayer *)targetLayer {
-    if (venue == nil || targetLayer == nil) {
+- (AFLayer *_Nullable)findLayerById:(NSString *)layerId {
+    if (layerId == nil) {
         return nil;
     }
-    return [venue addHoverWireframeLayer:targetLayer];
+    return nil;
+}
+
+- (AFLayer *_Nullable)pickLayerAtUnderPoint:(NSPoint)point {
+    //    auto root = _venue->rootLayer();
+    //    auto container = _venue->containerLayer();
+    //        //    auto local = container->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //    auto layers = container->getLayersUnderPoint(static_cast<float>(point.x), static_cast<float>(point.y));
+    //    if (layers.empty()) {
+    //        return nil;
+    //    }
+    //    auto topLayer = layers.front();
+    //    if (topLayer.get() == container) {
+    //        return nil;
+    //    }
+    //    auto baseLayer = std::dynamic_pointer_cast<arenaforge::BaseLayer>(topLayer);
+    //    if (!baseLayer) {
+    //        return nil;
+    //    }
+    //    NSString *layerId = [NSString stringWithUTF8String:baseLayer->layerId().c_str()];
+    //    AFLayer *layer = [self.layerMap getLayerById:layerId];
+    //    AFLayer *parent = layer.parent;
+    //    if (parent && parent.type == AFLayerTypeGroup) {
+    //        layer = parent;
+    //    }
+    //    if (layer.parent == nil) {
+    //        return nil;
+    //    }
+    return nil;
+}
+
+- (BOOL)hitTestPoint:(NSPoint)point {
+    //    auto root = _venue->rootLayerPtr();
+    //        //    auto localPoint = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //        //    auto container = _venue->container();
+    //    auto hit = root->hitTestPoint(static_cast<float>(point.x), static_cast<float>(point.y));
+    //    return hit;
+    return point.x > 0;
+}
+
+- (NSPoint)globalToLocal:(NSPoint)point {
+    //    auto root = _venue->rootLayer();
+    //    auto local = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+    return point;
+}
+
+- (NSPoint)localToGlobal:(NSPoint)point {
+    //    auto root = _venue->rootLayer();
+    //    auto global = root->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
+    return point;
+}
+
+- (AFLayer *_Nullable)createHoverWireframeLayerInTargetLayer:(AFLayer *)targetLayer {
+    if (targetLayer == nil) {
+        return nil;
+    }
+    return nil;
+}
+
+- (void)resetHoverWireframe {
 }
 
 #pragma mark - getter
-- (NSArray<AFVenue *> *)venues {
-    return self.orderVenues;
-}
+
 @end

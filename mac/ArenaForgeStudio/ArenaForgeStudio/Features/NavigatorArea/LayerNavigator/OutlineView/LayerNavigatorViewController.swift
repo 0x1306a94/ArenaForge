@@ -33,9 +33,7 @@ final class LayerNavigatorViewController: NSViewController {
     private var scrollView: NSScrollView!
     var outlineView: NSOutlineView!
 
-    var venues: [AFVenue] {
-        project?.project?.venues ?? []
-    }
+    var layers: [AFLayer] = []
 
     var rowHeight: Double = 22 {
         willSet {
@@ -51,8 +49,6 @@ final class LayerNavigatorViewController: NSViewController {
     init(project: ProjectDocument) {
         super.init(nibName: nil, bundle: nil)
         self.project = project
-//        let venues = project.project?.venues ?? []
-//        self.venues = venues
     }
 
     /// Setup the ``scrollView`` and ``outlineView``
@@ -115,27 +111,13 @@ final class LayerNavigatorViewController: NSViewController {
     @objc
     func onItemDoubleClicked() {}
 
-    func onNewVeuen(_ venue: AFVenue) {
+    func onAddShape(shape: AFLayer) {
         project?.undoManager?.registerUndo(withTarget: self) {
-            $0.project?.project?.removeVenue(venue)
+            shape.removeFromParent()
             $0.outlineView.reloadData()
         }
 
         outlineView.reloadData()
-    }
-
-    func onVeuenAddShape(_ venue: AFVenue, shape: AFLayer) {
-        let index = outlineView.row(forItem: venue.root)
-        if index == -1 {
-            return
-        }
-
-        project?.undoManager?.registerUndo(withTarget: self) {
-            shape.removeFromParent()
-            $0.outlineView.reloadItem(venue.root, reloadChildren: true)
-        }
-
-        outlineView.reloadItem(venue.root, reloadChildren: true)
     }
 
     #if DEBUG

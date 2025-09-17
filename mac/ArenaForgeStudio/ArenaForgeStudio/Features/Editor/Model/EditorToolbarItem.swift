@@ -28,13 +28,11 @@ import Foundation
 
 enum EditorToolbarItem: Equatable, CaseIterable {
     case cursors
-    case venue
     case shape
 
     var iconName: String {
         switch self {
         case .cursors: return "icon_cursors"
-        case .venue: return "icon_venue"
         case .shape: return "icon_layer_rectangle"
         }
     }
@@ -42,7 +40,6 @@ enum EditorToolbarItem: Equatable, CaseIterable {
     var helpTip: String {
         switch self {
         case .cursors: return "mouse mode"
-        case .venue: return "create venue"
         case .shape: return "create shape"
         }
     }

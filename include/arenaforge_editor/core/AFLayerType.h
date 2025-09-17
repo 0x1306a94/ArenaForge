@@ -31,6 +31,9 @@
 
 typedef NS_ENUM(NSUInteger, AFLayerType) {
     AFLayerTypeGroup,
+    AFLayerTypeShape,
+    AFLayerTypeBoolean,
+    AFLayerTypeText,
     AFLayerTypeRectangle,
     AFLayerTypeEllipse,
     AFLayerTypeLine,

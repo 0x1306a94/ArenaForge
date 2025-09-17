@@ -27,26 +27,14 @@
 #include "../base/ArenaForgeTest.h"
 
 #include <arenaforge_core/Project.h>
-#include <arenaforge_core/Venue.h>
 
 namespace arenaforge {
 ArenaForge_TEST(ProjectTest, Create) {
-    auto project = Project::Make("test", "test");
+    auto project = Project::Make("test", "test", arenaforge::Size::Make(1280, 720));
     EXPECT_EQ(project->name(), "test");
     EXPECT_EQ(project->description(), "test");
 
-    auto venue = project->createVenue("test", "test");
-    EXPECT_EQ(venue->name(), "test");
-    EXPECT_EQ(venue->description(), "test");
-    EXPECT_TRUE(venue->project() == nullptr);
-
-    EXPECT_TRUE(project->addVenue(venue));
-    EXPECT_EQ(venue->project(), project);
-
-    EXPECT_TRUE(project->contains(venue));
-    
-    EXPECT_TRUE(project->removeVenue(venue));
-    
-    EXPECT_FALSE(project->contains(venue));
+    std::string json = project->toJSON(true);
+    printf("%s\n", json.c_str());
 };
 };  // namespace arenaforge

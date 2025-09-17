@@ -49,6 +49,8 @@ if(APPLE)
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFProject.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFVenue.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFLayer.h
+        ${PUBLIC_HEADER_ROOT_DIR}/core/AFShapeLayer.h
+        ${PUBLIC_HEADER_ROOT_DIR}/core/AFBooleanLayer.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFLayerType.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFEditor.h
         ${PUBLIC_HEADER_ROOT_DIR}/platform/mac/AFMacCanvasView.h

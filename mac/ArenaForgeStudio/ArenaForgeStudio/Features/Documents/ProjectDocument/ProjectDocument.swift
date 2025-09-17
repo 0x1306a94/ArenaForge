@@ -89,23 +89,7 @@ final class ProjectDocument: NSDocument, ObservableObject {
         let projectFile = FileWrapper(regularFileWithContents: projectData)
         projectFile.preferredFilename = "project.json"
         rootWrapper.addFileWrapper(projectFile)
-        
-        let venuesWrapper = FileWrapper(directoryWithFileWrappers: [:])
-        venuesWrapper.preferredFilename = "venues"
-        
-        for venue in project.venues {
-            let venueJSON = venue.toJSONString()
-            guard let venueData = venueJSON.data(using: .utf8) else {
-                continue
-            }
-            
-            let venueFile = FileWrapper(regularFileWithContents: venueData)
-            venueFile.preferredFilename = "\(venue.venueId).json"
-            venuesWrapper.addFileWrapper(venueFile)
-        }
-        
-        rootWrapper.addFileWrapper(venuesWrapper)
-        
+
         return rootWrapper
     }
     

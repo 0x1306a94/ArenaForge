@@ -29,9 +29,7 @@ import arenaforge_editor
 import Combine
 
 protocol ProjectEditCanvasViewControllerDelegate: AnyObject {
-    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewVenue venue: AFVenue)
-
-    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewShape shape: AFLayer, ownerVenue: AFVenue)
+    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewShape shape: AFLayer)
 }
 
 final class ProjectEditCanvasViewController: NSViewController {
@@ -42,10 +40,8 @@ final class ProjectEditCanvasViewController: NSViewController {
     private var trackingArea: NSTrackingArea?
 
     private var createMouseStartPoint: NSPoint?
-    private var createVenue: AFVenue?
 
-    private weak var creatShapeInVenue: AFVenue?
-    private weak var createShape: AFLayer?
+    private weak var createShape: AFShapeLayer?
     private var hoverTargetLayer: AFLayer?
     private var hoverWireframeLayer: AFLayer?
 
@@ -164,19 +160,11 @@ final class ProjectEditCanvasViewController: NSViewController {
         switch project.activateEditorToolbarItem {
         case .cursors:
             break
-        case .venue:
-            let veune = editor.project.createVenue()
-            editor.project.addVenue(veune)
-            createVenue = veune
         case .shape:
-            guard let veune = editor.project.pickVenue(atUnderPoint: canvasLocation) else {
+            guard let shape = editor.project.createShapeLayer() else {
                 return
             }
-            creatShapeInVenue = veune
-
-            guard let shape = editor.project.createLayer(in: veune) else {
-                return
-            }
+            
             shape.fillColor = NSColor(calibratedRed: CGFloat.random(in: 0.0...1.0), green: CGFloat.random(in: 0.0...1.0), blue: CGFloat.random(in: 0.0...1.0), alpha: 1.0)
             createShape = shape
         }
@@ -209,19 +197,13 @@ final class ProjectEditCanvasViewController: NSViewController {
         switch project.activateEditorToolbarItem {
         case .cursors:
             break
-        case .venue:
-            guard let createVenue else {
-                return
-            }
-            let rect = computeRect(start: createMouseStartPoint, end: canvasLocation)
-            createVenue.frame = rect
         case .shape:
-            guard let creatShapeInVenue, let createShape else {
+            guard let createShape else {
                 return
             }
 
-            let startPoint = creatShapeInVenue.global(toLocal: createMouseStartPoint)
-            let endPoint = creatShapeInVenue.global(toLocal: canvasLocation)
+            let startPoint = createShape.global(toLocal: createMouseStartPoint)
+            let endPoint = createShape.global(toLocal: canvasLocation)
             let rect = computeRect(start: startPoint, end: endPoint)
             createShape.frame = rect
         }
@@ -242,23 +224,8 @@ final class ProjectEditCanvasViewController: NSViewController {
         switch project.activateEditorToolbarItem {
         case .cursors:
             break
-        case .venue:
-            guard let createVenue else {
-                return
-            }
-            if createMouseStartPoint == canvasLocation {
-                canvasLocation.x = createMouseStartPoint.x + 300
-                canvasLocation.y = createMouseStartPoint.y + 300
-            }
-
-            let rect = computeRect(start: createMouseStartPoint, end: canvasLocation)
-            createVenue.frame = rect
-
-            project.activateEditorToolbarItem = .cursors
-            delegate?.projectEditCanvasViewController(self, didNewVenue: createVenue)
-            self.createVenue = nil
         case .shape:
-            guard let creatShapeInVenue, let createShape else {
+            guard let createShape else {
                 return
             }
 
@@ -267,14 +234,13 @@ final class ProjectEditCanvasViewController: NSViewController {
                 canvasLocation.y = createMouseStartPoint.y + 100
             }
 
-            let startPoint = creatShapeInVenue.global(toLocal: createMouseStartPoint)
-            let endPoint = creatShapeInVenue.global(toLocal: canvasLocation)
+            let startPoint = createShape.global(toLocal: createMouseStartPoint)
+            let endPoint = createShape.global(toLocal: canvasLocation)
             let rect = computeRect(start: startPoint, end: endPoint)
             createShape.frame = rect
 
             project.activateEditorToolbarItem = .cursors
-            delegate?.projectEditCanvasViewController(self, didNewShape: createShape, ownerVenue: creatShapeInVenue)
-            self.creatShapeInVenue = nil
+            delegate?.projectEditCanvasViewController(self, didNewShape: createShape)
             self.createShape = nil
         }
     }
@@ -342,39 +308,23 @@ final class ProjectEditCanvasViewController: NSViewController {
         let location = canvasView.convert(event.locationInWindow, from: nil)
         let canvasLocation = toCanvasPoint(source: location)
 
-        guard let veune = editor.project.pickVenue(atUnderPoint: canvasLocation) else {
+        guard let targetLayer = project.project?.pickLayer(atUnderPoint: canvasLocation) else {
             clearHoverWireframe()
             return
         }
 
-//        guard let targetLayer = veune.pick(atUnderPoint: canvasLocation) else {
-//            clearHoverWireframe()
-//            return
-//        }
-
-        let targetLayer = veune.pick(atUnderPoint: canvasLocation) ?? veune.root
         if let hoverTargetLayer, targetLayer == hoverTargetLayer {
             return
         }
         clearHoverWireframe()
 
-//        hoverWireframeLayer?.removeFromParent()
         hoverTargetLayer = targetLayer
-        editor.project.createHoverWireframeLayer(in: veune, targetLayer: targetLayer)
-//        hoverWireframeLayer = editor.project.createHoverWireframeLayer(in: veune, targetLayer: targetLayer)
+        editor.project.createHoverWireframeLayer(inTargetLayer: targetLayer)
     }
 
     private func clearHoverWireframe() {
-//        hoverTargetLayer = nil
-//        if let hoverWireframeLayer {
-//            hoverWireframeLayer.removeFromParent()
-//            self.hoverWireframeLayer = nil
-//        }
-
         hoverTargetLayer = nil
-        project?.project?.venues.forEach {
-            $0.resetHoverWireframe()
-        }
+        project?.project?.resetHoverWireframe()
     }
 
     private func toCanvasPoint(source: NSPoint) -> NSPoint {

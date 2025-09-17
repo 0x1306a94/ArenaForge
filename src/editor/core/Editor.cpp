@@ -27,6 +27,7 @@
 #include <arenaforge_editor/core/Editor.h>
 
 #include <arenaforge_core/Project.h>
+#include <arenaforge_core/Size.h>
 #include <arenaforge_core/Venue.h>
 #include <arenaforge_core/layers/BaseLayer.h>
 
@@ -35,6 +36,9 @@
 #include "renderer/RendererState.h"
 
 #include <tgfx/layers/Layer.h>
+#include <tgfx/layers/ShapeLayer.h>
+#include <tgfx/layers/SolidColor.h>
+#include <tgfx/layers/TextLayer.h>
 #include <tgfx/platform/Print.h>
 
 namespace arenaforge::editor {
@@ -46,6 +50,8 @@ std::shared_ptr<Editor> Editor::Make(std::shared_ptr<arenaforge::Project> projec
 Editor::Editor(std::shared_ptr<arenaforge::Project> project)
     : _project(std::move(project))
     , _renderer(Renderer::Make(std::make_shared<RendererState>(), nullptr)) {
+
+    setupRootLayer();
 }
 
 Editor::~Editor() {
@@ -147,32 +153,6 @@ void Editor::autoAdjustCanvasScaleForContent() {
     _renderer->autoAdjustCanvasScaleForContent();
 }
 
-void Editor::onVenueChanges() {
-    auto root = _renderer->designLayerRoot();
-    auto existsChildren = root->children();
-    auto venues = _project->venues();
-    for (const auto &venue : venues) {
-        auto venueRoot = venue->rootLayerPtr();
-        if (!venueRoot) {
-            continue;
-        }
-
-        auto iter = std::find_if(existsChildren.begin(), existsChildren.end(), [=](auto item) {
-            return item == venueRoot;
-        });
-
-        if (iter == existsChildren.end()) {
-            root->addChild(venueRoot);
-        } else {
-            existsChildren.erase(iter);
-        }
-    }
-
-    for (auto &item : existsChildren) {
-        item->removeFromParent();
-    }
-}
-
 void Editor::invalidateContent() {
     if (!_renderer) {
         return;
@@ -185,6 +165,30 @@ void Editor::draw(bool force) {
         return;
     }
     _renderer->draw(force);
+}
+
+void Editor::setupRootLayer() {
+    auto canvasSize = _project->canvasSize();
+    _rootLayer = tgfx::ShapeLayer::Make();
+
+    tgfx::Path rootPath;
+    rootPath.addRect(tgfx::Rect::MakeWH(canvasSize.width, canvasSize.height));
+    _rootLayer->setPath(rootPath);
+
+    _containerLayer = tgfx::ShapeLayer::Make();
+    _containerLayer->setPath(rootPath);
+    _containerLayer->setFillStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0xcc, 0xcc, 0xcc)));
+
+    _maskLayer = tgfx::ShapeLayer::Make();
+    _maskLayer->setPath(rootPath);
+    _maskLayer->setFillStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0xcc, 0xcc, 0xcc)));
+
+    _rootLayer->addChild(_containerLayer);
+    _rootLayer->addChild(_maskLayer);
+    _containerLayer->setMask(_maskLayer);
+
+    auto layerTreeRoot = _renderer->designLayerRoot();
+    layerTreeRoot->addChild(_rootLayer);
 }
 
 };  // namespace arenaforge::editor

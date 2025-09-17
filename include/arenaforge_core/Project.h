@@ -33,16 +33,15 @@
 #include <vector>
 
 #include <arenaforge_core/ProjectVersion.h>
+#include <arenaforge_core/Size.h>
 
 namespace arenaforge {
-class Venue;
+class Layer;
 class Project : public std::enable_shared_from_this<Project> {
   public:
-    static std::shared_ptr<Project> Make(const std::string &name, const std::string &description);
+    static std::shared_ptr<Project> Make(const std::string &name, const std::string &description, const Size &canvasSize = {1400.0f, 1200.0f});
 
-    static std::shared_ptr<Project> MakeFromJSONFile(const std::string &jsonFile, std::function<std::shared_ptr<Venue>(const std::string &venuedId)> venuedCreater);
-
-    std::shared_ptr<Venue> createVenue(const std::string &name, const std::string &description);
+    static std::shared_ptr<Project> MakeFromJSONFile(const std::string &projectDir);
 
     ~Project();
 
@@ -66,12 +65,12 @@ class Project : public std::enable_shared_from_this<Project> {
         return _version;
     }
 
-    const std::vector<std::shared_ptr<Venue>> venues() const {
-        return _venues;
-    }
+    const Size canvasSize() const;
 
-    uint32_t genVenueCounter() {
-        return _venueCounter++;
+    void setCanvasSize(const Size &canvasSize);
+
+    const std::shared_ptr<Layer> root() const {
+        return _root;
     }
 
     uint32_t genRectangleCounter() {
@@ -82,31 +81,20 @@ class Project : public std::enable_shared_from_this<Project> {
         return _groupCounter++;
     }
 
-    bool addVenue(std::shared_ptr<Venue> venue);
-    bool addVenueAt(std::shared_ptr<Venue> venue, int index);
-    bool removeVenue(std::shared_ptr<Venue> venue);
-    std::shared_ptr<Venue> removeVenueAt(int index);
-    bool setChildIndex(std::shared_ptr<Venue> venue, int index);
-    int getVeuneIndex(std::shared_ptr<Venue> venue) const;
-    bool contains(std::shared_ptr<Venue> venue) const;
-
     std::string toJSON(bool pretty = false) const;
 
   protected:
-    Project(const std::string &name, const std::string &description);
+    Project(const std::string &name, const std::string &description, const Size &canvasSize);
 
   private:
-    int doGetVenueIndex(const Venue *venue) const;
-    bool doContains(const Venue *venue) const;
-
   private:
     std::string _name{""};
     std::string _description{""};
     ProjectVersion _version{ProjectVersion::Version1};
-    uint32_t _venueCounter{0};
     uint32_t _rectangleCounter{0};
     uint32_t _groupCounter{0};
-    std::vector<std::shared_ptr<Venue>> _venues{};
+    Size _canvasSize;
+    std::shared_ptr<Layer> _root{};
 };
 };  // namespace arenaforge
 

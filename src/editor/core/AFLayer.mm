@@ -26,16 +26,13 @@
 
 #import <arenaforge_editor/core/AFLayer.h>
 
-#import <arenaforge_core/layers/BaseLayer.h>
+#import <arenaforge_core/layers/Layer.h>
 #import <arenaforge_core/uuid/UUID.h>
 
 #include <tgfx/layers/SolidColor.h>
 
 #import "AFLayer+Private.h"
 #import "AFLayerMap.h"
-#import "AFVenue+Private.h"
-
-#import <AppKit/NSColorSpace.h>
 
 @interface AFLayer ()
 @property (nonatomic, weak) AFLayer *parent;
@@ -44,7 +41,7 @@
 @end
 
 @implementation AFLayer {
-    std::shared_ptr<arenaforge::BaseLayer> _layer;
+    std::shared_ptr<arenaforge::Layer> _layer;
 }
 
 //#if DEBUG
@@ -53,25 +50,22 @@
 //}
 //#endif
 
-- (instancetype)initWithName:(NSString *)name type:(AFLayerType)type layerMap:(AFLayerMap *)layerMap {
+- (instancetype)initWithName:(NSString *)name layerMap:(AFLayerMap *)layerMap {
     if (self == [super init]) {
-        auto uuid = arenaforge::UUID::Instance();
-        auto layerId = uuid();
         _layerMap = layerMap;
-        _layer = arenaforge::BaseLayer::Make(layerId, static_cast<arenaforge::LayerType>(type));
-        _layer->setName((name == nil ? "" : std::string(name.UTF8String)));
+        _layer = [self createCppObject:name];
 
-        _cacheChildren = @[];
+        [self rebuildCacheChildren];
     }
     return self;
 }
 
-- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::BaseLayer>)cppObject layerMap:(AFLayerMap *)layerMap {
+- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::Layer>)cppObject layerMap:(AFLayerMap *)layerMap {
     if (self == [super init]) {
         _layer = std::move(cppObject);
         _layerMap = layerMap;
         for (auto &cppChild : _layer->children()) {
-            AFLayer *child = [[AFLayer alloc] initWithCppObject:std::static_pointer_cast<arenaforge::BaseLayer>(cppChild) layerMap:layerMap];
+            AFLayer *child = [[AFLayer alloc] initWithCppObject:std::static_pointer_cast<arenaforge::Layer>(cppChild) layerMap:layerMap];
             child.parent = self;
             [layerMap addLayer:child];
         }
@@ -79,6 +73,14 @@
         [self rebuildCacheChildren];
     }
     return self;
+}
+
+- (std::shared_ptr<arenaforge::Layer>)createCppObject:(NSString *_Nullable)name {
+    auto uuid = arenaforge::UUID::Instance();
+    auto layerId = uuid();
+    auto layer = arenaforge::Layer::Make(layerId);
+    layer->setName((name == nil ? "" : std::string(name.UTF8String)));
+    return layer;
 }
 
 - (BOOL)addChild:(AFLayer *)child {
@@ -141,20 +143,21 @@
 }
 
 - (NSPoint)globalToLocal:(NSPoint)point {
-    auto local = _layer->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+    //    auto local = _layer->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+    return point;
 }
 
 - (NSPoint)localToGlobal:(NSPoint)point {
-    auto global = _layer->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
+    //    auto global = _layer->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    //    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
+    return point;
 }
 
 - (void)rebuildCacheChildren {
     NSMutableArray<AFLayer *> *children = [NSMutableArray<AFLayer *> array];
-    for (const auto &item : _layer->children()) {
-        auto baseLayer = std::static_pointer_cast<arenaforge::BaseLayer>(item);
-        NSString *layerId = [NSString stringWithUTF8String:baseLayer->layerId().c_str()];
+    for (const auto &child : _layer->children()) {
+        NSString *layerId = [NSString stringWithUTF8String:child->layerId().c_str()];
         AFLayer *layer = [self.layerMap getLayerById:layerId];
         if (layer) {
             [children addObject:layer];
@@ -164,7 +167,7 @@
 }
 #pragma mark - setter getter
 
-- (std::shared_ptr<arenaforge::BaseLayer>)cppObject {
+- (std::shared_ptr<arenaforge::Layer>)cppObject {
     return _layer;
 }
 
@@ -174,7 +177,7 @@
 }
 
 - (AFLayerType)type {
-    auto type = static_cast<AFLayerType>(_layer->userType());
+    auto type = static_cast<AFLayerType>(_layer->type());
     return type;
 }
 
@@ -210,7 +213,7 @@
 }
 
 - (void)setFrame:(NSRect)frame {
-    auto cppRect = tgfx::Rect::MakeXYWH(
+    auto cppRect = arenaforge::Rect::MakeXYWH(
         static_cast<float>(frame.origin.x),
         static_cast<float>(frame.origin.y),
         static_cast<float>(frame.size.width),
@@ -223,93 +226,4 @@
     return NSRectFromCGRect(CGRectMake(cppRect.x(), cppRect.y(), cppRect.width(), cppRect.height()));
 }
 
-- (void)setPositionRelative:(BOOL)positionRelative {
-    _layer->setPositionRelative(positionRelative);
-}
-
-- (BOOL)positionRelative {
-    return _layer->positionRelative();
-}
-
-- (void)setFillColor:(NSColor *)fillColor {
-    if (fillColor == nil) {
-        _layer->setFillStyle(nullptr);
-        return;
-    }
-
-    NSColor *rgbColor = [fillColor colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
-    CGFloat red, green, blue, alpha;
-    [rgbColor getRed:&red green:&green blue:&blue alpha:&alpha];
-    auto cppColor = tgfx::Color{
-        static_cast<float>(red),
-        static_cast<float>(green),
-        static_cast<float>(blue),
-        static_cast<float>(alpha)};
-
-    _layer->setFillStyle(tgfx::SolidColor::Make(cppColor));
-}
-
-- (NSColor *)fillColor {
-    auto fillStyles = _layer->fillStyles();
-    if (fillStyles.empty()) {
-        return nil;
-    }
-    auto fill = std::static_pointer_cast<tgfx::SolidColor>(fillStyles.front());
-    auto cppColor = fill->color();
-    if (cppColor == tgfx::Color::Transparent()) {
-        return NSColor.clearColor;
-    }
-    return [NSColor colorWithRed:cppColor.red green:cppColor.green blue:cppColor.blue alpha:cppColor.alpha];
-}
-
-- (void)setStrokeColor:(NSColor *)strokeColor {
-    if (strokeColor == nil) {
-        _layer->setStrokeStyle(nullptr);
-        return;
-    }
-
-    NSColor *rgbColor = [strokeColor colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
-    CGFloat red, green, blue, alpha;
-    [rgbColor getRed:&red green:&green blue:&blue alpha:&alpha];
-    auto cppColor = tgfx::Color{
-        static_cast<float>(red),
-        static_cast<float>(green),
-        static_cast<float>(blue),
-        static_cast<float>(alpha)};
-
-    _layer->setStrokeStyle(tgfx::SolidColor::Make(cppColor));
-}
-
-- (NSColor *)strokeColor {
-    auto strokeStyles = _layer->strokeStyles();
-    if (strokeStyles.empty()) {
-        return nil;
-    }
-    auto stroke = std::static_pointer_cast<tgfx::SolidColor>(strokeStyles.front());
-    auto cppColor = stroke->color();
-    if (cppColor == tgfx::Color::Transparent()) {
-        return NSColor.clearColor;
-    }
-    return [NSColor colorWithRed:cppColor.red green:cppColor.green blue:cppColor.blue alpha:cppColor.alpha];
-}
-
-- (void)setLineWidth:(CGFloat)lineWidth {
-    _layer->setLineWidth(static_cast<float>(lineWidth));
-}
-
-- (CGFloat)lineWidth {
-    return static_cast<CGFloat>(_layer->lineWidth());
-}
-
-- (AFVenue *)attachVenue {
-    AFLayer *current = self;
-    while (current) {
-        AFVenue *venue = current.venue;
-        if (venue) {
-            return venue;
-        }
-        current = current.parent;
-    }
-    return nil;
-}
 @end

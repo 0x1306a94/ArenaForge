@@ -95,6 +95,11 @@ void Renderer::autoAdjustCanvasScaleForContent() {
     // 如果内容加上 padding 后仍然小于视口，就不缩放
     if (contentWidth + 2 * padding < viewSize.width &&
         contentHeight + 2 * padding < viewSize.height) {
+
+        float offsetX = (viewSize.width - contentWidth) * 0.5f;
+        float offsetY = (viewSize.height - contentHeight) * 0.5f;
+
+        _state->updateZoomAndOffset(1.0f, tgfx::Point{offsetX, offsetY});
         return;
     }
 
