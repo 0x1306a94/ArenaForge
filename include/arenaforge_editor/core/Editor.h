@@ -41,6 +41,7 @@ class TextLayer;
 namespace arenaforge {
 class Project;
 class Venue;
+class LayerBridgeManager;
 };  // namespace arenaforge
 
 namespace arenaforge::editor {
@@ -82,10 +83,7 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
   private:
     std::shared_ptr<arenaforge::Project> _project{nullptr};
     std::shared_ptr<Renderer> _renderer{nullptr};
-    std::shared_ptr<tgfx::ShapeLayer> _rootLayer{nullptr};
-    std::shared_ptr<tgfx::TextLayer> _nameLayer{nullptr};
-    std::shared_ptr<tgfx::ShapeLayer> _containerLayer{nullptr};
-    std::shared_ptr<tgfx::ShapeLayer> _maskLayer{nullptr};
+    std::shared_ptr<LayerBridgeManager> _bridgeManager{nullptr};
 };
 };  // namespace arenaforge::editor
 

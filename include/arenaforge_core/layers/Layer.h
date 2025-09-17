@@ -81,6 +81,10 @@ class Layer : public std::enable_shared_from_this<Layer> {
 
     void setFrame(const Rect &frame);
 
+    bool isRoot() const {
+        return _isRoot;
+    }
+
     Layer *parent() const {
         return _parent;
     }
@@ -129,6 +133,8 @@ class Layer : public std::enable_shared_from_this<Layer> {
 
     bool doContains(const Layer *child) const;
 
+    void setIsRoot(bool value);
+
   private:
     std::string _layerId{""};
     std::string _name{""};
@@ -136,9 +142,12 @@ class Layer : public std::enable_shared_from_this<Layer> {
     bool _visible{true};
     bool _transient{false};
     bool _locked{false};
+    bool _isRoot{false};
     Layer *_parent{nullptr};
     std::vector<std::shared_ptr<Layer>> _children{};
     std::unordered_map<std::string, std::string> _attributes{};
+
+    friend class Project;
 };
 };  // namespace arenaforge
 

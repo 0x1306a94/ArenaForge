@@ -230,4 +230,8 @@ bool Layer::doContains(const Layer *child) const {
     return false;
 }
 
+void Layer::setIsRoot(bool value) {
+    _isRoot = value;
+}
+
 };  // namespace arenaforge

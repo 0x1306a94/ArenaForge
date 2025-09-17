@@ -65,8 +65,9 @@ std::shared_ptr<Project> Project::MakeFromJSONFile(const std::string &projectDir
     project->_version = as::read_value<ProjectVersion>(j, "version", ProjectVersion::Version1);
     project->_rectangleCounter = as::read_value<uint32_t>(j, "rectangleCounter", 0);
     project->_groupCounter = as::read_value<uint32_t>(j, "groupCounter", 0);
-    
+
     auto root = j["rootLayer"].get<std::shared_ptr<Layer>>();
+    root->setIsRoot(true);
     project->_root = std::move(root);
 
     return project;
@@ -79,6 +80,7 @@ Project::Project(const std::string &name, const std::string &description, const 
     auto uuid = UUID::Instance();
     _root = Layer::Make(uuid());
     _root->setFrame(Rect::MakeWH(canvasSize.width, canvasSize.height));
+    _root->setIsRoot(true);
 }
 
 Project::~Project() {
