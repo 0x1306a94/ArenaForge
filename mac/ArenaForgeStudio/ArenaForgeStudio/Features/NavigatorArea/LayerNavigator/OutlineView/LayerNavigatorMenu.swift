@@ -54,13 +54,9 @@ final class LayerNavigatorMenu: NSMenu {
     private func setupMenu() {
         removeAllItems()
 
-        guard document != nil else {
-            return
-        }
+        guard document != nil else { return }
 
-        if selectedLayers.isEmpty {
-            return
-        }
+        if selectedLayers.isEmpty { return }
 
         let parents = selectedLayers.compactMap { $0.parent }
         let parentsSet = Set(parents)
@@ -71,10 +67,8 @@ final class LayerNavigatorMenu: NSMenu {
             let groupItem = menuItem("Undo Group", action: #selector(undoGroup))
             items.append(groupItem)
         } else {
-            if let layer = selectedLayers.first {
-                let duplicateItem = menuItem("Duplicate", action: #selector(duplicate))
-                items.append(duplicateItem)
-            }
+            let duplicateItem = menuItem("Duplicate", action: #selector(duplicate))
+            items.append(duplicateItem)
         }
 
         let deleteItem = menuItem("Delete", action: #selector(delete))
@@ -102,7 +96,32 @@ extension LayerNavigatorMenu {
         performDelete(layers: selectedLayers)
     }
 
-    private func performDelete(layers: [AFLayer]) {}
+    private func performDelete(layers: [AFLayer]) {
+        guard let project = document?.project else { return }
+
+        let deletedLayerInfo: [(parent: AFLayer, child: AFLayer, index: Int32)] = layers.compactMap { child in
+            guard let parent = child.parent else { return nil }
+            let index = parent.getChildIndex(child)
+            return (parent, child, index)
+        }
+        .sorted { $0.index < $1.index }
+
+        guard !deletedLayerInfo.isEmpty else { return }
+
+        for deletedLayerInfo in deletedLayerInfo {
+            deletedLayerInfo.parent.removeChild(deletedLayerInfo.child)
+        }
+
+        document?.undoManager?.registerUndo(withTarget: self) {
+            for deletedLayerInfo in deletedLayerInfo {
+                deletedLayerInfo.parent.addChild(deletedLayerInfo.child, at: deletedLayerInfo.index)
+            }
+
+            $0.reloadData()
+        }
+
+        reloadData()
+    }
 
     @objc
     func duplicate() {}
@@ -113,50 +132,38 @@ extension LayerNavigatorMenu {
     }
 
     private func performUpgradeGroup(layers: [AFLayer]) {
-//        guard !layers.isEmpty else {
-//            return
-//        }
-//
-//        let venues = Set(layers.compactMap { $0.attachVenue })
-//        guard venues.count == 1, let veune = venues.first else {
-//            return
-//        }
-//
-//        if let group = veune.upgradeGroup(layers) {
-//            document?.undoManager?.registerUndo(withTarget: self) { [weak veune, weak group] in
-//                guard let veune, let group else { return }
-//                $0.performUndoGroup(veune: veune, group: group)
-//            }
-//
-//            sender?.outlineView.reloadItem(veune.root, reloadChildren: true)
-//        }
+        guard !layers.isEmpty else { return }
+
+        guard let project = document?.project else { return }
+
+        guard let group = project.upgradeGroup(layers) else { return }
+
+        document?.undoManager?.registerUndo(withTarget: self, handler: { [weak group] in
+            guard let group else { return }
+            $0.performUndoGroup(group: group)
+        })
+
+        reloadData()
     }
 
     @objc
     func undoGroup() {
-//        guard selectedLayers.count == 1 else {
-//            return
-//        }
-//        let venues = Set(selectedLayers.compactMap { $0.attachVenue })
-//        guard venues.count == 1, let veune = venues.first else {
-//            return
-//        }
-//
-//        let group = selectedLayers[0]
-//        performUndoGroup(veune: veune, group: group)
+        guard selectedLayers.count == 1 else { return }
+
+        let group = selectedLayers[0]
+        performUndoGroup(group: group)
     }
 
     private func performUndoGroup(group: AFLayer) {
-//        guard veune.undoGroup(group) else {
-//            return
-//        }
-//        document?.undoManager?.registerUndo(withTarget: self) { [weak group] in
-//            guard let group else {
-//                return
-//            }
-//            $0.performUpgradeGroup(layers: group.children)
-//        }
-//
-//        sender?.outlineView.reloadItem(veune.root, reloadChildren: true)
+        guard let project = document?.project else { return }
+
+        guard project.undoGroup(group) else { return }
+
+        document?.undoManager?.registerUndo(withTarget: self, handler: { [weak group] in
+            guard let group else { return }
+            $0.performUpgradeGroup(layers: group.children)
+        })
+
+        reloadData()
     }
 }

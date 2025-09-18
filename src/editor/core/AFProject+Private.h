@@ -33,7 +33,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class AFLayerMap;
 @interface AFProject ()
 @property (nonatomic, strong, readonly) AFLayerMap *layerMap;
-@property (nonatomic, strong, nullable) void (^venueChangeHandler)(AFProject *project);
 - (std::shared_ptr<arenaforge::Project>)cppObject;
 @end
 

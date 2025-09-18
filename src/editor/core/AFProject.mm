@@ -26,8 +26,6 @@
 
 #import <arenaforge_editor/core/AFProject.h>
 
-#import <arenaforge_editor/core/AFVenue.h>
-
 #import <arenaforge_editor/core/AFShapeLayer.h>
 
 #import "AFLayer+Private.h"
@@ -66,6 +64,10 @@
         self.fileURL = fileURL;
         _layerMap = [AFLayerMap new];
         _project = std::move(project);
+
+        auto rootCpp = _project->root();
+        _root = [[AFLayer alloc] initWithCppObject:std::move(rootCpp) layerMap:_layerMap];
+        [_layerMap addLayer:_root];
     }
     return self;
 }
@@ -85,7 +87,10 @@
 }
 
 - (AFShapeLayer *_Nullable)createShapeLayer {
-    AFShapeLayer *layer = [[AFShapeLayer alloc] initWithName:@"Shape" layerMap:self.layerMap];
+    auto counter = _project->genRectangleCounter();
+    NSString *name = [NSString stringWithFormat:@"Rectangle %u", counter];
+    AFShapeLayer *layer = [[AFShapeLayer alloc] initWithName:name layerMap:self.layerMap];
+    [self.layerMap addLayer:layer];
     return layer;
 }
 
@@ -93,68 +98,97 @@
     if (layerId == nil) {
         return nil;
     }
-    return nil;
+    AFLayer *layer = [self.layerMap getLayerById:layerId];
+    return layer;
 }
 
-- (AFLayer *_Nullable)pickLayerAtUnderPoint:(NSPoint)point {
-    //    auto root = _venue->rootLayer();
-    //    auto container = _venue->containerLayer();
-    //        //    auto local = container->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    //    auto layers = container->getLayersUnderPoint(static_cast<float>(point.x), static_cast<float>(point.y));
-    //    if (layers.empty()) {
-    //        return nil;
-    //    }
-    //    auto topLayer = layers.front();
-    //    if (topLayer.get() == container) {
-    //        return nil;
-    //    }
-    //    auto baseLayer = std::dynamic_pointer_cast<arenaforge::BaseLayer>(topLayer);
-    //    if (!baseLayer) {
-    //        return nil;
-    //    }
-    //    NSString *layerId = [NSString stringWithUTF8String:baseLayer->layerId().c_str()];
-    //    AFLayer *layer = [self.layerMap getLayerById:layerId];
-    //    AFLayer *parent = layer.parent;
-    //    if (parent && parent.type == AFLayerTypeGroup) {
-    //        layer = parent;
-    //    }
-    //    if (layer.parent == nil) {
-    //        return nil;
-    //    }
-    return nil;
-}
-
-- (BOOL)hitTestPoint:(NSPoint)point {
-    //    auto root = _venue->rootLayerPtr();
-    //        //    auto localPoint = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    //        //    auto container = _venue->container();
-    //    auto hit = root->hitTestPoint(static_cast<float>(point.x), static_cast<float>(point.y));
-    //    return hit;
-    return point.x > 0;
-}
-
-- (NSPoint)globalToLocal:(NSPoint)point {
-    //    auto root = _venue->rootLayer();
-    //    auto local = root->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    //    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
-    return point;
-}
-
-- (NSPoint)localToGlobal:(NSPoint)point {
-    //    auto root = _venue->rootLayer();
-    //    auto global = root->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    //    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
-    return point;
-}
-
-- (AFLayer *_Nullable)createHoverWireframeLayerInTargetLayer:(AFLayer *)targetLayer {
-    if (targetLayer == nil) {
+- (AFLayer *_Nullable)upgradeGroup:(NSArray<AFLayer *> *)layers {
+    if (layers.count <= 1) {
         return nil;
     }
-    return nil;
+
+    AFLayer *parent = layers[0].parent;
+    for (AFLayer *layer : layers) {
+        if (layer.parent != parent) {
+            return nil;
+        }
+    }
+
+    auto counter = _project->genGroupCounter();
+    auto name = [NSString stringWithFormat:@"Group %u", counter];
+    AFLayer *group = [[AFLayer alloc] initWithName:name layerMap:self.layerMap];
+    // 计算 group 的外包矩形
+    CGFloat minX = CGFLOAT_MAX;
+    CGFloat minY = CGFLOAT_MAX;
+    CGFloat maxX = -CGFLOAT_MAX;
+    CGFloat maxY = -CGFLOAT_MAX;
+
+    for (AFLayer *layer in layers) {
+        NSRect frame = layer.frame;
+        minX = fmin(minX, frame.origin.x);
+        minY = fmin(minY, frame.origin.y);
+        maxX = fmax(maxX, frame.origin.x + frame.size.width);
+        maxY = fmax(maxY, frame.origin.y + frame.size.height);
+    }
+
+    group.frame = NSMakeRect(minX, minY, maxX - minX, maxY - minY);
+    [self.layerMap addLayer:group];
+
+    NSArray<AFLayer *> *sortedLayers = [layers sortedArrayUsingComparator:^NSComparisonResult(AFLayer *_Nonnull obj1, AFLayer *_Nonnull obj2) {
+        int lhsIndex = [parent getChildIndex:obj1];
+        int rhsIndex = [parent getChildIndex:obj2];
+        if (lhsIndex < rhsIndex) {
+            return NSOrderedAscending;
+        } else if (lhsIndex > rhsIndex) {
+            return NSOrderedDescending;
+        } else {
+            return NSOrderedSame;
+        }
+    }];
+
+    auto insetIndex = [parent getChildIndex:sortedLayers.firstObject];
+    // 将 group 添加到原父节点
+    [parent addChild:group atIndex:insetIndex];
+
+    // 添加子图层，并调整子图层 frame 相对于 group
+    for (AFLayer *layer in sortedLayers) {
+        // 调整 frame
+        NSRect frame = layer.frame;
+        frame.origin.x -= group.frame.origin.x;
+        frame.origin.y -= group.frame.origin.y;
+        layer.frame = frame;
+        [layer removeFromParent];
+
+        [group addChild:layer];
+    }
+
+    return group;
 }
 
-- (void)resetHoverWireframe {
+- (BOOL)undoGroup:(AFLayer *)group {
+    if (group == nil) {
+        return NO;
+    }
+
+    AFLayer *parent = group.parent;
+    NSArray<AFLayer *> *children = group.children;
+    if (parent == nil) {
+        return NO;
+    }
+
+    auto index = [parent getChildIndex:group];
+    [group removeFromParent];
+
+    NSRect groupFrame = group.frame;
+    for (AFLayer *child in children) {
+        NSRect childFrame = child.frame;
+        childFrame.origin.x += groupFrame.origin.x;
+        childFrame.origin.y += groupFrame.origin.y;
+        child.frame = childFrame;
+        [parent addChild:child atIndex:index];
+        index++;
+    }
+    return YES;
 }
 
 #pragma mark - getter

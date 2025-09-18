@@ -53,7 +53,13 @@ ARENA_FORGE_EXPORT_API @interface AFEditor : NSObject
 - (void)updateZoomScale:(CGFloat)zoomScale;
 - (void)updateOffset:(NSPoint)offset;
 - (void)updateZoomScale:(CGFloat)zoomScale offset:(NSPoint)offset;
+- (BOOL)addLayer:(AFLayer *)layer toParent:(AFLayer *)parent;
+- (AFLayer *_Nullable)findLayerAtPoint:(NSPoint)point;
+- (NSPoint)globalToLocal:(NSPoint)point targetLayer:(AFLayer *)layer;
+- (NSPoint)localToGlobal:(NSPoint)point sourceLayer:(AFLayer *)layer;
 
+- (void)createHoverWireframeLayerInTargetLayer:(AFLayer *)targetLayer;
+- (void)resetHoverWireframe;
 @end
 
 NS_ASSUME_NONNULL_END

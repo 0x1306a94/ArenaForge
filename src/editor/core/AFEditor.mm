@@ -28,16 +28,17 @@
 
 #import <arenaforge_editor/core/AFLayer.h>
 #import <arenaforge_editor/core/AFProject.h>
-#import <arenaforge_editor/core/AFVenue.h>
 #import <arenaforge_editor/core/Editor.h>
 
 #import "AFEditor+Private.h"
 #import "AFLayer+Private.h"
+#import "AFLayerMap.h"
 #import "AFProject+Private.h"
-#import "AFVenue+Private.h"
 
 #import "platform/mac/AFMacCanvasView+Private.h"
 #import "platform/mac/MacRendererBackend.h"
+
+#import <tgfx/layers/ShapeLayer.h>
 
 @interface AFEditor () <AFMacCanvasViewDelegate>
 @property (nonatomic, strong) AFProject *project;
@@ -136,6 +137,103 @@
     if (_editor) {
         _editor->updateZoomAndOffset(static_cast<float>(zoomScale), static_cast<float>(offset.x), static_cast<float>(offset.y));
     }
+}
+
+- (BOOL)addLayer:(AFLayer *)layer toParent:(AFLayer *)parent {
+    if (!_editor) {
+        return NO;
+    }
+
+    if (layer == nil || parent == nil) {
+        return NO;
+    }
+
+    return [parent addChild:layer];
+}
+
+- (AFLayer *_Nullable)findLayerAtPoint:(NSPoint)point {
+    auto renderLayer = _editor->findLayerAtPoint(static_cast<float>(point.x), static_cast<float>(point.y));
+    if (!renderLayer) {
+        if (_editor->hitTestPointInContainer(static_cast<float>(point.x), static_cast<float>(point.y))) {
+            return self.project.root;
+        }
+        return nil;
+    }
+
+    auto layerName = renderLayer->name();
+    NSString *layerId = [NSString stringWithUTF8String:layerName.c_str()];
+    AFLayer *layer = [self.project.layerMap getLayerById:layerId];
+    if (layer.parent && layer.parent.type == AFLayerTypeGroup && !layer.parent.isRoot) {
+        return layer.parent;
+    }
+    return layer;
+}
+
+- (NSPoint)globalToLocal:(NSPoint)point targetLayer:(AFLayer *)layer {
+    if (!_editor || layer == nil) {
+        return point;
+    }
+
+    if (layer.isRoot) {
+        auto rootLayer = _editor->rootLayer();
+        auto local = rootLayer->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+        return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+    }
+
+    auto cppLayer = [layer cppObject];
+    auto layerId = cppLayer->layerId();
+    auto renderLayer = _editor->getLayerByLayerId(layerId);
+    if (!renderLayer) {
+        return point;
+    }
+
+    auto local = renderLayer->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+}
+
+- (NSPoint)localToGlobal:(NSPoint)point sourceLayer:(AFLayer *)layer {
+    if (!_editor || layer == nil) {
+        return point;
+    }
+
+    if (layer.isRoot) {
+        auto rootLayer = _editor->rootLayer();
+        auto local = rootLayer->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+        return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+    }
+
+    auto cppLayer = [layer cppObject];
+    auto layerId = cppLayer->layerId();
+    auto renderLayer = _editor->getLayerByLayerId(layerId);
+    if (!renderLayer) {
+        return point;
+    }
+
+    auto global = renderLayer->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
+}
+
+- (void)createHoverWireframeLayerInTargetLayer:(AFLayer *)targetLayer {
+    if (targetLayer == nil) {
+        return;
+    }
+
+    if (targetLayer.isRoot) {
+        _editor->addHoverWireframe({_editor->rootLayer()});
+        return;
+    }
+
+    auto cppLayer = [targetLayer cppObject];
+    auto layerId = cppLayer->layerId();
+    auto renderLayer = _editor->getLayerByLayerId(layerId);
+    if (!renderLayer) {
+        return;
+    }
+    _editor->addHoverWireframe({renderLayer});
+}
+
+- (void)resetHoverWireframe {
+    _editor->resetHoverWireframe();
 }
 
 #pragma mark - AFMacCanvasViewDelegate

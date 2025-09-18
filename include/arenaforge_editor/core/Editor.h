@@ -31,17 +31,20 @@
 #include <arenaforge_editor/core/defines.h>
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace tgfx {
+class Layer;
 class ShapeLayer;
 class TextLayer;
 }  // namespace tgfx
 
 namespace arenaforge {
+class Layer;
 class Project;
 class Venue;
-class LayerBridgeManager;
+class LayerTreeAdapter;
 };  // namespace arenaforge
 
 namespace arenaforge::editor {
@@ -53,6 +56,10 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
     ~Editor();
 
     void setRendererBackend(std::shared_ptr<RendererBackend> rendererBackend);
+
+    const std::shared_ptr<tgfx::ShapeLayer> &rootLayer() const {
+        return _rootLayer;
+    }
 
     bool getBoundsSize(float &width, float &height) const;
 
@@ -70,6 +77,15 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
 
     void autoAdjustCanvasScaleForContent();
 
+    bool hitTestPointInContainer(float x, float y) const;
+
+    std::shared_ptr<tgfx::Layer> findLayerAtPoint(float x, float y) const;
+
+    std::shared_ptr<tgfx::Layer> getLayerByLayerId(const std::string &layerId) const;
+
+    void addHoverWireframe(std::vector<std::shared_ptr<tgfx::Layer>> targets);
+    void resetHoverWireframe();
+
     void invalidateContent();
 
     void draw(bool force = false);
@@ -83,7 +99,11 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
   private:
     std::shared_ptr<arenaforge::Project> _project{nullptr};
     std::shared_ptr<Renderer> _renderer{nullptr};
-    std::shared_ptr<LayerBridgeManager> _bridgeManager{nullptr};
+    std::shared_ptr<tgfx::ShapeLayer> _rootLayer{nullptr};
+    std::shared_ptr<tgfx::ShapeLayer> _containerLayer{nullptr};
+    std::shared_ptr<tgfx::ShapeLayer> _maskLayer{nullptr};
+    std::shared_ptr<LayerTreeAdapter> _treeAdapter{nullptr};
+    std::unordered_map<uintptr_t, std::weak_ptr<tgfx::Layer>> _hoverWireframeLayers{};
 };
 };  // namespace arenaforge::editor
 

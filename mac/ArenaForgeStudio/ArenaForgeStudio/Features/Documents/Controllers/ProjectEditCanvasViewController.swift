@@ -150,6 +150,12 @@ final class ProjectEditCanvasViewController: NSViewController {
 
     override func mouseDown(with event: NSEvent) {
         guard let project, let editor else {
+            project?.activateEditorToolbarItem = .cursors
+            return
+        }
+
+        guard let rootLayer = project.project?.root else {
+            project.activateEditorToolbarItem = .cursors
             return
         }
 
@@ -164,8 +170,13 @@ final class ProjectEditCanvasViewController: NSViewController {
             guard let shape = editor.project.createShapeLayer() else {
                 return
             }
-            
+
+            guard editor.add(shape, toParent: rootLayer) else {
+                return
+            }
+
             shape.fillColor = NSColor(calibratedRed: CGFloat.random(in: 0.0...1.0), green: CGFloat.random(in: 0.0...1.0), blue: CGFloat.random(in: 0.0...1.0), alpha: 1.0)
+
             createShape = shape
         }
     }
@@ -183,11 +194,18 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     override func mouseDragged(with event: NSEvent) {
-        guard let project, project.activateEditorToolbarItem != .cursors else {
+        guard let project, project.activateEditorToolbarItem != .cursors, let editor else {
+            project?.activateEditorToolbarItem = .cursors
             return
         }
 
         guard let createMouseStartPoint else {
+            project.activateEditorToolbarItem = .cursors
+            return
+        }
+
+        guard let rootLayer = project.project?.root else {
+            project.activateEditorToolbarItem = .cursors
             return
         }
 
@@ -202,19 +220,26 @@ final class ProjectEditCanvasViewController: NSViewController {
                 return
             }
 
-            let startPoint = createShape.global(toLocal: createMouseStartPoint)
-            let endPoint = createShape.global(toLocal: canvasLocation)
+            let startPoint = editor.global(toLocal: createMouseStartPoint, targetLayer: rootLayer)
+            let endPoint = editor.global(toLocal: canvasLocation, targetLayer: rootLayer)
             let rect = computeRect(start: startPoint, end: endPoint)
             createShape.frame = rect
         }
     }
 
     override func mouseUp(with event: NSEvent) {
-        guard let project, project.activateEditorToolbarItem != .cursors else {
+        guard let project, project.activateEditorToolbarItem != .cursors, let editor else {
+            project?.activateEditorToolbarItem = .cursors
             return
         }
 
         guard let createMouseStartPoint else {
+            project.activateEditorToolbarItem = .cursors
+            return
+        }
+
+        guard let rootLayer = project.project?.root else {
+            project.activateEditorToolbarItem = .cursors
             return
         }
 
@@ -234,8 +259,8 @@ final class ProjectEditCanvasViewController: NSViewController {
                 canvasLocation.y = createMouseStartPoint.y + 100
             }
 
-            let startPoint = createShape.global(toLocal: createMouseStartPoint)
-            let endPoint = createShape.global(toLocal: canvasLocation)
+            let startPoint = editor.global(toLocal: createMouseStartPoint, targetLayer: rootLayer)
+            let endPoint = editor.global(toLocal: canvasLocation, targetLayer: rootLayer)
             let rect = computeRect(start: startPoint, end: endPoint)
             createShape.frame = rect
 
@@ -308,7 +333,7 @@ final class ProjectEditCanvasViewController: NSViewController {
         let location = canvasView.convert(event.locationInWindow, from: nil)
         let canvasLocation = toCanvasPoint(source: location)
 
-        guard let targetLayer = project.project?.pickLayer(atUnderPoint: canvasLocation) else {
+        guard let targetLayer = editor.findLayer(at: canvasLocation) else {
             clearHoverWireframe()
             return
         }
@@ -319,12 +344,12 @@ final class ProjectEditCanvasViewController: NSViewController {
         clearHoverWireframe()
 
         hoverTargetLayer = targetLayer
-        editor.project.createHoverWireframeLayer(inTargetLayer: targetLayer)
+        editor.createHoverWireframeLayer(inTargetLayer: targetLayer)
     }
 
     private func clearHoverWireframe() {
         hoverTargetLayer = nil
-        project?.project?.resetHoverWireframe()
+        editor?.resetHoverWireframe()
     }
 
     private func toCanvasPoint(source: NSPoint) -> NSPoint {

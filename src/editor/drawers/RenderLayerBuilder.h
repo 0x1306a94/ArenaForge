@@ -18,43 +18,33 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  RootLayerBridge.h
+//  RenderLayerBuilder.h
 //  arenaforge_editor
 //
-//  Created by king on 2025/9/17.
+//  Created by king on 2025/9/18.
 //
 
-#ifndef RootLayerBridge_h_ArenaForge
-#define RootLayerBridge_h_ArenaForge
+#ifndef RenderLayerBuilder_h_ArenaForge
+#define RenderLayerBuilder_h_ArenaForge
 
-#include "LayerBridge.h"
+#include <memory>
 
 namespace tgfx {
+class Layer;
 class ShapeLayer;
-};
+};  // namespace tgfx
 
 namespace arenaforge {
 class Layer;
-class RootLayerBridge : public LayerBridge {
+class ShapeLayer;
+
+class RenderLayerBuilder {
   public:
-    static std::shared_ptr<RootLayerBridge> Make(tgfx::Layer *renderParent, std::shared_ptr<Layer> data);
-    virtual ~RootLayerBridge() = default;
-
-    std::shared_ptr<Layer> dataLayer() override;
-
-    std::shared_ptr<tgfx::Layer> renderLayer() override;
-
-    void buildRenderLayer() override;
-
-  protected:
-    RootLayerBridge(tgfx::Layer *renderParent, std::shared_ptr<Layer> data);
+    static std::shared_ptr<tgfx::Layer> BuildFromData(const Layer *data);
 
   private:
-    std::shared_ptr<Layer> _data;
-    std::shared_ptr<tgfx::ShapeLayer> _rootLayer;
-    std::shared_ptr<tgfx::ShapeLayer> _containerLayer{nullptr};
-    std::shared_ptr<tgfx::ShapeLayer> _maskLayer{nullptr};
+    static std::shared_ptr<tgfx::ShapeLayer> BuildShapeLayer(const ShapeLayer *data);
 };
 };  // namespace arenaforge
 
-#endif /* RootLayerBridge_h_ArenaForge */
+#endif /* RenderLayerBuilder_h_ArenaForge */

@@ -99,9 +99,13 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
             return false
         }
 
+        guard let editor else {
+            return false
+        }
+
         let oldIndex = sourceParent.getChildIndex(source)
         let oldFrame = source.frame
-        let oldGlobal = source.local(toGlobal: .zero)
+        let oldGlobal = editor.local(toGlobal: .zero, sourceLayer: source)
 
         // 显示是按照倒序
         var reversedIndex = destination.childrenCount - index
@@ -116,7 +120,7 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
         }
 
         if sourceParent != destination {
-            let newLocal = destination.global(toLocal: oldGlobal)
+            let newLocal = editor.global(toLocal: oldGlobal, targetLayer: destination)
             var newFrame = oldFrame
             newFrame.origin = newLocal
             source.frame = newFrame

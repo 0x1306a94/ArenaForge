@@ -29,14 +29,13 @@
 #include <arenaforge_core/Project.h>
 #include <arenaforge_core/Size.h>
 #include <arenaforge_core/Venue.h>
-#include <arenaforge_core/layers/BaseLayer.h>
+#include <arenaforge_core/layers/Layer.h>
 
 #include "renderer/Renderer.h"
 #include "renderer/RendererBackend.h"
 #include "renderer/RendererState.h"
 
-#include "drawers/LayerBridge.h"
-#include "drawers/LayerBridgeManager.h"
+#include "drawers/LayerTreeAdapter.h"
 
 #include <tgfx/layers/Layer.h>
 #include <tgfx/layers/ShapeLayer.h>
@@ -52,10 +51,12 @@ std::shared_ptr<Editor> Editor::Make(std::shared_ptr<arenaforge::Project> projec
 
 Editor::Editor(std::shared_ptr<arenaforge::Project> project)
     : _project(std::move(project))
-    , _renderer(Renderer::Make(std::make_shared<RendererState>(), nullptr))
-    , _bridgeManager(std::make_shared<LayerBridgeManager>()) {
+    , _renderer(Renderer::Make(std::make_shared<RendererState>(), nullptr)) {
 
     setupRootLayer();
+
+    auto root = _project->root();
+    _treeAdapter = std::make_shared<arenaforge::LayerTreeAdapter>(root, _containerLayer);
 }
 
 Editor::~Editor() {
@@ -157,6 +158,90 @@ void Editor::autoAdjustCanvasScaleForContent() {
     _renderer->autoAdjustCanvasScaleForContent();
 }
 
+bool Editor::hitTestPointInContainer(float x, float y) const {
+    return _containerLayer->hitTestPoint(x, y);
+}
+
+std::shared_ptr<tgfx::Layer> Editor::findLayerAtPoint(float x, float y) const {
+    auto layers = _containerLayer->getLayersUnderPoint(x, y);
+    if (layers.empty()) {
+        return nullptr;
+    }
+
+    auto topLayer = layers.front();
+    if (topLayer == _containerLayer) {
+        return nullptr;
+    }
+
+    return topLayer;
+}
+
+std::shared_ptr<tgfx::Layer> Editor::getLayerByLayerId(const std::string &layerId) const {
+    auto layer = _treeAdapter->findRenderLayer(layerId);
+    return layer;
+}
+
+void Editor::addHoverWireframe(std::vector<std::shared_ptr<tgfx::Layer>> targets) {
+    if (targets.empty()) {
+        return;
+    }
+
+    for (auto &target : targets) {
+        auto key = reinterpret_cast<uintptr_t>(target.get());
+        auto it = _hoverWireframeLayers.find(key);
+        if (it != _hoverWireframeLayers.end()) {
+            continue;
+        }
+
+        auto parent = target->parent();
+        if (parent == nullptr) {
+            continue;
+        }
+
+        auto layerId = target->name();
+        auto data = (target == _rootLayer) ? _project->root() : _treeAdapter->findDataLayer(layerId);
+        if (!data) {
+            continue;
+        }
+
+        // 先将自身转为全局，再从全局转为_rootLayer
+        auto position = target->localToGlobal(tgfx::Point::Zero());
+        position = _rootLayer->globalToLocal(position);
+
+        auto frame = data->frame();
+
+        tgfx::Path path;
+        path.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
+
+        auto hoverLayer = tgfx::ShapeLayer::Make();
+        hoverLayer->setPath(std::move(path));
+        hoverLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
+        hoverLayer->setPosition(position);
+        hoverLayer->setLineWidth(4);
+
+        // 根节点特殊处理
+        if (target == _rootLayer) {
+            _rootLayer->parent()->addChild(hoverLayer);
+        } else {
+            _rootLayer->addChild(hoverLayer);
+        }
+        _hoverWireframeLayers[key] = hoverLayer;
+    }
+}
+
+void Editor::resetHoverWireframe() {
+    if (_hoverWireframeLayers.empty()) {
+        return;
+    }
+    std::unordered_map<uintptr_t, std::weak_ptr<tgfx::Layer>> exists;
+    std::swap(_hoverWireframeLayers, exists);
+    for (auto &[key, value] : exists) {
+        if (auto layer = value.lock()) {
+            layer->removeFromParent();
+        }
+    }
+}
+
 void Editor::invalidateContent() {
     if (!_renderer) {
         return;
@@ -172,18 +257,31 @@ void Editor::draw(bool force) {
 }
 
 void Editor::setupRootLayer() {
-
     auto root = _project->root();
-    if (!root) {
-        return;
-    }
-    auto layerTreeRoot = _renderer->designLayerRoot();
-    auto bridge = _bridgeManager->createBridge(layerTreeRoot, root);
-    if (!bridge) {
-        return;
-    }
 
-    bridge->buildRenderLayer();
+    auto frame = root->frame();
+
+    tgfx::Path rootPath;
+    rootPath.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
+
+    auto layerTreeRoot = _renderer->designLayerRoot();
+    _rootLayer = tgfx::ShapeLayer::Make();
+    _rootLayer->setPath(rootPath);
+
+    _containerLayer = tgfx::ShapeLayer::Make();
+    _containerLayer->setFillStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0xcc, 0xcc, 0xcc)));
+    _containerLayer->setPath(rootPath);
+
+    _maskLayer = tgfx::ShapeLayer::Make();
+    _maskLayer->setFillStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0xcc, 0xcc, 0xcc)));
+    _maskLayer->setPath(rootPath);
+
+    _rootLayer->addChild(_containerLayer);
+    _rootLayer->addChild(_maskLayer);
+
+    _containerLayer->setMask(_maskLayer);
+
+    layerTreeRoot->addChild(_rootLayer);
 }
 
 };  // namespace arenaforge::editor

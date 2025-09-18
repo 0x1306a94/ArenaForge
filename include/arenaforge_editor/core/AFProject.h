@@ -37,6 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class AFShapeLayer;
 ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 @property (nonatomic, copy, readonly) NSString *name;
+@property (nonatomic, strong, readonly) AFLayer *root;
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype __nullable)initWithFileURL:(NSURL *)fileURL error:(NSError **)error NS_DESIGNATED_INITIALIZER;
@@ -49,13 +50,9 @@ ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 
 - (AFLayer *_Nullable)findLayerById:(NSString *)layerId;
 
-- (AFLayer *_Nullable)pickLayerAtUnderPoint:(NSPoint)point;
-- (BOOL)hitTestPoint:(NSPoint)point;
-- (NSPoint)globalToLocal:(NSPoint)point;
-- (NSPoint)localToGlobal:(NSPoint)point;
+- (AFLayer *_Nullable)upgradeGroup:(NSArray<AFLayer *> *)layers;
 
-- (AFLayer *_Nullable)createHoverWireframeLayerInTargetLayer:(AFLayer *)targetLayer;
-- (void)resetHoverWireframe;
+- (BOOL)undoGroup:(AFLayer *)group;
 @end
 
 NS_ASSUME_NONNULL_END

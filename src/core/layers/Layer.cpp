@@ -53,6 +53,7 @@ void Layer::setVisible(bool value) {
         return;
     }
     _visible = value;
+    notifyPropertyChanged();
 }
 
 void Layer::setLocked(bool value) {
@@ -74,6 +75,7 @@ void Layer::setFrame(const Rect &frame) {
         return;
     }
     _frame = frame;
+    notifyPropertyChanged();
 }
 
 bool Layer::addChild(std::shared_ptr<Layer> child) {
@@ -102,6 +104,7 @@ bool Layer::addChildAt(std::shared_ptr<Layer> child, int index) {
     child->removeFromParent();
     _children.insert(_children.begin() + index, child);
     child->_parent = this;
+    notifyStructureChanged(child, StructureChangeType::ChildAdded, index);
     return true;
 }
 
@@ -127,7 +130,7 @@ std::shared_ptr<Layer> Layer::removeChildAt(int index) {
     auto child = _children[static_cast<size_t>(index)];
     child->_parent = nullptr;
     _children.erase(_children.begin() + index);
-
+    notifyStructureChanged(child, StructureChangeType::ChildRemoved, index);
     return child;
 }
 
@@ -159,6 +162,7 @@ bool Layer::setChildIndex(std::shared_ptr<Layer> child, int index) {
     }
     _children.erase(_children.begin() + oldIndex);
     _children.insert(_children.begin() + index, child);
+    notifyStructureChanged(child, StructureChangeType::ChildReordered, index);
     return true;
 }
 
@@ -206,6 +210,26 @@ std::optional<std::string> Layer::getAttributes(const std::string &key) {
 std::string Layer::toJSON(bool pretty) {
     nlohmann::json j = shared_from_this();
     return j.dump(pretty ? 4 : -1);
+}
+
+void Layer::setOnPropertyChanged(PropertyChangedCallback cb) {
+    _onPropChanged = std::move(cb);
+}
+
+void Layer::setOnStructureChanged(StructureChangedCallback cb) {
+    _onStructChanged = std::move(cb);
+}
+
+void Layer::notifyPropertyChanged() {
+    if (_onPropChanged) {
+        _onPropChanged(this);
+    }
+}
+
+void Layer::notifyStructureChanged(std::shared_ptr<Layer> child, StructureChangeType type, int index) {
+    if (_onStructChanged && child) {
+        _onStructChanged(this, child.get(), type, index);
+    }
 }
 
 int Layer::doGetChildIndex(const Layer *child) const {

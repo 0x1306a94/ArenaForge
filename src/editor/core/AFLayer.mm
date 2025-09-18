@@ -142,18 +142,6 @@
     self.parent = nil;
 }
 
-- (NSPoint)globalToLocal:(NSPoint)point {
-    //    auto local = _layer->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    //    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
-    return point;
-}
-
-- (NSPoint)localToGlobal:(NSPoint)point {
-    //    auto global = _layer->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    //    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
-    return point;
-}
-
 - (void)rebuildCacheChildren {
     NSMutableArray<AFLayer *> *children = [NSMutableArray<AFLayer *> array];
     for (const auto &child : _layer->children()) {
@@ -224,6 +212,10 @@
 - (NSRect)frame {
     auto cppRect = _layer->frame();
     return NSRectFromCGRect(CGRectMake(cppRect.x(), cppRect.y(), cppRect.width(), cppRect.height()));
+}
+
+- (BOOL)isRoot {
+    return _layer->isRoot();
 }
 
 @end

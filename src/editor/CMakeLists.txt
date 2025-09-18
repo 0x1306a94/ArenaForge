@@ -47,7 +47,6 @@ if(APPLE)
         ${PUBLIC_HEADER_ROOT_DIR}/core/defines.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/Platform.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFProject.h
-        ${PUBLIC_HEADER_ROOT_DIR}/core/AFVenue.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFLayer.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFShapeLayer.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/AFBooleanLayer.h

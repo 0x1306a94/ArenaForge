@@ -27,6 +27,7 @@
 #ifndef Layer_h_ArenaForge
 #define Layer_h_ArenaForge
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -38,6 +39,14 @@
 namespace arenaforge {
 class Layer : public std::enable_shared_from_this<Layer> {
   public:
+    enum class StructureChangeType {
+        ChildAdded,
+        ChildRemoved,
+        ChildReordered,
+    };
+
+    using PropertyChangedCallback = std::function<void(Layer *layer)>;
+    using StructureChangedCallback = std::function<void(Layer *parent, Layer *child, StructureChangeType type, int index)>;
     static std::shared_ptr<Layer> Make(const std::string &layerId);
     virtual ~Layer();
 
@@ -125,6 +134,12 @@ class Layer : public std::enable_shared_from_this<Layer> {
 
     std::string toJSON(bool pretty = false);
 
+    void setOnPropertyChanged(PropertyChangedCallback cb);
+    void setOnStructureChanged(StructureChangedCallback cb);
+
+    void notifyPropertyChanged();
+    void notifyStructureChanged(std::shared_ptr<Layer> child, StructureChangeType type, int index);
+
   protected:
     Layer(const std::string &layerId);
 
@@ -146,6 +161,8 @@ class Layer : public std::enable_shared_from_this<Layer> {
     Layer *_parent{nullptr};
     std::vector<std::shared_ptr<Layer>> _children{};
     std::unordered_map<std::string, std::string> _attributes{};
+    PropertyChangedCallback _onPropChanged{nullptr};
+    StructureChangedCallback _onStructChanged{nullptr};
 
     friend class Project;
 };

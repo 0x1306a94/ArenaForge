@@ -18,26 +18,53 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  LayerBridge.cpp
+//  RenderLayerBuilder.cpp
 //  arenaforge_editor
 //
-//  Created by king on 2025/9/17.
+//  Created by king on 2025/9/18.
 //
 
-#include "LayerBridge.h"
+#include "RenderLayerBuilder.h"
 
 #include <arenaforge_core/layers/Layer.h>
+#include <arenaforge_core/layers/ShapeLayer.h>
 
 #include <tgfx/layers/ShapeLayer.h>
+#include <tgfx/layers/SolidColor.h>
+
 namespace arenaforge {
+std::shared_ptr<tgfx::Layer> RenderLayerBuilder::BuildFromData(const Layer *data) {
+    if (data == nullptr) {
+        return nullptr;
+    }
 
-LayerBridge::LayerBridge(tgfx::Layer *renderParent)
-    : _renderParent(renderParent) {
+    auto type = data->type();
+    switch (type) {
+        case LayerType::Group: {
+            auto layer = tgfx::ShapeLayer::Make();
+            layer->setName(data->layerId());
+            return layer;
+            break;
+        }
+        case LayerType::Shape: {
+            return BuildShapeLayer(static_cast<const ShapeLayer *>(data));
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return nullptr;
 }
 
-void LayerBridge::buildRenderLayer() {
+std::shared_ptr<tgfx::ShapeLayer> RenderLayerBuilder::BuildShapeLayer(const ShapeLayer *data) {
+    if (data == nullptr) {
+        return nullptr;
+    }
+    auto layer = tgfx::ShapeLayer::Make();
+    layer->setName(data->layerId());
+    return layer;
 }
-
-void LayerBridge::sync() {
-}
+    
 };  // namespace arenaforge

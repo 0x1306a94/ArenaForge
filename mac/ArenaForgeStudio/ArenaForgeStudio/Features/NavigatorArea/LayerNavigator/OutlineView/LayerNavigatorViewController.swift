@@ -29,11 +29,13 @@ import arenaforge_editor
 
 final class LayerNavigatorViewController: NSViewController {
     weak var project: ProjectDocument?
-
+    weak var editor: AFEditor?
     private var scrollView: NSScrollView!
     var outlineView: NSOutlineView!
 
-    var layers: [AFLayer] = []
+    var layers: [AFLayer] {
+        project?.project?.root.children ?? []
+    }
 
     var rowHeight: Double = 22 {
         willSet {
@@ -46,9 +48,10 @@ final class LayerNavigatorViewController: NSViewController {
 
     var expandedItems: NSSet = []
 
-    init(project: ProjectDocument) {
+    init(project: ProjectDocument, editor: AFEditor) {
         super.init(nibName: nil, bundle: nil)
         self.project = project
+        self.editor = editor
     }
 
     /// Setup the ``scrollView`` and ``outlineView``

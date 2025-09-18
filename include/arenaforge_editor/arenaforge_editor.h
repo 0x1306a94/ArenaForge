@@ -34,7 +34,6 @@
 #import <arenaforge_editor/core/AFShapeLayer.h>
 #import <arenaforge_editor/core/AFBooleanLayer.h>
 #import <arenaforge_editor/core/AFProject.h>
-#import <arenaforge_editor/core/AFVenue.h>
 #import <arenaforge_editor/core/Platform.h>
 #import <arenaforge_editor/platform/mac/AFMacCanvasView.h>
 
