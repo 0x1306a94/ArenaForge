@@ -34,7 +34,7 @@ PathCommand Make(PathCommandType type) {
     return cmd;
 }
 
-PathCommand PathCommand::MakeMoveTo(const tgfx::Point &point) {
+PathCommand PathCommand::MakeMoveTo(const Point &point) {
     PathCommand cmd{};
     cmd.type = PathCommandType::MoveTo;
     cmd.c1 = point;
@@ -43,7 +43,7 @@ PathCommand PathCommand::MakeMoveTo(const tgfx::Point &point) {
     return cmd;
 }
 
-PathCommand PathCommand::MakeLineTo(const tgfx::Point &point) {
+PathCommand PathCommand::MakeLineTo(const Point &point) {
     PathCommand cmd{};
     cmd.type = PathCommandType::LineTo;
     cmd.c1 = point;
@@ -52,7 +52,7 @@ PathCommand PathCommand::MakeLineTo(const tgfx::Point &point) {
     return cmd;
 }
 
-PathCommand PathCommand::MakeQuadTo(const tgfx::Point &control, const tgfx::Point &point) {
+PathCommand PathCommand::MakeQuadTo(const Point &control, const Point &point) {
     PathCommand cmd{};
     cmd.type = PathCommandType::QuadTo;
     cmd.c1 = control;
@@ -61,7 +61,7 @@ PathCommand PathCommand::MakeQuadTo(const tgfx::Point &control, const tgfx::Poin
     return cmd;
 }
 
-PathCommand PathCommand::MakeCubicTo(const tgfx::Point &controlStart, const tgfx::Point &controlEnd, const tgfx::Point &point) {
+PathCommand PathCommand::MakeCubicTo(const Point &controlStart, const Point &controlEnd, const Point &point) {
     PathCommand cmd{};
     cmd.type = PathCommandType::CubicTo;
     cmd.c1 = controlStart;
@@ -74,6 +74,27 @@ PathCommand PathCommand::MakeClose() {
     PathCommand cmd{};
     cmd.type = PathCommandType::ClosePath;
     return cmd;
+}
+
+std::vector<PathCommand> PathCommand::MakeRectangle() {
+    std::vector<PathCommand> commands;
+    commands.push_back(PathCommand::MakeMoveTo({0.0, 0.0}));
+    commands.push_back(PathCommand::MakeLineTo({1.0, 0.0}));
+    commands.push_back(PathCommand::MakeLineTo({1.0, 1.0}));
+    commands.push_back(PathCommand::MakeLineTo({0.0, 1.0}));
+    commands.push_back(PathCommand::MakeLineTo({0.0, 0.0}));
+    commands.push_back(PathCommand::MakeClose());
+    return commands;
+}
+
+std::vector<PathCommand> PathCommand::MakeTriangle() {
+    std::vector<PathCommand> commands;
+    commands.push_back(PathCommand::MakeMoveTo({0.5, 0.0}));
+    commands.push_back(PathCommand::MakeLineTo({1.0, 1.0}));
+    commands.push_back(PathCommand::MakeLineTo({0.0, 1.0}));
+    commands.push_back(PathCommand::MakeLineTo({0.5, 0.0}));
+    commands.push_back(PathCommand::MakeClose());
+    return commands;
 }
 
 std::string PathCommandTypeToString(PathCommandType type) {

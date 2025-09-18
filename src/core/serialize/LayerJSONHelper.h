@@ -38,6 +38,7 @@ struct Point;
 struct ISize;
 struct Size;
 struct Rect;
+struct PathCommand;
 
 };  // namespace arenaforge
 
@@ -46,6 +47,12 @@ template <>
 struct adl_serializer<std::shared_ptr<arenaforge::Layer>> {
     static std::shared_ptr<arenaforge::Layer> from_json(const nlohmann::json &j);
     static void to_json(nlohmann::json &j, std::shared_ptr<arenaforge::Layer> layer);
+};
+
+template <>
+struct adl_serializer<arenaforge::PathCommand> {
+    static arenaforge::PathCommand from_json(const nlohmann::json &j);
+    static void to_json(nlohmann::json &j, const arenaforge::PathCommand &cmd);
 };
 
 template <>

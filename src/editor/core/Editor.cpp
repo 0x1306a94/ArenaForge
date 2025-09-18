@@ -28,7 +28,6 @@
 
 #include <arenaforge_core/Project.h>
 #include <arenaforge_core/Size.h>
-#include <arenaforge_core/Venue.h>
 #include <arenaforge_core/layers/Layer.h>
 
 #include "renderer/Renderer.h"

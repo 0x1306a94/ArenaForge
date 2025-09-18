@@ -241,6 +241,58 @@ void adl_serializer<std::shared_ptr<arenaforge::Layer>>::to_json(nlohmann::json 
     }
 }
 
+arenaforge::PathCommand adl_serializer<arenaforge::PathCommand>::from_json(const nlohmann::json &j) {
+    auto type = arenaforge::PathCommandTypeFromString(as::read_string_value(j, "type", ""));
+    arenaforge::PathCommand cmd;
+    cmd.type = type;
+    do {
+        if (cmd.type == arenaforge::PathCommandType::ClosePath || cmd.type == arenaforge::PathCommandType::Unknown) {
+            break;
+        }
+
+        as::read_field(cmd.p, j, "p");
+        if (cmd.type == arenaforge::PathCommandType::QuadTo) {
+            as::read_field(cmd.c1, j, "c1");
+        } else if (cmd.type == arenaforge::PathCommandType::CubicTo) {
+            as::read_field(cmd.c1, j, "c1");
+            as::read_field(cmd.c2, j, "c2");
+        }
+    } while (0);
+
+    return cmd;
+}
+
+void adl_serializer<arenaforge::PathCommand>::to_json(nlohmann::json &j, const arenaforge::PathCommand &cmd) {
+    j["type"] = arenaforge::PathCommandTypeToString(cmd.type);
+    if (cmd.type == arenaforge::PathCommandType::ClosePath || cmd.type == arenaforge::PathCommandType::Unknown) {
+        return;
+    }
+
+    switch (cmd.type) {
+        case arenaforge::PathCommandType::LineTo: {
+            j["p"] = cmd.p;
+            break;
+        }
+        case arenaforge::PathCommandType::MoveTo: {
+            j["p"] = cmd.p;
+            break;
+        }
+        case arenaforge::PathCommandType::QuadTo: {
+            j["p"] = cmd.p;
+            j["c1"] = cmd.c1;
+            break;
+        }
+        case arenaforge::PathCommandType::CubicTo: {
+            j["c1"] = cmd.c1;
+            j["c2"] = cmd.c2;
+            j["p"] = cmd.p;
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 arenaforge::Rect adl_serializer<arenaforge::Rect>::from_json(const nlohmann::json &j) {
     auto x = as::read_value<float>(j, "x", 0.0f);
     auto y = as::read_value<float>(j, "y", 0.0f);

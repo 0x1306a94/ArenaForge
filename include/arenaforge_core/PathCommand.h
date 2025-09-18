@@ -28,8 +28,9 @@
 #define PathCommand_h_ArenaForge
 
 #include <string>
+#include <vector>
 
-#include <tgfx/core/Point.h>
+#include <arenaforge_core/Point.h>
 
 namespace arenaforge {
 enum class PathCommandType {
@@ -43,14 +44,17 @@ enum class PathCommandType {
 
 struct PathCommand {
     PathCommandType type;
-    tgfx::Point c1, c2, p;
+    Point c1, c2, p;
 
     static PathCommand Make(PathCommandType type);
-    static PathCommand MakeMoveTo(const tgfx::Point &point);
-    static PathCommand MakeLineTo(const tgfx::Point &point);
-    static PathCommand MakeQuadTo(const tgfx::Point &control, const tgfx::Point &point);
-    static PathCommand MakeCubicTo(const tgfx::Point &controlStart, const tgfx::Point &controlEnd, const tgfx::Point &point);
+    static PathCommand MakeMoveTo(const Point &point);
+    static PathCommand MakeLineTo(const Point &point);
+    static PathCommand MakeQuadTo(const Point &control, const Point &point);
+    static PathCommand MakeCubicTo(const Point &controlStart, const Point &controlEnd, const Point &point);
     static PathCommand MakeClose();
+
+    static std::vector<PathCommand> MakeRectangle();
+    static std::vector<PathCommand> MakeTriangle();
 };
 
 std::string PathCommandTypeToString(PathCommandType type);
