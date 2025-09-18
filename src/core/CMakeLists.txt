@@ -53,7 +53,6 @@ add_source_group(SRC_FILES ${CMAKE_CURRENT_LIST_DIR} "Sources")
 
 target_link_libraries(${TAGRGET_NAME}
     ${CORE_SHARED_LIBS}
-    tgfx
     nlohmann_json::nlohmann_json
     fmt::fmt
 )

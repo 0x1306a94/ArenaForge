@@ -34,11 +34,6 @@ typedef NS_ENUM(NSUInteger, AFLayerType) {
     AFLayerTypeShape,
     AFLayerTypeBoolean,
     AFLayerTypeText,
-    AFLayerTypeRectangle,
-    AFLayerTypeEllipse,
-    AFLayerTypeLine,
-    AFLayerTypeTriangle,
-    AFLayerTypeVector,
 };
 
 #endif /* AFLayerType_h_ArenaForge */

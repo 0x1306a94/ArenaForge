@@ -27,6 +27,7 @@
 #ifndef ShapeLayer_h_ArenaForge
 #define ShapeLayer_h_ArenaForge
 
+#include <arenaforge_core/PathCommand.h>
 #include <arenaforge_core/layers/Layer.h>
 
 #include <arenaforge_core/Color.h>
@@ -80,6 +81,12 @@ class ShapeLayer : public Layer {
 
     void setStroke(std::optional<Color> stroke);
 
+    const std::vector<PathCommand> &pathCommands() const {
+        return _pathCommands;
+    }
+
+    void setPathCommands(std::vector<PathCommand> commands);
+
   protected:
     ShapeLayer(const std::string &layerId);
 
@@ -90,6 +97,7 @@ class ShapeLayer : public Layer {
     StrokeAlign _strokeAlign{StrokeAlign::Inside};
     LineCap _lineCap{LineCap::Butt};
     LineJoin _lineJoin{LineJoin::Miter};
+    std::vector<PathCommand> _pathCommands{};
 };
 };  // namespace arenaforge
 

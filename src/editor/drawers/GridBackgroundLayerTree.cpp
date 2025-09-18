@@ -28,17 +28,18 @@
 
 #include "renderer/RendererState.h"
 
+#include <arenaforge_core/Print.h>
+#include <arenaforge_core/Size.h>
 #include <arenaforge_editor/core/defines.h>
 
 #include <tgfx/core/Canvas.h>
 #include <tgfx/layers/DisplayList.h>
 #include <tgfx/layers/LayerRecorder.h>
-#include <tgfx/platform/Print.h>
 
 namespace arenaforge::editor {
 class GridBackgroundLayer : public tgfx::Layer {
   private:
-    tgfx::Size _contentSize{};
+    arenaforge::Size _contentSize{};
     float _density{1.0};
 
   public:
@@ -46,7 +47,7 @@ class GridBackgroundLayer : public tgfx::Layer {
         return std::shared_ptr<GridBackgroundLayer>(new GridBackgroundLayer());
     }
 
-    void setContentSize(const tgfx::Size &contentSize) {
+    void setContentSize(const arenaforge::Size &contentSize) {
         if (_contentSize == contentSize) {
             return;
         }
@@ -92,11 +93,11 @@ GridBackgroundLayerTree::GridBackgroundLayerTree()
     : Drawer("GridBackgroundLayerTree")
     , _root(nullptr)
     , _displayList(std::make_unique<tgfx::DisplayList>()) {
-    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
+    PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
 GridBackgroundLayerTree::~GridBackgroundLayerTree() {
-    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
+    PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
 bool GridBackgroundLayerTree::hasContentChanged() const {

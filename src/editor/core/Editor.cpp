@@ -26,6 +26,8 @@
 
 #include <arenaforge_editor/core/Editor.h>
 
+#include <arenaforge_core/Point.h>
+#include <arenaforge_core/Print.h>
 #include <arenaforge_core/Project.h>
 #include <arenaforge_core/Size.h>
 #include <arenaforge_core/layers/Layer.h>
@@ -40,7 +42,6 @@
 #include <tgfx/layers/ShapeLayer.h>
 #include <tgfx/layers/SolidColor.h>
 #include <tgfx/layers/TextLayer.h>
-#include <tgfx/platform/Print.h>
 
 namespace arenaforge::editor {
 
@@ -59,7 +60,7 @@ Editor::Editor(std::shared_ptr<arenaforge::Project> project)
 }
 
 Editor::~Editor() {
-    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
+    PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
 void Editor::setRendererBackend(std::shared_ptr<RendererBackend> rendererBackend) {
@@ -135,7 +136,7 @@ bool Editor::updateZoomAndOffset(float zoomScale, float offsetX, float offsetY) 
     if (!state) {
         return false;
     }
-    auto changed = state->updateZoomAndOffset(zoomScale, tgfx::Point{offsetX, offsetY});
+    auto changed = state->updateZoomAndOffset(zoomScale, Point{offsetX, offsetY});
     return changed;
 }
 

@@ -26,13 +26,12 @@
 
 #include <arenaforge_core/Project.h>
 
+#include <arenaforge_core/Print.h>
 #include <arenaforge_core/layers/Layer.h>
 #include <arenaforge_core/uuid/UUID.h>
 
 #include "serialize/JSONSerializeHelper.h"
 #include "serialize/LayerJSONHelper.h"
-
-#include <tgfx/platform/Print.h>
 
 #include <nlohmann/json.hpp>
 
@@ -84,7 +83,7 @@ Project::Project(const std::string &name, const std::string &description, const 
 }
 
 Project::~Project() {
-    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
+    PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
 const Size Project::canvasSize() const {

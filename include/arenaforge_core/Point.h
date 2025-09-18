@@ -29,6 +29,8 @@
 
 #include <cmath>
 
+#include <arenaforge_core/Size.h>
+
 namespace arenaforge {
 /**
  * Point holds two 32-bit floating point coordinates.
@@ -170,6 +172,14 @@ struct Point {
     void operator*=(float scale) {
         x *= scale;
         y *= scale;
+    }
+
+    /**
+     * Returns Point multiplied by size.
+     * (x * size.width, y * size.height)
+     */
+    friend Point operator*(const Point &p, const Size &size) {
+        return {p.x * size.width, p.y * size.height};
     }
 
     /**

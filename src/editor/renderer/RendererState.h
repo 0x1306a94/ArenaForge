@@ -27,16 +27,16 @@
 #ifndef RendererState_h_ArenaForge
 #define RendererState_h_ArenaForge
 
-#include <tgfx/core/Point.h>
-#include <tgfx/core/Size.h>
+#include <arenaforge_core/Point.h>
+#include <arenaforge_core/Size.h>
 
 namespace arenaforge::editor {
 class RendererState {
   public:
-    explicit RendererState(const tgfx::Size &boundsSize = {1280, 720}, float density = 1.0f);
+    explicit RendererState(const arenaforge::Size &boundsSize = {1280, 720}, float density = 1.0f);
     ~RendererState();
     /// canvas 尺寸
-    const tgfx::Size &getBoundsSize() const;
+    const arenaforge::Size &getBoundsSize() const;
 
     float density() const;
 
@@ -44,17 +44,17 @@ class RendererState {
     float zoomScale() const;
 
     /// 当前滑动偏移
-    const tgfx::Point &contentOffset() const;
+    const arenaforge::Point &contentOffset() const;
 
-    bool updateBounds(const tgfx::Size &boundsSize, float density);
-    bool updateZoomAndOffset(float zoomScale, const tgfx::Point &contentOffset);
+    bool updateBounds(const arenaforge::Size &boundsSize, float density);
+    bool updateZoomAndOffset(float zoomScale, const arenaforge::Point &contentOffset);
 
   private:
     /// canvas 尺寸
-    tgfx::Size _boundsSize{1280, 720};
+    arenaforge::Size _boundsSize{1280, 720};
     float _density{1.0f};
     float _zoomScale = 1.0f;
-    tgfx::Point _contentOffset = {};
+    arenaforge::Point _contentOffset = {};
 };
 };  // namespace arenaforge::editor
 

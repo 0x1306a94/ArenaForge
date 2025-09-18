@@ -60,4 +60,8 @@ void ShapeLayer::setFill(std::optional<Color> fill) {
 void ShapeLayer::setStroke(std::optional<Color> stroke) {
     _stroke = std::move(stroke);
 }
+
+void ShapeLayer::setPathCommands(std::vector<PathCommand> commands) {
+    _pathCommands = std::move(commands);
+}
 };  // namespace arenaforge

@@ -35,15 +35,7 @@ enum class LayerType {
     Shape,
     Boolean,
     Text,
-    Rectangle,
-    Ellipse,
-    Line,
-    Triangle,
-    Vector,
 };
-
-std::string LayerTypeToString(LayerType type);
-LayerType LayerTypeFromString(const std::string &type);
 
 };  // namespace arenaforge
 

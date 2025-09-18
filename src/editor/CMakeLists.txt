@@ -114,6 +114,7 @@ add_source_group(SRC_FILES ${CMAKE_CURRENT_LIST_DIR} "Sources")
 
 target_link_libraries(${TAGRGET_NAME}
     ${TAGRET_NAME_PREFIX}::core
+    tgfx
 )
 
 target_include_directories(${TAGRGET_NAME} PRIVATE

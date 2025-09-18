@@ -32,12 +32,14 @@
 #include "drawers/GridBackgroundLayerTree.h"
 #include "drawers/UserDesignLayerTree.h"
 
+#include <arenaforge_core/Print.h>
+#include <arenaforge_core/Size.h>
+
 #include <tgfx/core/Canvas.h>
 #include <tgfx/core/Surface.h>
 #include <tgfx/gpu/Device.h>
 #include <tgfx/gpu/Window.h>
 #include <tgfx/layers/Layer.h>
-#include <tgfx/platform/Print.h>
 
 namespace arenaforge::editor {
 std::shared_ptr<Renderer> Renderer::Make(std::shared_ptr<RendererState> state, std::shared_ptr<RendererBackend> backend) {
@@ -53,7 +55,7 @@ Renderer::Renderer(std::shared_ptr<RendererState> state, std::shared_ptr<Rendere
 }
 
 Renderer::~Renderer() {
-    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
+    PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
 std::shared_ptr<RendererBackend> Renderer::getRendererBackend() {
@@ -77,7 +79,7 @@ bool Renderer::updateSize() {
     auto width = _backend->getWidth();
     auto height = _backend->getHeight();
     auto density = _backend->getDensity();
-    auto sizeChanged = _state->updateBounds(tgfx::Size{static_cast<float>(width), static_cast<float>(height)}, density);
+    auto sizeChanged = _state->updateBounds({static_cast<float>(width), static_cast<float>(height)}, density);
     if (sizeChanged) {
         window->invalidSize();
     }
@@ -99,7 +101,7 @@ void Renderer::autoAdjustCanvasScaleForContent() {
         float offsetX = (viewSize.width - contentWidth) * 0.5f;
         float offsetY = (viewSize.height - contentHeight) * 0.5f;
 
-        _state->updateZoomAndOffset(1.0f, tgfx::Point{offsetX, offsetY});
+        _state->updateZoomAndOffset(1.0f, Point{offsetX, offsetY});
         return;
     }
 
@@ -112,7 +114,7 @@ void Renderer::autoAdjustCanvasScaleForContent() {
     float offsetX = (viewSize.width - (contentWidth + 2 * padding) * scale) / 2.0f - (contentBounds.left - padding) * scale;
     float offsetY = (viewSize.height - (contentHeight + 2 * padding) * scale) / 2.0f - (contentBounds.top - padding) * scale;
 
-    _state->updateZoomAndOffset(scale, tgfx::Point{offsetX, offsetY});
+    _state->updateZoomAndOffset(scale, Point{offsetX, offsetY});
 }
 
 void Renderer::invalidateContent() {

@@ -26,20 +26,20 @@
 
 #include "RendererState.h"
 
-#include <tgfx/platform/Print.h>
+#include <arenaforge_core/Print.h>
 
 namespace arenaforge::editor {
-RendererState::RendererState(const tgfx::Size &boundsSize, float density)
+RendererState::RendererState(const arenaforge::Size &boundsSize, float density)
     : _boundsSize(boundsSize)
     , _density(density) {
-    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
+    PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
 RendererState::~RendererState() {
-    tgfx::PrintLog("%s", __PRETTY_FUNCTION__);
+    PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
-const tgfx::Size &RendererState::getBoundsSize() const {
+const arenaforge::Size &RendererState::getBoundsSize() const {
     return _boundsSize;
 }
 
@@ -53,18 +53,18 @@ float RendererState::zoomScale() const {
 }
 
 /// 当前滑动偏移
-const tgfx::Point &RendererState::contentOffset() const {
+const arenaforge::Point &RendererState::contentOffset() const {
     return _contentOffset;
 }
 
-bool RendererState::updateBounds(const tgfx::Size &boundsSize, float density) {
+bool RendererState::updateBounds(const arenaforge::Size &boundsSize, float density) {
     if (boundsSize.width <= 0 || boundsSize.height <= 0) {
-        tgfx::PrintError("%s width or height is invalid!", __PRETTY_FUNCTION__);
+        PrintError("%s width or height is invalid!", __PRETTY_FUNCTION__);
         return false;
     }
 
     if (density < 1.0) {
-        tgfx::PrintError("%s density is invalid!", __PRETTY_FUNCTION__);
+        PrintError("%s density is invalid!", __PRETTY_FUNCTION__);
         return false;
     }
 
@@ -77,7 +77,7 @@ bool RendererState::updateBounds(const tgfx::Size &boundsSize, float density) {
     return true;
 }
 
-bool RendererState::updateZoomAndOffset(float zoomScale, const tgfx::Point &contentOffset) {
+bool RendererState::updateZoomAndOffset(float zoomScale, const arenaforge::Point &contentOffset) {
     if (zoomScale == _zoomScale && contentOffset == _contentOffset) {
         return false;
     }
