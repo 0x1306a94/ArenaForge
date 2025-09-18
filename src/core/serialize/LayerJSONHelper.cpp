@@ -41,7 +41,7 @@ namespace nlohmann {
 namespace as = arenaforge::json;
 
 static void fill_from_json(const nlohmann::json &j, arenaforge::Layer *target) {
-    if (target == nullptr) {
+    if (target == nullptr || j.is_null() || !j.is_object()) {
         return;
     }
     auto name = as::read_string_value(j, "name", "");
@@ -80,7 +80,7 @@ static void fill_from_json(const nlohmann::json &j, arenaforge::Layer *target) {
 }
 
 static void fill_from_json(const nlohmann::json &j, arenaforge::ShapeLayer *target) {
-    if (target == nullptr) {
+    if (target == nullptr || j.is_null() || !j.is_object()) {
         return;
     }
     fill_from_json(j, static_cast<arenaforge::Layer *>(target));
@@ -126,7 +126,7 @@ static void fill_from_json(const nlohmann::json &j, arenaforge::ShapeLayer *targ
 }
 
 static void fill_from_json(const nlohmann::json &j, arenaforge::BooleanLayer *target) {
-    if (target == nullptr) {
+    if (target == nullptr || j.is_null() || !j.is_object()) {
         return;
     }
     fill_from_json(j, static_cast<arenaforge::Layer *>(target));
@@ -213,6 +213,9 @@ static void fill_to_json(nlohmann::json &j, const arenaforge::BooleanLayer *laye
 }
 
 std::shared_ptr<arenaforge::Layer> adl_serializer<std::shared_ptr<arenaforge::Layer>>::from_json(const nlohmann::json &j) {
+    if (j.is_null() || !j.is_object()) {
+        return nullptr;
+    }
     auto layerId = as::read_string_value(j, "id", "");
     auto layerType = static_cast<arenaforge::LayerType>(as::read_value<int>(j, "type", 0));
     std::shared_ptr<arenaforge::Layer> layer = nullptr;

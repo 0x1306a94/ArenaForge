@@ -24,6 +24,7 @@
 //  Created by king on 2025/9/10.
 //
 
+import arenaforge_editor
 import Cocoa
 import SwiftUI
 import UniformTypeIdentifiers
@@ -39,7 +40,7 @@ final class ArenaForgeStudioDocumentController: NSDocumentController {
     func createAndOpenNewDocument(onCompletion: @escaping () -> Void) {
         guard let newDocumentUrl = self.newDocumentUrl else { return }
         
-        if !createProjectFile(newDocumentUrl) {
+        if !self.createProjectFile(newDocumentUrl) {
             print("Failed to create new document")
             return
         }
@@ -55,9 +56,11 @@ final class ArenaForgeStudioDocumentController: NSDocumentController {
                 FileAttributeKey.creationDate: Date(),
             ]
             try self.fileManager.createDirectory(at: url, withIntermediateDirectories: true, attributes: attributes)
-            
+            let project = AFProject(name: "test", description: "test", width: 1400, height: 1200)
+            let jsonString = project.toJSONString()
+            let jsonData = jsonString.data(using: .utf8)
             let projectURL = url.appendingPathComponent("project.json")
-            let projectFile = self.fileManager.createFile(atPath: projectURL.path, contents: "{}".data(using: .utf8)!, attributes: attributes)
+            let projectFile = self.fileManager.createFile(atPath: projectURL.path, contents: jsonData, attributes: attributes)
             return projectFile
         } catch {
             return false
@@ -67,7 +70,7 @@ final class ArenaForgeStudioDocumentController: NSDocumentController {
     override func newDocument(_ sender: Any?) {
         guard let newDocumentUrl = self.newDocumentUrl else { return }
         
-        if !createProjectFile(newDocumentUrl) {
+        if !self.createProjectFile(newDocumentUrl) {
             print("Failed to create new document")
             return
         }
@@ -125,7 +128,7 @@ final class ArenaForgeStudioDocumentController: NSDocumentController {
         super.removeDocument(document)
         
         if ArenaForgeStudioDocumentController.shared.documents.isEmpty {
-            openWindow(sceneID: .welcome)
+            self.openWindow(sceneID: .welcome)
         }
     }
 }

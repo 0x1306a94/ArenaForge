@@ -27,6 +27,7 @@
 #ifndef AFProject_h_ArenaForge
 #define AFProject_h_ArenaForge
 
+#import <CoreFoundation/CFCGTypes.h>
 #import <Foundation/Foundation.h>
 
 #import <arenaforge_editor/bridge/apple/AFBuiltinShapeType.h>
@@ -41,6 +42,7 @@ ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 @property (nonatomic, strong, readonly) AFLayer *root;
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithName:(NSString *)name description:(NSString *)description width:(CGFloat)width height:(CGFloat)height NS_DESIGNATED_INITIALIZER;
 - (instancetype __nullable)initWithFileURL:(NSURL *)fileURL error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 
 - (NSString *)toJSONString;

@@ -39,7 +39,10 @@ namespace arenaforge {
 class Layer;
 class Project : public std::enable_shared_from_this<Project> {
   public:
-    static std::shared_ptr<Project> Make(const std::string &name, const std::string &description, const Size &canvasSize = {1400.0f, 1200.0f});
+    static constexpr float DefaultCanvasWidth = 1400.0f;
+    static constexpr float DefaultCanvasHeight = 1200.0f;
+
+    static std::shared_ptr<Project> Make(const std::string &name, const std::string &description, const Size &canvasSize = {DefaultCanvasWidth, DefaultCanvasHeight});
 
     static std::shared_ptr<Project> MakeFromJSONFile(const std::string &projectDir);
 

@@ -48,6 +48,17 @@
 }
 #endif
 
+- (instancetype)initWithName:(NSString *)name description:(NSString *)description width:(CGFloat)width height:(CGFloat)height {
+    if (self == [super init]) {
+        _layerMap = [AFLayerMap new];
+        _project = arenaforge::Project::Make((name != nil ? name.UTF8String : ""), (description != nil ? description.UTF8String : ""), {static_cast<float>(width), static_cast<float>(height)});
+        auto rootCpp = _project->root();
+        _root = [[AFLayer alloc] initWithCppObject:std::move(rootCpp) layerMap:_layerMap];
+        [_layerMap addLayer:_root];
+    }
+    return self;
+}
+
 - (instancetype __nullable)initWithFileURL:(NSURL *)fileURL error:(NSError **)error {
 
     std::shared_ptr<arenaforge::Project> project;

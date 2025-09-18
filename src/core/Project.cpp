@@ -59,15 +59,19 @@ std::shared_ptr<Project> Project::MakeFromJSONFile(const std::string &projectDir
     nlohmann::json j = nlohmann::json::parse(ifs);
     auto name = as::read_value<std::string>(j, "name", "");
     auto description = as::read_value<std::string>(j, "description", "");
-    auto project = Make(name, description);
+    auto canvasWidth = as::read_value<float>(j, "canvasWidth", DefaultCanvasWidth);
+    auto canvasHeight = as::read_value<float>(j, "canvasHeight", DefaultCanvasHeight);
+    auto project = Make(name, description, {canvasWidth, canvasHeight});
 
     project->_version = as::read_value<ProjectVersion>(j, "version", ProjectVersion::Version1);
     project->_rectangleCounter = as::read_value<uint32_t>(j, "rectangleCounter", 0);
     project->_groupCounter = as::read_value<uint32_t>(j, "groupCounter", 0);
 
-    auto root = j["rootLayer"].get<std::shared_ptr<Layer>>();
-    root->setIsRoot(true);
-    project->_root = std::move(root);
+    if (j.contains("rootLayer")) {
+        auto root = j["rootLayer"].get<std::shared_ptr<Layer>>();
+        root->setIsRoot(true);
+        project->_root = std::move(root);
+    }
 
     return project;
 }
@@ -75,10 +79,10 @@ std::shared_ptr<Project> Project::MakeFromJSONFile(const std::string &projectDir
 Project::Project(const std::string &name, const std::string &description, const Size &canvasSize)
     : _name(name)
     , _description(description)
-    , _canvasSize(canvasSize) {
+    , _canvasSize(canvasSize.isEmpty() ? Size{DefaultCanvasWidth, DefaultCanvasHeight} : canvasSize) {
     auto uuid = UUID::Instance();
     _root = Layer::Make(uuid());
-    _root->setFrame(Rect::MakeWH(canvasSize.width, canvasSize.height));
+    _root->setFrame(Rect::MakeWH(_canvasSize.width, _canvasSize.height));
     _root->setIsRoot(true);
 }
 
@@ -102,6 +106,8 @@ std::string Project::toJSON(bool pretty) const {
     j["version"] = version();
     j["rectangleCounter"] = _rectangleCounter;
     j["groupCounter"] = _groupCounter;
+    j["canvasWidth"] = _canvasSize.width;
+    j["canvasHeight"] = _canvasSize.height;
     j["rootLayer"] = _root;
     return j.dump(pretty ? 4 : -1);
 }
