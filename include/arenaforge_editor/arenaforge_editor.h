@@ -27,14 +27,26 @@
 #ifndef arenaforge_editor_h_ArenaForge
 #define arenaforge_editor_h_ArenaForge
 
+#include <arenaforge_editor/core/Platform.h>
+
+#if defined(__APPLE__)
+
 #import <Foundation/Foundation.h>
 
-#import <arenaforge_editor/core/AFEditor.h>
-#import <arenaforge_editor/core/AFLayer.h>
-#import <arenaforge_editor/core/AFShapeLayer.h>
-#import <arenaforge_editor/core/AFBooleanLayer.h>
-#import <arenaforge_editor/core/AFProject.h>
-#import <arenaforge_editor/core/Platform.h>
-#import <arenaforge_editor/platform/mac/AFMacCanvasView.h>
+#import <arenaforge_editor/bridge/apple/AFEditor.h>
+#import <arenaforge_editor/bridge/apple/AFLayer.h>
+#import <arenaforge_editor/bridge/apple/AFShapeLayer.h>
+#import <arenaforge_editor/bridge/apple/AFBooleanLayer.h>
+#import <arenaforge_editor/bridge/apple/AFProject.h>
+
+#if defined(TARGET_OS_OSX)
+#import <arenaforge_editor/bridge/mac/AFMacCanvasView.h>
+#endif
+
+#else
+
+#include <arenaforge_editor/core/Editor.h>
+
+#endif
 
 #endif /* arenaforge_editor_h_ArenaForge */

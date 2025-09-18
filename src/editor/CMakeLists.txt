@@ -39,21 +39,36 @@ endif()
 
 set(PUBLIC_HEADER_ROOT_DIR ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRGET_NAME})
 
+add_files_by_extension(PUBLIC_HEADER_FILES ".h;.hpp"
+    ${PUBLIC_HEADER_ROOT_DIR}/core
+)
+
+list(APPEND PUBLIC_HEADER_FILES 
+    ${PUBLIC_HEADER_ROOT_DIR}/arenaforge_editor.h
+ )
 
 
 if(APPLE)
-    list(APPEND PUBLIC_HEADER_FILES 
+    list(APPEND PUBLIC_FRAMEWORK_HEADER_FILES 
         ${PUBLIC_HEADER_ROOT_DIR}/arenaforge_editor.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/defines.h
         ${PUBLIC_HEADER_ROOT_DIR}/core/Platform.h
-        ${PUBLIC_HEADER_ROOT_DIR}/core/AFProject.h
-        ${PUBLIC_HEADER_ROOT_DIR}/core/AFLayer.h
-        ${PUBLIC_HEADER_ROOT_DIR}/core/AFShapeLayer.h
-        ${PUBLIC_HEADER_ROOT_DIR}/core/AFBooleanLayer.h
-        ${PUBLIC_HEADER_ROOT_DIR}/core/AFLayerType.h
-        ${PUBLIC_HEADER_ROOT_DIR}/core/AFEditor.h
-        ${PUBLIC_HEADER_ROOT_DIR}/platform/mac/AFMacCanvasView.h
+        ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFProject.h
+        ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFLayer.h
+        ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFShapeLayer.h
+        ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFBooleanLayer.h
+        ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFLayerType.h
+        ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFEditor.h
     )
+
+    if(MACOS)
+        list(APPEND PUBLIC_FRAMEWORK_HEADER_FILES 
+            ${PUBLIC_HEADER_ROOT_DIR}/bridge/mac/AFMacCanvasView.h
+        )
+    endif()
+    
+    
+    list(APPEND PUBLIC_HEADER_FILES ${PUBLIC_FRAMEWORK_HEADER_FILES})
 
     # set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -exported_symbols_list ${CMAKE_CURRENT_LIST_DIR}/arenaforge_editor.lds")
 else()
@@ -69,8 +84,7 @@ add_files_by_extension(SRC_FILES ".h;.hpp;.cpp"
 
 if(MACOS)
     add_files_by_extension(MAC_FILES ".h;.hpp;.cpp;.m;.mm"
-        core
-        renderer
+        bridge/apple
         platform/mac
     )
     list(APPEND SRC_FILES ${MAC_FILES})
@@ -94,7 +108,9 @@ endif()
 
 
 add_source_group(PUBLIC_HEADER_FILES ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRGET_NAME} "PublicHeaders")
+
 add_source_group(SRC_FILES ${CMAKE_CURRENT_LIST_DIR} "Sources")
+
 
 target_link_libraries(${TAGRGET_NAME}
     ${TAGRET_NAME_PREFIX}::core
@@ -143,7 +159,7 @@ if (BUILD_EDITOR_FRAMEWORK)
         MACOSX_FRAMEWORK_BUNDLE_NAME ${TAGRGET_NAME}
     )
 
-    foreach (header ${PUBLIC_HEADER_FILES})
+    foreach (header ${PUBLIC_FRAMEWORK_HEADER_FILES})
         file(RELATIVE_PATH dir ${ArenaForge_ROOT_INCLUDE_DIR}/${TAGRGET_NAME} ${header})
         get_filename_component(dir "${dir}" DIRECTORY)
         if (dir)

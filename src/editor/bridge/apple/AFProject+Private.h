@@ -18,16 +18,22 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFBooleanLayer.mm
+//  AFProject+Private.h
 //  arenaforge_editor
 //
-//  Created by king on 2025/9/17.
+//  Created by KK on 2025/9/7.
 //
 
-#import <arenaforge_editor/core/AFBooleanLayer.h>
+#import <arenaforge_editor/bridge/apple/AFProject.h>
 
-#import <arenaforge_core/layers/BooleanLayer.h>
+#import <arenaforge_core/Project.h>
 
-@implementation AFBooleanLayer
+NS_ASSUME_NONNULL_BEGIN
 
+@class AFLayerMap;
+@interface AFProject ()
+@property (nonatomic, strong, readonly) AFLayerMap *layerMap;
+- (std::shared_ptr<arenaforge::Project>)cppObject;
 @end
+
+NS_ASSUME_NONNULL_END

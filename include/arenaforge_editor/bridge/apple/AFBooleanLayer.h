@@ -18,23 +18,21 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFLayer+Private.h
+//  AFBooleanLayer.h
 //  arenaforge_editor
 //
-//  Created by KK on 2025/9/7.
+//  Created by king on 2025/9/17.
 //
 
-#import <arenaforge_editor/core/AFLayer.h>
+#ifndef AFBooleanLayer_h_ArenaForge
+#define AFBooleanLayer_h_ArenaForge
 
-#import <arenaforge_core/layers/Layer.h>
+#import <arenaforge_editor/bridge/apple/AFLayer.h>
 
-NS_ASSUME_NONNULL_BEGIN
-@class AFLayerMap;
-@interface AFLayer ()
-- (std::shared_ptr<arenaforge::Layer>)createCppObject:(NSString *_Nullable)name;
-- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::Layer>)cppObject layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
-- (std::shared_ptr<arenaforge::Layer>)cppObject;
+#import <arenaforge_editor/core/defines.h>
 
-- (void)rebuildCacheChildren;
+ARENA_FORGE_EXPORT_API @interface AFBooleanLayer : AFLayer
+
 @end
-NS_ASSUME_NONNULL_END
+
+#endif /* AFBooleanLayer_h_ArenaForge */

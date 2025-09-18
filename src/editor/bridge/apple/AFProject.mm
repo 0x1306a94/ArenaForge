@@ -24,9 +24,9 @@
 //  Created by KK on 2025/9/7.
 //
 
-#import <arenaforge_editor/core/AFProject.h>
+#import <arenaforge_editor/bridge/apple/AFProject.h>
 
-#import <arenaforge_editor/core/AFShapeLayer.h>
+#import <arenaforge_editor/bridge/apple/AFShapeLayer.h>
 
 #import "AFLayer+Private.h"
 #import "AFProject+Private.h"

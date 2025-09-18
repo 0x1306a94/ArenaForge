@@ -24,7 +24,7 @@
 //  Created by KK on 2025/9/7.
 //
 
-#import <arenaforge_editor/core/AFEditor.h>
+#import <arenaforge_editor/bridge/apple/AFEditor.h>
 
 @interface AFEditor ()
 

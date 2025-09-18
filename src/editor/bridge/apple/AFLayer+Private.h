@@ -18,24 +18,23 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFShapeLayer.h
+//  AFLayer+Private.h
 //  arenaforge_editor
 //
-//  Created by king on 2025/9/17.
+//  Created by KK on 2025/9/7.
 //
 
-#ifndef AFShapeLayer_h_ArenaForge
-#define AFShapeLayer_h_ArenaForge
+#import <arenaforge_editor/bridge/apple/AFLayer.h>
 
-#import <AppKit/NSColor.h>
+#import <arenaforge_core/layers/Layer.h>
 
-#import <arenaforge_editor/core/AFLayer.h>
-#import <arenaforge_editor/core/defines.h>
+NS_ASSUME_NONNULL_BEGIN
+@class AFLayerMap;
+@interface AFLayer ()
+- (std::shared_ptr<arenaforge::Layer>)createCppObject:(NSString *_Nullable)name;
+- (instancetype)initWithCppObject:(std::shared_ptr<arenaforge::Layer>)cppObject layerMap:(AFLayerMap *)layerMap NS_DESIGNATED_INITIALIZER;
+- (std::shared_ptr<arenaforge::Layer>)cppObject;
 
-ARENA_FORGE_EXPORT_API @interface AFShapeLayer : AFLayer
-@property (nonatomic, strong, nullable) NSColor *fillColor;
-@property (nonatomic, strong, nullable) NSColor *strokeColor;
-@property (nonatomic, assign) CGFloat lineWidth;
+- (void)rebuildCacheChildren;
 @end
-
-#endif /* AFShapeLayer_h_ArenaForge */
+NS_ASSUME_NONNULL_END

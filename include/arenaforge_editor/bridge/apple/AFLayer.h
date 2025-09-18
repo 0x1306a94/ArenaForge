@@ -29,7 +29,8 @@
 
 #import <Foundation/Foundation.h>
 
-#import <arenaforge_editor/core/AFLayerType.h>
+#import <arenaforge_editor/bridge/apple/AFLayerType.h>
+
 #import <arenaforge_editor/core/defines.h>
 
 NS_ASSUME_NONNULL_BEGIN

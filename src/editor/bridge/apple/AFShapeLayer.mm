@@ -24,7 +24,7 @@
 //  Created by king on 2025/9/17.
 //
 
-#include <arenaforge_editor/core/AFShapeLayer.h>
+#include <arenaforge_editor/bridge/apple/AFShapeLayer.h>
 
 #include <arenaforge_core/layers/ShapeLayer.h>
 #import <arenaforge_core/uuid/UUID.h>

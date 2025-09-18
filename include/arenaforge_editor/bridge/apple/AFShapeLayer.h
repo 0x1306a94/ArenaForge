@@ -18,20 +18,25 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFBooleanLayer.h
+//  AFShapeLayer.h
 //  arenaforge_editor
 //
 //  Created by king on 2025/9/17.
 //
 
-#ifndef AFBooleanLayer_h_ArenaForge
-#define AFBooleanLayer_h_ArenaForge
+#ifndef AFShapeLayer_h_ArenaForge
+#define AFShapeLayer_h_ArenaForge
 
-#import <arenaforge_editor/core/AFLayer.h>
+#import <AppKit/NSColor.h>
+
+#import <arenaforge_editor/bridge/apple/AFLayer.h>
+
 #import <arenaforge_editor/core/defines.h>
 
-ARENA_FORGE_EXPORT_API @interface AFBooleanLayer : AFLayer
-
+ARENA_FORGE_EXPORT_API @interface AFShapeLayer : AFLayer
+@property (nonatomic, strong, nullable) NSColor *fillColor;
+@property (nonatomic, strong, nullable) NSColor *strokeColor;
+@property (nonatomic, assign) CGFloat lineWidth;
 @end
 
-#endif /* AFBooleanLayer_h_ArenaForge */
+#endif /* AFShapeLayer_h_ArenaForge */

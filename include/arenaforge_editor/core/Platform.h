@@ -27,7 +27,7 @@
 #ifndef Platform_h_ArenaForge
 #define Platform_h_ArenaForge
 
-#if __APPLE__
+#if defined(__APPLE__)
 #include <TargetConditionals.h>
 #endif
 
