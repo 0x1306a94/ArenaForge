@@ -26,6 +26,8 @@
 
 #import <arenaforge_editor/bridge/apple/AFProject.h>
 
+#import <arenaforge_core/PathCommand.h>
+#import <arenaforge_core/layers/ShapeLayer.h>
 #import <arenaforge_editor/bridge/apple/AFShapeLayer.h>
 
 #import "AFLayer+Private.h"
@@ -86,10 +88,17 @@
     return nil;
 }
 
-- (AFShapeLayer *_Nullable)createShapeLayer {
+- (AFShapeLayer *_Nullable)createShapeLayer:(AFBuiltinShapeType)type {
+    if (type < AFBuiltinShapeTypeRectangle || type > AFBuiltinShapeTypeTriangle) {
+        return nil;
+    }
+    auto typeName = AFBuiltinShapeTypeToString(type);
     auto counter = _project->genRectangleCounter();
-    NSString *name = [NSString stringWithFormat:@"Rectangle %u", counter];
+    NSString *name = [NSString stringWithFormat:@"%@ %u", typeName, counter];
     AFShapeLayer *layer = [[AFShapeLayer alloc] initWithName:name layerMap:self.layerMap];
+    auto cppLayer = std::static_pointer_cast<arenaforge::ShapeLayer>([layer cppObject]);
+    auto commands = arenaforge::PathCommand::MakeFrom(static_cast<arenaforge::BuiltinShapeType>(type));
+    cppLayer->setPathCommands(std::move(commands));
     [self.layerMap addLayer:layer];
     return layer;
 }

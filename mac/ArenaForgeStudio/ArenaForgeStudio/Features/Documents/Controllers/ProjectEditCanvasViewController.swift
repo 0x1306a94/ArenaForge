@@ -167,7 +167,7 @@ final class ProjectEditCanvasViewController: NSViewController {
         case .cursors:
             break
         case .shape:
-            guard let shape = editor.project.createShapeLayer() else {
+            guard let shape = editor.project.createShapeLayer(AFBuiltinShapeType.line) else {
                 return
             }
 

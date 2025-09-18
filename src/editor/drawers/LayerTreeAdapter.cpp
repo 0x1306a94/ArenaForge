@@ -26,6 +26,7 @@
 
 #include "LayerTreeAdapter.h"
 
+#include "PathBuilder.h"
 #include "RenderLayerBuilder.h"
 
 #include <tgfx/layers/Layer.h>
@@ -178,8 +179,12 @@ void LayerTreeAdapter::syncShapeNodeProperties(const ShapeLayer *dataLayer, tgfx
 
     auto frame = dataLayer->frame();
 
-    tgfx::Path path;
-    path.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
+    const auto &commands = dataLayer->pathCommands();
+    tgfx::Path path = PathBuilder::BuildPath(commands, frame.size());
+    if (path.isLine()) {
+        path.reset();
+        path.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
+    }
     renderLayer->setPath(std::move(path));
 
     auto fill = dataLayer->fill();

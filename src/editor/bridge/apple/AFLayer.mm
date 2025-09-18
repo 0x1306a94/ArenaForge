@@ -29,7 +29,7 @@
 #import <arenaforge_core/layers/Layer.h>
 #import <arenaforge_core/uuid/UUID.h>
 
-#include <tgfx/layers/SolidColor.h>
+#import <tgfx/layers/SolidColor.h>
 
 #import "AFLayer+Private.h"
 #import "AFLayerMap.h"

@@ -18,40 +18,23 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  arenaforge_editor.h
-//  ArenaForge
+//  PathBuilder.h
+//  arenaforge_editor
 //
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/18.
 //
 
-#ifndef arenaforge_editor_h_ArenaForge
-#define arenaforge_editor_h_ArenaForge
+#ifndef PathBuilder_h_ArenaForge
+#define PathBuilder_h_ArenaForge
 
-#include <arenaforge_editor/core/Platform.h>
+#include <arenaforge_core/PathCommand.h>
+#include <tgfx/core/Path.h>
 
-#if defined(__APPLE__)
+namespace arenaforge {
+class PathBuilder {
+  public:
+    static tgfx::Path BuildPath(const std::vector<PathCommand> &commands, const Size &size);
+};
+};  // namespace arenaforge
 
-#import <Foundation/Foundation.h>
-
-#import <arenaforge_editor/bridge/apple/AFBuiltinShapeType.h>
-#import <arenaforge_editor/bridge/apple/AFLayerType.h>
-
-#import <arenaforge_editor/bridge/apple/AFLayer.h>
-
-#import <arenaforge_editor/bridge/apple/AFBooleanLayer.h>
-#import <arenaforge_editor/bridge/apple/AFShapeLayer.h>
-
-#import <arenaforge_editor/bridge/apple/AFEditor.h>
-#import <arenaforge_editor/bridge/apple/AFProject.h>
-
-#if defined(TARGET_OS_OSX)
-#import <arenaforge_editor/bridge/mac/AFMacCanvasView.h>
-#endif
-
-#else
-
-#include <arenaforge_editor/core/Editor.h>
-
-#endif
-
-#endif /* arenaforge_editor_h_ArenaForge */
+#endif /* PathBuilder_h_ArenaForge */

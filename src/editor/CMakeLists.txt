@@ -58,6 +58,7 @@ if(APPLE)
         ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFShapeLayer.h
         ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFBooleanLayer.h
         ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFLayerType.h
+        ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFBuiltinShapeType.h
         ${PUBLIC_HEADER_ROOT_DIR}/bridge/apple/AFEditor.h
     )
 

@@ -18,44 +18,37 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFProject.h
-//  arenaforge
+//  AFBuiltinShapeType.h
+//  arenaforge_editor
 //
-//  Created by KK on 2025/9/7.
+//  Created by king on 2025/9/18.
 //
-
-#ifndef AFProject_h_ArenaForge
-#define AFProject_h_ArenaForge
 
 #import <Foundation/Foundation.h>
 
-#import <arenaforge_editor/bridge/apple/AFBuiltinShapeType.h>
-#import <arenaforge_editor/core/defines.h>
-
 NS_ASSUME_NONNULL_BEGIN
 
-@class AFLayer;
-@class AFShapeLayer;
-ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
-@property (nonatomic, copy, readonly) NSString *name;
-@property (nonatomic, strong, readonly) AFLayer *root;
-+ (instancetype)new NS_UNAVAILABLE;
-- (instancetype)init NS_UNAVAILABLE;
-- (instancetype __nullable)initWithFileURL:(NSURL *)fileURL error:(NSError **)error NS_DESIGNATED_INITIALIZER;
+typedef NS_ENUM(NSUInteger, AFBuiltinShapeType) {
+    AFBuiltinShapeTypeRectangle,
+    AFBuiltinShapeTypeEllipse,
+    AFBuiltinShapeTypeLine,
+    AFBuiltinShapeTypeTriangle,
+};
 
-- (NSString *)toJSONString;
-
-- (AFLayer *_Nullable)createLayer;
-
-- (AFShapeLayer *_Nullable)createShapeLayer:(AFBuiltinShapeType)type;
-
-- (AFLayer *_Nullable)findLayerById:(NSString *)layerId;
-
-- (AFLayer *_Nullable)upgradeGroup:(NSArray<AFLayer *> *)layers;
-
-- (BOOL)undoGroup:(AFLayer *)group;
-@end
+FOUNDATION_STATIC_INLINE NSString *AFBuiltinShapeTypeToString(AFBuiltinShapeType type) {
+    switch (type) {
+        case AFBuiltinShapeTypeRectangle:
+            return @"Rectangle";
+        case AFBuiltinShapeTypeEllipse:
+            return @"Ellipse";
+        case AFBuiltinShapeTypeLine:
+            return @"Line";
+        case AFBuiltinShapeTypeTriangle:
+            return @"Triangle";
+        default:
+            break;
+    }
+    return @"Shape";
+}
 
 NS_ASSUME_NONNULL_END
-
-#endif /* AFProject_h_ArenaForge */

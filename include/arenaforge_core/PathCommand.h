@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 
+#include <arenaforge_core/BuiltinShapeType.h>
 #include <arenaforge_core/Point.h>
 
 namespace arenaforge {
@@ -55,6 +56,9 @@ struct PathCommand {
 
     static std::vector<PathCommand> MakeRectangle();
     static std::vector<PathCommand> MakeTriangle();
+    static std::vector<PathCommand> MakeEllipse();
+    static std::vector<PathCommand> MakeLine();
+    static std::vector<PathCommand> MakeFrom(BuiltinShapeType type);
 };
 
 std::string PathCommandTypeToString(PathCommandType type);

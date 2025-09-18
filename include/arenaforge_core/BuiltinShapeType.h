@@ -18,40 +18,21 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  arenaforge_editor.h
+//  BuiltinShapeType.h
 //  ArenaForge
 //
-//  Created by KK on 2025/9/6.
+//  Created by king on 2025/9/18.
 //
 
-#ifndef arenaforge_editor_h_ArenaForge
-#define arenaforge_editor_h_ArenaForge
+#ifndef BuiltinShapeType_h_ArenaForge
+#define BuiltinShapeType_h_ArenaForge
 
-#include <arenaforge_editor/core/Platform.h>
-
-#if defined(__APPLE__)
-
-#import <Foundation/Foundation.h>
-
-#import <arenaforge_editor/bridge/apple/AFBuiltinShapeType.h>
-#import <arenaforge_editor/bridge/apple/AFLayerType.h>
-
-#import <arenaforge_editor/bridge/apple/AFLayer.h>
-
-#import <arenaforge_editor/bridge/apple/AFBooleanLayer.h>
-#import <arenaforge_editor/bridge/apple/AFShapeLayer.h>
-
-#import <arenaforge_editor/bridge/apple/AFEditor.h>
-#import <arenaforge_editor/bridge/apple/AFProject.h>
-
-#if defined(TARGET_OS_OSX)
-#import <arenaforge_editor/bridge/mac/AFMacCanvasView.h>
-#endif
-
-#else
-
-#include <arenaforge_editor/core/Editor.h>
-
-#endif
-
-#endif /* arenaforge_editor_h_ArenaForge */
+namespace arenaforge {
+enum class BuiltinShapeType {
+    Rectangle,
+    Ellipse,
+    Line,
+    Triangle,
+};
+};
+#endif /* BuiltinShapeType_h_ArenaForge */

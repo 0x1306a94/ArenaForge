@@ -24,9 +24,10 @@
 //  Created by king on 2025/9/17.
 //
 
-#include <arenaforge_editor/bridge/apple/AFShapeLayer.h>
+#import <arenaforge_editor/bridge/apple/AFShapeLayer.h>
 
-#include <arenaforge_core/layers/ShapeLayer.h>
+#import <arenaforge_core/PathCommand.h>
+#import <arenaforge_core/layers/ShapeLayer.h>
 #import <arenaforge_core/uuid/UUID.h>
 
 #import <AppKit/NSColorSpace.h>
@@ -39,6 +40,8 @@
     auto layerId = uuid();
     auto layer = arenaforge::ShapeLayer::Make(layerId);
     layer->setName((name == nil ? "" : std::string(name.UTF8String)));
+    auto commands = arenaforge::PathCommand::MakeRectangle();
+    layer->setPathCommands(std::move(commands));
     return layer;
 }
 

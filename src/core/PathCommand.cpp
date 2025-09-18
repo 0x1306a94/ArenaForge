@@ -97,6 +97,70 @@ std::vector<PathCommand> PathCommand::MakeTriangle() {
     return commands;
 }
 
+std::vector<PathCommand> PathCommand::MakeEllipse() {
+    std::vector<PathCommand> commands;
+
+    // 椭圆的中心和半径（这里默认椭圆位于 (0,0)-(1,1) 的矩形内）
+    float cx = 0.5f;
+    float cy = 0.5f;
+    float rx = 0.5f;  // 半径 x
+    float ry = 0.5f;  // 半径 y
+
+    // 贝塞尔逼近圆弧的常数 (float)
+    const float kappa = 0.55228475f;
+
+    // 从右边点开始
+    commands.push_back(PathCommand::MakeMoveTo({cx + rx, cy}));
+
+    // 右 -> 下
+    commands.push_back(PathCommand::MakeCubicTo(
+        {cx + rx, cy + ry * kappa},
+        {cx + rx * kappa, cy + ry},
+        {cx, cy + ry}));
+
+    // 下 -> 左
+    commands.push_back(PathCommand::MakeCubicTo(
+        {cx - rx * kappa, cy + ry},
+        {cx - rx, cy + ry * kappa},
+        {cx - rx, cy}));
+
+    // 左 -> 上
+    commands.push_back(PathCommand::MakeCubicTo(
+        {cx - rx, cy - ry * kappa},
+        {cx - rx * kappa, cy - ry},
+        {cx, cy - ry}));
+
+    // 上 -> 右
+    commands.push_back(PathCommand::MakeCubicTo(
+        {cx + rx * kappa, cy - ry},
+        {cx + rx, cy - ry * kappa},
+        {cx + rx, cy}));
+
+    commands.push_back(PathCommand::MakeClose());
+
+    return commands;
+}
+
+std::vector<PathCommand> PathCommand::MakeLine() {
+    std::vector<PathCommand> commands;
+    commands.push_back(PathCommand::MakeMoveTo({0.5, 0.5}));
+    commands.push_back(PathCommand::MakeLineTo({1.0, 0.5}));
+    return commands;
+}
+
+std::vector<PathCommand> PathCommand::MakeFrom(BuiltinShapeType type) {
+    switch (type) {
+        case BuiltinShapeType::Rectangle:
+            return MakeRectangle();
+        case BuiltinShapeType::Triangle:
+            return MakeTriangle();
+        case BuiltinShapeType::Ellipse:
+            return MakeEllipse();
+        case BuiltinShapeType::Line:
+            return MakeLine();
+    }
+}
+
 std::string PathCommandTypeToString(PathCommandType type) {
     switch (type) {
         case PathCommandType::MoveTo:

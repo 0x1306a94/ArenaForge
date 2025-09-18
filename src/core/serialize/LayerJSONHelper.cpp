@@ -86,6 +86,15 @@ static void fill_from_json(const nlohmann::json &j, arenaforge::ShapeLayer *targ
     fill_from_json(j, static_cast<arenaforge::Layer *>(target));
 
     do {
+        auto pathsIt = j.find("paths");
+        if (pathsIt == j.end()) {
+            break;
+        }
+        auto paths = pathsIt->get<std::vector<arenaforge::PathCommand>>();
+        target->setPathCommands(std::move(paths));
+    } while (0);
+
+    do {
         auto styleIt = j.find("style");
         if (styleIt == j.end()) {
             break;
@@ -163,6 +172,15 @@ static void fill_to_json(nlohmann::json &j, const arenaforge::ShapeLayer *layer)
         return;
     }
     fill_to_json(j, static_cast<const arenaforge::Layer *>(layer));
+
+    do {
+        auto commands = layer->pathCommands();
+        auto paths = nlohmann::json::array();
+        for (const auto &cmd : commands) {
+            paths.push_back(cmd);
+        }
+        j["paths"] = paths;
+    } while (0);
 
     nlohmann::json style;
     auto fill = layer->fill();
