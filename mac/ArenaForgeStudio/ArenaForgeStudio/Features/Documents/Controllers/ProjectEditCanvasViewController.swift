@@ -167,7 +167,7 @@ final class ProjectEditCanvasViewController: NSViewController {
         case .cursors:
             break
         case .shape:
-            guard let shape = editor.project.createShapeLayer(AFBuiltinShapeType.ellipse) else {
+            guard let shape = editor.project.createLineLayer() else {
                 return
             }
 
@@ -175,7 +175,8 @@ final class ProjectEditCanvasViewController: NSViewController {
                 return
             }
 
-            shape.fillColor = NSColor(calibratedRed: CGFloat.random(in: 0.0...1.0), green: CGFloat.random(in: 0.0...1.0), blue: CGFloat.random(in: 0.0...1.0), alpha: 1.0)
+            shape.strokeColor = NSColor(calibratedRed: CGFloat.random(in: 0.0...1.0), green: CGFloat.random(in: 0.0...1.0), blue: CGFloat.random(in: 0.0...1.0), alpha: 1.0)
+            shape.lineWidth = 4
 
             createShape = shape
         }
@@ -222,8 +223,13 @@ final class ProjectEditCanvasViewController: NSViewController {
 
             let startPoint = editor.global(toLocal: createMouseStartPoint, targetLayer: rootLayer)
             let endPoint = editor.global(toLocal: canvasLocation, targetLayer: rootLayer)
-            let rect = computeRect(start: startPoint, end: endPoint)
-            createShape.frame = rect
+
+            if let lineLayer = createShape as? AFLineLayer {
+                lineLayer.updateStart(startPoint, end: endPoint)
+            } else {
+                let rect = computeRect(start: startPoint, end: endPoint)
+                createShape.frame = rect
+            }
         }
     }
 
@@ -352,7 +358,7 @@ final class ProjectEditCanvasViewController: NSViewController {
         editor?.resetHoverWireframe()
     }
 
-    private func toCanvasPoint(source: NSPoint) -> NSPoint {
+    private func toCanvasPoint(source: CGPoint) -> CGPoint {
         guard let editor else { return source }
 
         let currentZoom = editor.zoomScale()
@@ -364,7 +370,7 @@ final class ProjectEditCanvasViewController: NSViewController {
         let x = (px - contentOffset.x) / currentZoom
         let y = (py - contentOffset.y) / currentZoom
 
-        return NSPoint(x: x, y: y)
+        return CGPoint(x: x, y: y)
     }
 
     private func updateZooming(scaleFactor: CGFloat) {
@@ -382,12 +388,12 @@ final class ProjectEditCanvasViewController: NSViewController {
         editor.updateZoomScale(newZoom, offset: contentOffset)
     }
 
-    private func computeRect(start: NSPoint, end: NSPoint) -> NSRect {
+    private func computeRect(start: CGPoint, end: CGPoint) -> CGRect {
         let x = min(start.x, end.x)
         let y = min(start.y, end.y)
         let w = abs(end.x - start.x)
         let h = abs(end.y - start.y)
-        return NSRect(x: x, y: y, width: w, height: h)
+        return CGRect(x: x, y: y, width: w, height: h)
     }
 
     deinit {

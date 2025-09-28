@@ -87,6 +87,8 @@ class ShapeLayer : public Layer {
 
     void setPathCommands(std::vector<PathCommand> commands);
 
+    bool isLine() const;
+
   protected:
     ShapeLayer(const std::string &layerId);
 
@@ -94,7 +96,7 @@ class ShapeLayer : public Layer {
     std::optional<Color> _fill;
     std::optional<Color> _stroke;
     float _lineWidth = 1.0f;
-    StrokeAlign _strokeAlign{StrokeAlign::Inside};
+    StrokeAlign _strokeAlign{StrokeAlign::Center};
     LineCap _lineCap{LineCap::Butt};
     LineJoin _lineJoin{LineJoin::Miter};
     std::vector<PathCommand> _pathCommands{};

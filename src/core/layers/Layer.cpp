@@ -70,12 +70,13 @@ void Layer::setTransient(bool value) {
     _transient = value;
 }
 
-void Layer::setFrame(const Rect &frame) {
+bool Layer::setFrame(const Rect &frame) {
     if (_frame == frame) {
-        return;
+        return false;
     }
     _frame = frame;
     notifyPropertyChanged();
+    return true;
 }
 
 bool Layer::addChild(std::shared_ptr<Layer> child) {
@@ -220,7 +221,18 @@ void Layer::setOnStructureChanged(StructureChangedCallback cb) {
     _onStructChanged = std::move(cb);
 }
 
+void Layer::disableNotifyPropertyChanged() {
+    _disableNotifyPropertyChanged = true;
+}
+
+void Layer::enableNotifyPropertyChanged() {
+    _disableNotifyPropertyChanged = false;
+}
+
 void Layer::notifyPropertyChanged() {
+    if (_disableNotifyPropertyChanged) {
+        return;
+    }
     if (_onPropChanged) {
         _onPropChanged(this);
     }

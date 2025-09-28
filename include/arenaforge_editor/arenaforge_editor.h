@@ -40,6 +40,7 @@
 
 #import <arenaforge_editor/bridge/apple/AFBooleanLayer.h>
 #import <arenaforge_editor/bridge/apple/AFShapeLayer.h>
+#import <arenaforge_editor/bridge/apple/AFLineLayer.h>
 
 #import <arenaforge_editor/bridge/apple/AFEditor.h>
 #import <arenaforge_editor/bridge/apple/AFProject.h>

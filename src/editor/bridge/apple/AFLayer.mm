@@ -153,6 +153,14 @@
     }
     self.cacheChildren = [children copy];
 }
+
+- (void)disableNotifyPropertyChanged {
+    _layer->disableNotifyPropertyChanged();
+}
+
+- (void)enableNotifyPropertyChanged {
+    _layer->enableNotifyPropertyChanged();
+}
 #pragma mark - setter getter
 
 - (std::shared_ptr<arenaforge::Layer>)cppObject {
@@ -200,7 +208,7 @@
     return _layer->transient();
 }
 
-- (void)setFrame:(NSRect)frame {
+- (void)setFrame:(CGRect)frame {
     auto cppRect = arenaforge::Rect::MakeXYWH(
         static_cast<float>(frame.origin.x),
         static_cast<float>(frame.origin.y),
@@ -209,9 +217,9 @@
     _layer->setFrame(cppRect);
 }
 
-- (NSRect)frame {
+- (CGRect)frame {
     auto cppRect = _layer->frame();
-    return NSRectFromCGRect(CGRectMake(cppRect.x(), cppRect.y(), cppRect.width(), cppRect.height()));
+    return CGRectMake(cppRect.x(), cppRect.y(), cppRect.width(), cppRect.height());
 }
 
 - (BOOL)isRoot {

@@ -143,8 +143,8 @@ std::vector<PathCommand> PathCommand::MakeEllipse() {
 
 std::vector<PathCommand> PathCommand::MakeLine() {
     std::vector<PathCommand> commands;
-    commands.push_back(PathCommand::MakeMoveTo({0.5, 0.5}));
-    commands.push_back(PathCommand::MakeLineTo({1.0, 0.5}));
+    commands.push_back(PathCommand::MakeMoveTo({0.0, 0.0}));
+    commands.push_back(PathCommand::MakeLineTo({1.0, 1.0}));
     return commands;
 }
 
@@ -159,6 +159,17 @@ std::vector<PathCommand> PathCommand::MakeFrom(BuiltinShapeType type) {
         case BuiltinShapeType::Line:
             return MakeLine();
     }
+}
+
+bool PathCommand::isLine(const std::vector<PathCommand> &commands) {
+    if (commands.size() != 2) {
+        return false;
+    }
+
+    if (commands[0].type == PathCommandType::MoveTo && commands[1].type == PathCommandType::LineTo) {
+        return true;
+    }
+    return false;
 }
 
 std::string PathCommandTypeToString(PathCommandType type) {

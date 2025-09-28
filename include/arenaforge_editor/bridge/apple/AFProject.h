@@ -37,6 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class AFLayer;
 @class AFShapeLayer;
+@class AFLineLayer;
 ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 @property (nonatomic, copy, readonly) NSString *name;
 @property (nonatomic, strong, readonly) AFLayer *root;
@@ -50,6 +51,8 @@ ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 - (AFLayer *_Nullable)createLayer;
 
 - (AFShapeLayer *_Nullable)createShapeLayer:(AFBuiltinShapeType)type;
+
+- (AFLineLayer *_Nullable)createLineLayer;
 
 - (AFLayer *_Nullable)findLayerById:(NSString *)layerId;
 

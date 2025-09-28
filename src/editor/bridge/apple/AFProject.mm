@@ -28,6 +28,7 @@
 
 #import <arenaforge_core/PathCommand.h>
 #import <arenaforge_core/layers/ShapeLayer.h>
+#import <arenaforge_editor/bridge/apple/AFLineLayer.h>
 #import <arenaforge_editor/bridge/apple/AFShapeLayer.h>
 
 #import "AFLayer+Private.h"
@@ -109,6 +110,18 @@
     AFShapeLayer *layer = [[AFShapeLayer alloc] initWithName:name layerMap:self.layerMap];
     auto cppLayer = std::static_pointer_cast<arenaforge::ShapeLayer>([layer cppObject]);
     auto commands = arenaforge::PathCommand::MakeFrom(static_cast<arenaforge::BuiltinShapeType>(type));
+    cppLayer->setPathCommands(std::move(commands));
+    [self.layerMap addLayer:layer];
+    return layer;
+}
+
+- (AFLineLayer *_Nullable)createLineLayer {
+    auto typeName = AFBuiltinShapeTypeToString(AFBuiltinShapeTypeLine);
+    auto counter = _project->genRectangleCounter();
+    NSString *name = [NSString stringWithFormat:@"%@ %u", typeName, counter];
+    AFLineLayer *layer = [[AFLineLayer alloc] initWithName:name layerMap:self.layerMap];
+    auto cppLayer = std::static_pointer_cast<arenaforge::ShapeLayer>([layer cppObject]);
+    auto commands = arenaforge::PathCommand::MakeFrom(static_cast<arenaforge::BuiltinShapeType>(AFBuiltinShapeTypeLine));
     cppLayer->setPathCommands(std::move(commands));
     [self.layerMap addLayer:layer];
     return layer;

@@ -39,29 +39,53 @@ ShapeLayer::ShapeLayer(const std::string &layerId)
 
 void ShapeLayer::setLineWidth(float width) {
     _lineWidth = width;
+    notifyPropertyChanged();
 }
 
 void ShapeLayer::setStrokeAlign(StrokeAlign align) {
+    if (align == _strokeAlign) {
+        return;
+    }
     _strokeAlign = align;
+    notifyPropertyChanged();
 }
 
 void ShapeLayer::setLineCap(LineCap cap) {
+    if (cap == _lineCap) {
+        return;
+    }
     _lineCap = cap;
+    notifyPropertyChanged();
 }
 
 void ShapeLayer::setLineJoin(LineJoin join) {
+    if (join == _lineJoin) {
+        return;
+    }
     _lineJoin = join;
+    notifyPropertyChanged();
 }
 
 void ShapeLayer::setFill(std::optional<Color> fill) {
     _fill = std::move(fill);
+
+    notifyPropertyChanged();
 }
 
 void ShapeLayer::setStroke(std::optional<Color> stroke) {
     _stroke = std::move(stroke);
+
+    notifyPropertyChanged();
 }
 
 void ShapeLayer::setPathCommands(std::vector<PathCommand> commands) {
     _pathCommands = std::move(commands);
+
+    notifyPropertyChanged();
+}
+
+bool ShapeLayer::isLine() const {
+    auto isLine = PathCommand::isLine(_pathCommands);
+    return isLine;
 }
 };  // namespace arenaforge

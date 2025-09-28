@@ -88,7 +88,7 @@ class Layer : public std::enable_shared_from_this<Layer> {
         return _frame;
     }
 
-    void setFrame(const Rect &frame);
+    bool setFrame(const Rect &frame);
 
     bool isRoot() const {
         return _isRoot;
@@ -137,6 +137,9 @@ class Layer : public std::enable_shared_from_this<Layer> {
     void setOnPropertyChanged(PropertyChangedCallback cb);
     void setOnStructureChanged(StructureChangedCallback cb);
 
+    void disableNotifyPropertyChanged();
+    void enableNotifyPropertyChanged();
+
     void notifyPropertyChanged();
     void notifyStructureChanged(std::shared_ptr<Layer> child, StructureChangeType type, int index);
 
@@ -163,6 +166,7 @@ class Layer : public std::enable_shared_from_this<Layer> {
     std::unordered_map<std::string, std::string> _attributes{};
     PropertyChangedCallback _onPropChanged{nullptr};
     StructureChangedCallback _onStructChanged{nullptr};
+    bool _disableNotifyPropertyChanged{false};
 
     friend class Project;
 };

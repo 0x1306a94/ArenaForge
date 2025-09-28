@@ -59,6 +59,8 @@ struct PathCommand {
     static std::vector<PathCommand> MakeEllipse();
     static std::vector<PathCommand> MakeLine();
     static std::vector<PathCommand> MakeFrom(BuiltinShapeType type);
+
+    static bool isLine(const std::vector<PathCommand> &commands);
 };
 
 std::string PathCommandTypeToString(PathCommandType type);
