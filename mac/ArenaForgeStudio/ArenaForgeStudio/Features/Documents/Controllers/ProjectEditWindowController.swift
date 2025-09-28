@@ -33,7 +33,7 @@ final class ProjectEditWindowController: NSWindowController, NSWindowDelegate, O
     @Published var inspectorCollapsed: Bool = false
 
     var project: ProjectDocument?
-    var editor: AFEditor?
+    var editor: EditorViewModel?
 
     var splitViewController: ProjectEditSplitViewController? {
         contentViewController as? ProjectEditSplitViewController
@@ -49,9 +49,9 @@ final class ProjectEditWindowController: NSWindowController, NSWindowDelegate, O
             fatalError("Failed to set up editor.")
         }
 
-        self.editor = editor
+        self.editor = EditorViewModel(editor: editor)
 
-        guard let splitViewController = setupSplitViewController(project: project, editor: editor) else {
+        guard let splitViewController = setupSplitViewController(project: project, editor: self.editor!) else {
             fatalError("Failed to set up content view.")
         }
 
@@ -69,7 +69,7 @@ final class ProjectEditWindowController: NSWindowController, NSWindowDelegate, O
         super.windowDidLoad()
     }
 
-    func setupSplitViewController(project: ProjectDocument, editor: AFEditor) -> ProjectEditSplitViewController? {
+    func setupSplitViewController(project: ProjectDocument, editor: EditorViewModel) -> ProjectEditSplitViewController? {
         guard let window else {
             assertionFailure("No window found for this controller. Cannot set up content.")
             return nil

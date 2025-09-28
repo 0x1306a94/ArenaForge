@@ -195,6 +195,19 @@ struct Point {
     static float Distance(const Point &a, const Point &b) {
         return Length(a.x - b.x, a.y - b.y);
     }
+
+    /**
+     * Returns the unit vector between a and b.
+     */
+    static Point UnitVector(const Point &a, const Point &b) {
+        auto dist = Distance(a, b);
+        return {(b.x - a.x) / dist, (b.y - a.y) / dist};
+    }
+
+    static Point ComputeSegmentLength(const Point &a, const Point &b, float lenght) {
+        auto x = UnitVector(a, b);
+        return a + x * lenght;
+    }
 };
 };  // namespace arenaforge
 

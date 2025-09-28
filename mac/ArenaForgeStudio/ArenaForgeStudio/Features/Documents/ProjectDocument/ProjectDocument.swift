@@ -31,6 +31,7 @@ import SwiftUI
 
 final class ProjectDocument: NSDocument, ObservableObject {
     @Published var activateEditorToolbarItem: EditorToolbarItem = .cursors
+    @Published var activeLayer: AFLayer?
     
     var project: AFProject?
     

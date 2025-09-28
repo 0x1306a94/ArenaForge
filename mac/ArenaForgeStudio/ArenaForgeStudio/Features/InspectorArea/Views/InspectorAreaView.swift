@@ -27,30 +27,36 @@
 import SwiftUI
 
 struct InspectorAreaView: View {
+    @EnvironmentObject private var project: ProjectDocument
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
-                InspectorAlignmentView()
+                if let _ = project.activeLayer {
+                    InspectorAlignmentView()
 
-                InspectorFrameView()
+                    InspectorFrameView()
+                }
             }
         }
         .frame(maxWidth: .infinity)
         .safeAreaInset(edge: .top) {
-            VStack(alignment: .leading, spacing: 0) {
-                Divider()
+            if let layer = project.activeLayer {
+                VStack(alignment: .leading, spacing: 0) {
+                    Divider()
 
-                HStack {
-                    Text("Venue")
+                    HStack {
+                        Text(layer.isRoot ? "Venue" : layer.name)
 
-                    Spacer()
+                        Spacer()
+                    }
+                    .padding(.leading, 10)
+                    .frame(height: 32)
+                    .frame(maxWidth: .infinity)
+                    Divider()
                 }
-                .padding(.leading, 10)
-                .frame(height: 32)
                 .frame(maxWidth: .infinity)
-                Divider()
             }
-            .frame(maxWidth: .infinity)
         }
     }
 }

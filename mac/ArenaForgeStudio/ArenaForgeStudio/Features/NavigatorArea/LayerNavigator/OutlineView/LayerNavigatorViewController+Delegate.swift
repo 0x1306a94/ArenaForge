@@ -67,6 +67,19 @@ extension LayerNavigatorViewController: NSOutlineViewDelegate {
         print(previousSelectIndexSet.map { $0 })
         print(currentSelectIndexSet.map { $0 })
 //        guard let item = outlineView.item(atRow: selectedIndex) as? AFLayer else { return }
+
+        guard outlineView.selectedRowIndexes.count == 1 else {
+            return
+        }
+
+        let selectedIndex = outlineView.selectedRow
+        guard let layer = outlineView.item(atRow: selectedIndex) as? AFLayer else { return }
+
+        if shouldSendSelectionUpdate {
+            shouldSendSelectionUpdate = false
+            project?.activeLayer = layer
+            shouldSendSelectionUpdate = true
+        }
     }
 }
 

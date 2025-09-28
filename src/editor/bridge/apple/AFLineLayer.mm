@@ -32,6 +32,54 @@
 
 @implementation AFLineLayer
 
+//- (void)setFrame:(CGRect)frame {
+//}
+
+- (void)setWidth:(CGFloat)width {
+    auto layer = std::static_pointer_cast<arenaforge::ShapeLayer>([self cppObject]);
+    const auto &commands = layer->pathCommands();
+    if (commands.size() != 2) {
+        return;
+    }
+
+    const auto &frame = layer->frame();
+    const auto &start = commands[0].p;
+    const auto &end = commands[1].p;
+
+    // 转换为 frame 空间的绝对坐标
+    auto startX = frame.x() + start.x * frame.width();
+    auto startY = frame.y() + start.y * frame.height();
+    auto endX = frame.x() + end.x * frame.width();
+    auto endY = frame.y() + end.y * frame.height();
+
+    auto newEnd = arenaforge::Point::ComputeSegmentLength(arenaforge::Point{startX, startY}, arenaforge::Point{endX, endY}, static_cast<float>(width));
+
+    [self updateStartPoint:CGPointMake(static_cast<CGFloat>(startX), static_cast<CGFloat>(startY)) endPoint:CGPointMake(static_cast<CGFloat>(newEnd.x), static_cast<CGFloat>(newEnd.y))];
+}
+
+- (CGFloat)width {
+    auto layer = std::static_pointer_cast<arenaforge::ShapeLayer>([self cppObject]);
+    const auto &commands = layer->pathCommands();
+    if (commands.size() != 2) {
+        return 0.0;
+    }
+
+    const auto &start = commands[0].p;
+    const auto &end = commands[1].p;
+    const auto &frame = layer->frame();
+
+    // 转换为 frame 空间的绝对坐标
+    auto startX = frame.x() + start.x * frame.width();
+    auto startY = frame.y() + start.y * frame.height();
+    auto endX = frame.x() + end.x * frame.width();
+    auto endY = frame.y() + end.y * frame.height();
+
+    auto p1 = arenaforge::Point(startX, startY);
+    auto p2 = arenaforge::Point(endX, endY);
+    auto distance = arenaforge::Point::Distance(p1, p2);
+    return static_cast<CGFloat>(distance);
+}
+
 - (void)updateStartPoint:(CGPoint)startPoint endPoint:(CGPoint)endPoint {
 
     CGFloat x = fmin(startPoint.x, endPoint.x);
@@ -45,17 +93,16 @@
         h = 1;
     }
 
-    [self disableNotifyPropertyChanged];
-    CGRect frame = CGRectMake(x, y, w, h);
-    self.frame = frame;
-    [self enableNotifyPropertyChanged];
+    auto layer = std::static_pointer_cast<arenaforge::ShapeLayer>([self cppObject]);
+
+    layer->disableNotifyPropertyChanged();
+    layer->setFrame(arenaforge::Rect::MakeXYWH(static_cast<float>(x), static_cast<float>(y), static_cast<float>(w), static_cast<float>(h)));
+    layer->enableNotifyPropertyChanged();
 
     CGFloat startX = (startPoint.x - x) / w;
     CGFloat startY = (startPoint.y - y) / h;
     CGFloat endX = (endPoint.x - x) / w;
     CGFloat endY = (endPoint.y - y) / h;
-
-    auto layer = std::static_pointer_cast<arenaforge::ShapeLayer>([self cppObject]);
 
     std::vector<arenaforge::PathCommand> commands;
     commands.push_back(arenaforge::PathCommand::MakeMoveTo({static_cast<float>(startX), static_cast<float>(startY)}));

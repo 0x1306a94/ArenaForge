@@ -30,11 +30,12 @@ import Combine
 
 protocol ProjectEditCanvasViewControllerDelegate: AnyObject {
     func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewShape shape: AFLayer)
+    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didSelected shape: AFLayer?)
 }
 
 final class ProjectEditCanvasViewController: NSViewController {
     private weak var project: ProjectDocument?
-    private weak var editor: AFEditor?
+    private weak var editor: EditorViewModel?
     private var canvasView: AFMacCanvasView!
 
     private var trackingArea: NSTrackingArea?
@@ -42,8 +43,6 @@ final class ProjectEditCanvasViewController: NSViewController {
     private var createMouseStartPoint: NSPoint?
 
     private weak var createShape: AFShapeLayer?
-    private var hoverTargetLayer: AFLayer?
-    private var hoverWireframeLayer: AFLayer?
 
     weak var delegate: ProjectEditCanvasViewControllerDelegate?
 
@@ -57,7 +56,7 @@ final class ProjectEditCanvasViewController: NSViewController {
 
     var cancellables = Set<AnyCancellable>()
 
-    init(project: ProjectDocument, editor: AFEditor) {
+    init(project: ProjectDocument, editor: EditorViewModel) {
         super.init(nibName: nil, bundle: nil)
         self.project = project
         self.editor = editor
@@ -104,7 +103,7 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     private func setupEditor() {
-        guard let project, let editor, let canvasView else {
+        guard let project, let editor = editor?.editor, let canvasView else {
             return
         }
         editor.setupCanvasView(canvasView)
@@ -113,7 +112,7 @@ final class ProjectEditCanvasViewController: NSViewController {
             .removeDuplicates()
             .sink { [weak self] in
                 if $0 != .cursors {
-                    self?.clearHoverWireframe()
+                    self?.editor?.clearHoverWireframe()
                 }
             }
             .store(in: &cancellables)
@@ -145,11 +144,11 @@ final class ProjectEditCanvasViewController: NSViewController {
 
     private func automaticallyAdjustZoomLevel() {
         needAutomaticallyAdjustZoomLevel = false
-        editor?.autoAdjustCanvasScaleForContent()
+        editor?.editor.autoAdjustCanvasScaleForContent()
     }
 
     override func mouseDown(with event: NSEvent) {
-        guard let project, let editor else {
+        guard let project, let editor = editor?.editor else {
             project?.activateEditorToolbarItem = .cursors
             return
         }
@@ -161,6 +160,13 @@ final class ProjectEditCanvasViewController: NSViewController {
 
         let location = canvasView.convert(event.locationInWindow, from: nil)
         let canvasLocation = toCanvasPoint(source: location)
+
+        if project.activateEditorToolbarItem == .cursors, event.clickCount == 2 {
+            let pickLayer = editor.findLayer(at: canvasLocation)
+            delegate?.projectEditCanvasViewController(self, didSelected: pickLayer)
+            return
+        }
+
         createMouseStartPoint = canvasLocation
 
         switch project.activateEditorToolbarItem {
@@ -196,11 +202,11 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     override func mouseExited(with event: NSEvent) {
-        clearHoverWireframe()
+        self.editor?.clearHoverWireframe()
     }
 
     override func mouseDragged(with event: NSEvent) {
-        guard let project, project.activateEditorToolbarItem != .cursors, let editor else {
+        guard let project, project.activateEditorToolbarItem != .cursors, let editor = editor?.editor else {
             project?.activateEditorToolbarItem = .cursors
             return
         }
@@ -239,7 +245,7 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     override func mouseUp(with event: NSEvent) {
-        guard let project, project.activateEditorToolbarItem != .cursors, let editor else {
+        guard let project, project.activateEditorToolbarItem != .cursors, let editor = editor?.editor else {
             project?.activateEditorToolbarItem = .cursors
             return
         }
@@ -272,8 +278,12 @@ final class ProjectEditCanvasViewController: NSViewController {
 
             let startPoint = editor.global(toLocal: createMouseStartPoint, targetLayer: rootLayer)
             let endPoint = editor.global(toLocal: canvasLocation, targetLayer: rootLayer)
-            let rect = computeRect(start: startPoint, end: endPoint)
-            createShape.frame = rect
+            if let lineLayer = createShape as? AFLineLayer {
+                lineLayer.updateStart(startPoint, end: endPoint)
+            } else {
+                let rect = computeRect(start: startPoint, end: endPoint)
+                createShape.frame = rect
+            }
 
             project.activateEditorToolbarItem = .cursors
             delegate?.projectEditCanvasViewController(self, didNewShape: createShape)
@@ -282,7 +292,7 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     override func scrollWheel(with event: NSEvent) {
-        guard let editor else {
+        guard let editor = editor?.editor else {
             return
         }
 
@@ -321,7 +331,7 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     override func magnify(with event: NSEvent) {
-        guard let editor else {
+        guard let editor = editor?.editor else {
             super.magnify(with: event)
             return
         }
@@ -358,26 +368,15 @@ final class ProjectEditCanvasViewController: NSViewController {
         let canvasLocation = toCanvasPoint(source: location)
 
         guard let targetLayer = editor.findLayer(at: canvasLocation) else {
-            clearHoverWireframe()
+            editor.clearHoverWireframe()
             return
         }
 
-        if let hoverTargetLayer, targetLayer == hoverTargetLayer {
-            return
-        }
-        clearHoverWireframe()
-
-        hoverTargetLayer = targetLayer
-        editor.createHoverWireframeLayer(inTargetLayer: targetLayer)
-    }
-
-    private func clearHoverWireframe() {
-        hoverTargetLayer = nil
-        editor?.resetHoverWireframe()
+        editor.createHoverWireframeLayer(targetLayer: targetLayer)
     }
 
     private func toCanvasPoint(source: CGPoint) -> CGPoint {
-        guard let editor else { return source }
+        guard let editor = editor?.editor else { return source }
 
         let currentZoom = editor.zoomScale()
         let density = editor.density()
@@ -392,7 +391,7 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     private func updateZooming(scaleFactor: CGFloat) {
-        guard let editor else {
+        guard let editor = editor?.editor else {
             return
         }
 

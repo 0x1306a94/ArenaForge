@@ -26,7 +26,12 @@
 
 #import <arenaforge_editor/bridge/apple/AFLayer.h>
 
+#import <arenaforge_editor/bridge/apple/AFShapeLayer.h>
+
+#import <arenaforge_editor/bridge/apple/AFLineLayer.h>
+
 #import <arenaforge_core/layers/Layer.h>
+#import <arenaforge_core/layers/ShapeLayer.h>
 #import <arenaforge_core/uuid/UUID.h>
 
 #import <tgfx/layers/SolidColor.h>
@@ -65,9 +70,20 @@
         _layer = std::move(cppObject);
         _layerMap = layerMap;
         for (auto &cppChild : _layer->children()) {
-            AFLayer *child = [[AFLayer alloc] initWithCppObject:std::static_pointer_cast<arenaforge::Layer>(cppChild) layerMap:layerMap];
-            child.parent = self;
-            [layerMap addLayer:child];
+            AFLayer *child = nil;
+            if (auto shape = std::dynamic_pointer_cast<arenaforge::ShapeLayer>(cppChild); shape != nullptr) {
+                if (shape->isLine()) {
+                    child = [[AFLineLayer alloc] initWithCppObject:cppChild layerMap:layerMap];
+                } else {
+                    child = [[AFShapeLayer alloc] initWithCppObject:cppChild layerMap:layerMap];
+                }
+            } else {
+                child = [[AFLayer alloc] initWithCppObject:cppChild layerMap:layerMap];
+            }
+            if (child) {
+                child.parent = self;
+                [layerMap addLayer:child];
+            }
         }
 
         [self rebuildCacheChildren];

@@ -29,7 +29,7 @@ import arenaforge_editor
 
 final class LayerNavigatorViewController: NSViewController {
     weak var project: ProjectDocument?
-    weak var editor: AFEditor?
+    weak var editor: EditorViewModel?
     private var scrollView: NSScrollView!
     var outlineView: NSOutlineView!
 
@@ -48,7 +48,9 @@ final class LayerNavigatorViewController: NSViewController {
 
     var expandedItems: NSSet = []
 
-    init(project: ProjectDocument, editor: AFEditor) {
+    var shouldSendSelectionUpdate: Bool = true
+
+    init(project: ProjectDocument, editor: EditorViewModel) {
         super.init(nibName: nil, bundle: nil)
         self.project = project
         self.editor = editor
@@ -117,10 +119,34 @@ final class LayerNavigatorViewController: NSViewController {
     func onAddShape(shape: AFLayer) {
         project?.undoManager?.registerUndo(withTarget: self) {
             shape.removeFromParent()
+            if $0.project?.activeLayer == shape {
+                $0.project?.activeLayer = nil
+                $0.editor?.editor.resetHoverWireframe()
+            }
+            $0.outlineView.deselectAll(nil)
             $0.outlineView.reloadData()
         }
 
         outlineView.reloadData()
+    }
+
+    func onSeletected(shape: AFLayer?) {
+        shouldSendSelectionUpdate = false
+        defer { shouldSendSelectionUpdate = true }
+        guard let shape else {
+            project?.activeLayer = nil
+            outlineView.deselectAll(nil)
+            return
+        }
+        shouldSendSelectionUpdate = false
+        project?.activeLayer = shape
+        let row = outlineView.row(forItem: shape)
+        if row == -1 {
+            // root
+            outlineView.deselectAll(nil)
+        } else {
+            outlineView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: true)
+        }
     }
 
     #if DEBUG

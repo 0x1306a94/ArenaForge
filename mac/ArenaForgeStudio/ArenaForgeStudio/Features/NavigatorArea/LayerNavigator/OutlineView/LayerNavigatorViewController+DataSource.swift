@@ -99,7 +99,7 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
             return false
         }
 
-        guard let editor else {
+        guard let editor = editor?.editor else {
             return false
         }
 

@@ -35,7 +35,7 @@ final class ProjectEditSplitViewController: NSSplitViewController, ProjectEditCa
     static let minSnapWidth: CGFloat = snapWidth - 10
 
     private weak var project: ProjectDocument?
-    private weak var editor: AFEditor?
+    private weak var editor: EditorViewModel?
     private weak var windowRef: NSWindow?
     private unowned var hapticPerformer: NSHapticFeedbackPerformer
 
@@ -47,7 +47,7 @@ final class ProjectEditSplitViewController: NSSplitViewController, ProjectEditCa
     init(
         windowRef: NSWindow,
         project: ProjectDocument,
-        editor: AFEditor,
+        editor: EditorViewModel,
         hapticPerformer: NSHapticFeedbackPerformer = NSHapticFeedbackManager.defaultPerformer
     ) {
         self.windowRef = windowRef
@@ -80,7 +80,12 @@ final class ProjectEditSplitViewController: NSSplitViewController, ProjectEditCa
 
         let navigator = makeNavigator(project: project, editor: editor)
         let canvas = makeCanvas(project: project, editor: editor)
-        let inspector = makeInspector(view: InspectorAreaView())
+        let inspector = makeInspector(view:
+            InspectorAreaView()
+                .environmentObject(project)
+                .environmentObject(editor)
+        )
+
         addSplitViewItem(navigator)
         addSplitViewItem(canvas)
         addSplitViewItem(inspector)
@@ -94,7 +99,7 @@ final class ProjectEditSplitViewController: NSSplitViewController, ProjectEditCa
         splitView.setPosition(Self.minSidebarWidth, ofDividerAt: 0)
     }
 
-    private func makeNavigator(project: ProjectDocument, editor: AFEditor) -> NSSplitViewItem {
+    private func makeNavigator(project: ProjectDocument, editor: EditorViewModel) -> NSSplitViewItem {
         let layerNavigator = LayerNavigatorViewController(project: project, editor: editor)
         self.layerNavigator = layerNavigator
         let navigator = NSSplitViewItem(sidebarWithViewController: layerNavigator)
@@ -115,7 +120,7 @@ final class ProjectEditSplitViewController: NSSplitViewController, ProjectEditCa
         return inspector
     }
 
-    private func makeCanvas(project: ProjectDocument, editor: AFEditor) -> NSSplitViewItem {
+    private func makeCanvas(project: ProjectDocument, editor: EditorViewModel) -> NSSplitViewItem {
         let canvasViewController = ProjectEditCanvasViewController(project: project, editor: editor)
         self.editCanvas = canvasViewController
         let canvas = NSSplitViewItem(viewController: canvasViewController)
@@ -187,6 +192,10 @@ final class ProjectEditSplitViewController: NSSplitViewController, ProjectEditCa
 
     func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didNewShape shape: AFLayer) {
         self.layerNavigator?.onAddShape(shape: shape)
+    }
+
+    func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didSelected shape: AFLayer?) {
+        self.layerNavigator?.onSeletected(shape: shape)
     }
 
     #if DEBUG

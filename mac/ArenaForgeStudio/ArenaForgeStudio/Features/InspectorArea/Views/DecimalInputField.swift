@@ -30,13 +30,16 @@ struct DecimalInputField: View {
     enum ValueChangeReason {
         case enterKey
         case focusLost
+        case sliderBegin
         case slider
+        case sliderEnd
     }
     
     private let label: String
     private let initialValue: Double
     private let maximumFractionDigits: Int
     private let formatter: NumberFormatter
+    @State private var sliderReason: ValueChangeReason = .sliderEnd
     
     @State private var value: Double
     @State private var dragAccumulator: CGFloat = 0
@@ -74,12 +77,20 @@ struct DecimalInputField: View {
                             if step != 0 {
                                 dragAccumulator += CGFloat(step)
                                 value += Double(step)
-                                onValueChanged?(value, .slider)
+                                if sliderReason == .sliderEnd {
+                                    sliderReason = .sliderBegin
+                                } else if sliderReason == .sliderBegin {
+                                    sliderReason = .slider
+                                }
+                                
+                                onValueChanged?(value, sliderReason)
                             }
                         }
                         .onEnded { _ in
                             dragAccumulator = 0
-                        }
+                            sliderReason = .sliderEnd
+                            onValueChanged?(value, sliderReason)
+                         }
                 )
             
             TextField("", value: $value, formatter: formatter)
@@ -91,7 +102,7 @@ struct DecimalInputField: View {
                     onValueChanged?(value, .enterKey)
                 }
                 .onChange(of: isFocused) { oldValue, newValue in
-                    if oldValue, !newValue {
+                    if oldValue, !newValue, value != initialValue {
                         onValueChanged?(value, .focusLost)
                     }
                 }
@@ -101,6 +112,9 @@ struct DecimalInputField: View {
             RoundedRectangle(cornerRadius: 4)
                 .fill(.bgSecondary)
         )
+        .onChange(of: initialValue) { _, newValue in
+            value = newValue
+        }
     }
 }
 

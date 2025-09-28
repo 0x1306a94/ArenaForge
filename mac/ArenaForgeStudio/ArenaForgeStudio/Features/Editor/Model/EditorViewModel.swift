@@ -18,25 +18,41 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  AFLineLayer.h
-//  arenaforge_editor
+//  EditorViewModel.swift
+//  ArenaForgeStudio
 //
 //  Created by king on 2025/9/28.
 //
 
-#ifndef AFLineLayer_h_ArenaForge
-#define AFLineLayer_h_ArenaForge
+import arenaforge_editor
+import SwiftUI
 
-#import <CoreFoundation/CFCGTypes.h>
+final class EditorViewModel: ObservableObject {
+    let editor: AFEditor
 
-#import <arenaforge_editor/bridge/apple/AFShapeLayer.h>
+    private var hoverTargetLayer: AFLayer?
+    private var hoverWireframeLayer: AFLayer?
 
-#import <arenaforge_editor/core/defines.h>
+    init(editor: AFEditor) {
+        self.editor = editor
+    }
+    
+    func findLayer(at point: CGPoint) -> AFLayer? {
+        editor.findLayer(at: point)
+    }
 
-ARENA_FORGE_EXPORT_API @interface AFLineLayer : AFShapeLayer
-@property (nonatomic, assign) CGFloat width;
+    func clearHoverWireframe() {
+        hoverTargetLayer = nil
+        editor.resetHoverWireframe()
+    }
 
-- (void)updateStartPoint:(CGPoint)startPoint endPoint:(CGPoint)endPoint;
-@end
+    func createHoverWireframeLayer(targetLayer: AFLayer) {
+        if let hoverTargetLayer, targetLayer == hoverTargetLayer {
+            return
+        }
 
-#endif /* AFLineLayer_h_ArenaForge */
+        clearHoverWireframe()
+        hoverTargetLayer = targetLayer
+        editor.createHoverWireframeLayer(inTargetLayer: targetLayer)
+    }
+}

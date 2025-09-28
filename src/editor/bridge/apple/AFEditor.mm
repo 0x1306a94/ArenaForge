@@ -97,12 +97,12 @@
     return 1.0;
 }
 
-- (NSPoint)contentOffset {
+- (CGPoint)contentOffset {
     float offsetX = 0, offsetY = 0;
     if (_editor) {
         _editor->contentOffset(offsetX, offsetY);
     }
-    return NSPointFromCGPoint(CGPointMake(offsetX, offsetY));
+    return CGPointMake(offsetX, offsetY);
 }
 
 - (CGFloat)density {
@@ -126,14 +126,14 @@
     }
 }
 
-- (void)updateOffset:(NSPoint)offset {
+- (void)updateOffset:(CGPoint)offset {
     if (_editor) {
         auto zoomScale = _editor->zoomScale();
         _editor->updateZoomAndOffset(zoomScale, static_cast<float>(offset.x), static_cast<float>(offset.y));
     }
 }
 
-- (void)updateZoomScale:(CGFloat)zoomScale offset:(NSPoint)offset {
+- (void)updateZoomScale:(CGFloat)zoomScale offset:(CGPoint)offset {
     if (_editor) {
         _editor->updateZoomAndOffset(static_cast<float>(zoomScale), static_cast<float>(offset.x), static_cast<float>(offset.y));
     }
@@ -151,7 +151,7 @@
     return [parent addChild:layer];
 }
 
-- (AFLayer *_Nullable)findLayerAtPoint:(NSPoint)point {
+- (AFLayer *_Nullable)findLayerAtPoint:(CGPoint)point {
     auto renderLayer = _editor->findLayerAtPoint(static_cast<float>(point.x), static_cast<float>(point.y));
     if (!renderLayer) {
         if (_editor->hitTestPointInContainer(static_cast<float>(point.x), static_cast<float>(point.y))) {
@@ -169,7 +169,7 @@
     return layer;
 }
 
-- (NSPoint)globalToLocal:(NSPoint)point targetLayer:(AFLayer *)layer {
+- (CGPoint)globalToLocal:(CGPoint)point targetLayer:(AFLayer *)layer {
     if (!_editor || layer == nil) {
         return point;
     }
@@ -177,7 +177,7 @@
     if (layer.isRoot) {
         auto rootLayer = _editor->rootLayer();
         auto local = rootLayer->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-        return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+        return CGPointMake(local.x, local.y);
     }
 
     auto cppLayer = [layer cppObject];
@@ -188,10 +188,10 @@
     }
 
     auto local = renderLayer->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+    return CGPointMake(local.x, local.y);
 }
 
-- (NSPoint)localToGlobal:(NSPoint)point sourceLayer:(AFLayer *)layer {
+- (CGPoint)localToGlobal:(CGPoint)point sourceLayer:(AFLayer *)layer {
     if (!_editor || layer == nil) {
         return point;
     }
@@ -199,7 +199,7 @@
     if (layer.isRoot) {
         auto rootLayer = _editor->rootLayer();
         auto local = rootLayer->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-        return NSPointFromCGPoint(CGPointMake(local.x, local.y));
+        return CGPointMake(local.x, local.y);
     }
 
     auto cppLayer = [layer cppObject];
@@ -210,7 +210,7 @@
     }
 
     auto global = renderLayer->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-    return NSPointFromCGPoint(CGPointMake(global.x, global.y));
+    return CGPointMake(global.x, global.y);
 }
 
 - (void)createHoverWireframeLayerInTargetLayer:(AFLayer *)targetLayer {
