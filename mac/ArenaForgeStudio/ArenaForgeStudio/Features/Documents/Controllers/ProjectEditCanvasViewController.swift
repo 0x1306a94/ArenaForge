@@ -166,8 +166,8 @@ final class ProjectEditCanvasViewController: NSViewController {
         switch project.activateEditorToolbarItem {
         case .cursors:
             break
-        case .shape:
-            guard let shape = editor.project.createLineLayer() else {
+        case .shape(let type):
+            guard let shape = createShape(editor: editor, type: type) else {
                 return
             }
 
@@ -175,8 +175,13 @@ final class ProjectEditCanvasViewController: NSViewController {
                 return
             }
 
-            shape.strokeColor = NSColor(calibratedRed: CGFloat.random(in: 0.0...1.0), green: CGFloat.random(in: 0.0...1.0), blue: CGFloat.random(in: 0.0...1.0), alpha: 1.0)
-            shape.lineWidth = 4
+            let color = NSColor(calibratedRed: CGFloat.random(in: 0.0...1.0), green: CGFloat.random(in: 0.0...1.0), blue: CGFloat.random(in: 0.0...1.0), alpha: 1.0)
+            if let line = shape as? AFLineLayer {
+                line.strokeColor = color
+                line.lineWidth = 4
+            } else {
+                shape.fillColor = color
+            }
 
             createShape = shape
         }
@@ -329,6 +334,19 @@ final class ProjectEditCanvasViewController: NSViewController {
         location.y *= density
         mousePosition = location
         updateZooming(scaleFactor: scaleFactor)
+    }
+
+    private func createShape(editor: AFEditor, type: AFBuiltinShapeType) -> AFShapeLayer? {
+        switch type {
+        case .rectangle:
+            return editor.project.createShapeLayer(.rectangle)
+        case .ellipse:
+            return editor.project.createShapeLayer(.ellipse)
+        case .line:
+            return editor.project.createLineLayer()
+        default:
+            return nil
+        }
     }
 
     private func updateHoverWireframe(with event: NSEvent) {

@@ -52,28 +52,7 @@ struct ArenaForgeStudioApp: App {
             )
         }
         .commands {
-            CommandGroup(replacing: .newItem) {
-                Button("New Project") {
-                    ArenaForgeStudioDocumentController.shared.newDocument(nil)
-                }
-                .keyboardShortcut("n")
-            }
-
-            CommandGroup(replacing: .saveItem) {
-                Button("Save") {
-                    NSDocumentController.shared.currentDocument?.save(nil)
-                }
-                .keyboardShortcut("s")
-            }
-
-            CommandGroup(after: .saveItem) {
-                Button("Save As…") {
-                    if let doc = NSDocumentController.shared.currentDocument {
-                        doc.runModalSavePanel(for: .saveAsOperation, delegate: nil, didSave: nil, contextInfo: nil)
-                    }
-                }
-                .keyboardShortcut("S", modifiers: [.shift, .command])
-            }
+            ArenaForgeStudioCommands()
         }
     }
 }

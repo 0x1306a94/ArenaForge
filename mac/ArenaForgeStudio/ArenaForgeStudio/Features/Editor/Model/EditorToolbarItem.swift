@@ -24,11 +24,12 @@
 //  Created by king on 2025/9/8.
 //
 
+import arenaforge_editor
 import Foundation
 
-enum EditorToolbarItem: Equatable, CaseIterable {
+enum EditorToolbarItem: Equatable {
     case cursors
-    case shape
+    case shape(type: AFBuiltinShapeType)
 
     var iconName: String {
         switch self {

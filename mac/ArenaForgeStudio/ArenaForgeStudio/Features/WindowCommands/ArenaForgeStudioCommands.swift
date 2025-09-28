@@ -18,37 +18,26 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //
-//  EditorMouseModeToolbarButton.swift
+//  ArenaForgeStudioCommands.swift
 //  ArenaForgeStudio
 //
-//  Created by king on 2025/9/8.
+//  Created by king on 2025/9/28.
 //
 
 import SwiftUI
 
-struct EditorMouseModeToolbarButton: View {
-    @Environment(\.controlActiveState)
-    private var controlActive
-    
-    let item: EditorToolbarItem
-    let isSelected: Bool
-    let action: () -> Void
-    
-    @State private var isHovering: Bool = false
-    
-    var body: some View {
-        HStack {
-            Button {
-                action()
-            } label: {
-                Image(item.iconName)
-                    .resizable()
-                    .renderingMode(.template)
-                    .foregroundColor(isSelected ? .bgSecondary : Color.secondary)
-                    .frame(width: 24, height: 24)
-                    .opacity(controlActive == .inactive ? 0.5 : 1.0)
-                    .help(item.helpTip)
+struct ArenaForgeStudioCommands: Commands {
+    @Environment(\.openWindow)
+    private var openWindow
+
+    @UpdatingWindowController var windowController
+
+    var body: some Commands {
+        Group {
+            FileCommands()
+            if let _ = windowController {
+                ShapeCommands()
             }
-          }
+        }
     }
 }

@@ -31,7 +31,6 @@ extension NSToolbarItem.Identifier {
     static let toggleFirstSidebarItem: NSToolbarItem.Identifier = .init("ToggleFirstSidebarItem")
     static let toggleLastSidebarItem: NSToolbarItem.Identifier = .init("ToggleLastSidebarItem")
     static let itemListTrackingSeparator = NSToolbarItem.Identifier("ItemListTrackingSeparator")
-    static let editorToolbarViewItem = NSToolbarItem.Identifier("editorToolbarViewItem")
 }
 
 extension ProjectEditWindowController: NSToolbarDelegate {
@@ -56,7 +55,6 @@ extension ProjectEditWindowController: NSToolbarDelegate {
             .toggleFirstSidebarItem,
             .flexibleSpace,
             .sidebarTrackingSeparator,
-            .editorToolbarViewItem,
             .flexibleSpace,
             .itemListTrackingSeparator,
             .flexibleSpace,
@@ -71,7 +69,6 @@ extension ProjectEditWindowController: NSToolbarDelegate {
             .flexibleSpace,
             .itemListTrackingSeparator,
             .toggleLastSidebarItem,
-            .editorToolbarViewItem,
         ]
     }
 
@@ -101,17 +98,6 @@ extension ProjectEditWindowController: NSToolbarDelegate {
                 systemSymbolName: "sidebar.leading",
                 accessibilityDescription: nil
             )?.withSymbolConfiguration(.init(scale: .large))
-
-            return toolbarItem
-        case .editorToolbarViewItem:
-            guard let project = self.project else { return nil }
-
-            let toolbarItem = NSToolbarItem(itemIdentifier: .editorToolbarViewItem)
-            let view = NSHostingView(
-                rootView: EditorToolbarView()
-                    .environmentObject(project)
-            )
-            toolbarItem.view = view
 
             return toolbarItem
         case .toggleLastSidebarItem:
