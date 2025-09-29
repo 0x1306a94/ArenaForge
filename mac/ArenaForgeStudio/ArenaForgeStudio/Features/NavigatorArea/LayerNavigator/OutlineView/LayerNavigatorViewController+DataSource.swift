@@ -80,7 +80,7 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
         }
 
         // 如果 index == -1，表示要放到 parent 节点本身
-        guard index != -1 else { return [] }
+        guard index != -1 else { return .move }
 
         return .move
     }
@@ -104,27 +104,29 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
         }
 
         let oldIndex = sourceParent.getChildIndex(source)
-        let oldFrame = source.frame()
-        let oldGlobal = editor.local(toGlobal: .zero, sourceLayer: source)
+//        let oldFrame = source.frame()
+//        let oldGlobal = editor.local(toGlobal: .zero, sourceLayer: source)
 
         // 显示是按照倒序
         var reversedIndex = destination.childrenCount - index
-        if reversedIndex < 0 {
+        if index == -1 {
+            reversedIndex = Int(sourceParent.getChildIndex(destination))
+        } else if reversedIndex < 0 {
             reversedIndex = 0
         } else if index == 0 {
             reversedIndex = destination.childrenCount
         }
 
-        guard destination.addChild(source, at: Int32(reversedIndex)) else {
+        guard sourceParent.addChild(source, at: Int32(reversedIndex)) else {
             return false
         }
 
-        if sourceParent != destination {
-            let newLocal = editor.global(toLocal: oldGlobal, targetLayer: destination)
-            var newFrame = oldFrame
-            newFrame.origin = newLocal
-            source.updateFrame(newFrame)
-        }
+//        if sourceParent != destination {
+//            let newLocal = editor.global(toLocal: oldGlobal, targetLayer: destination)
+//            var newFrame = oldFrame
+//            newFrame.origin = newLocal
+//            source.updateFrame(newFrame)
+//        }
 
         self.project?.undoManager?.registerUndo(withTarget: self) { [weak sourceParent, weak source, weak self] _ in
             guard let sourceParent, let source, let self else {
@@ -134,11 +136,11 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
             guard sourceParent.addChild(source, at: oldIndex) else {
                 return
             }
-            source.updateFrame(oldFrame)
+//            source.updateFrame(oldFrame)
             self.outlineView.reloadData()
         }
 
         outlineView.reloadData()
-        return false
+        return true
     }
 }

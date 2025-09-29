@@ -174,6 +174,19 @@ std::shared_ptr<tgfx::Layer> Editor::findLayerAtPoint(float x, float y) const {
         return nullptr;
     }
 
+//    do {
+//        if (topLayer->type() != tgfx::LayerType::Shape) {
+//            break;
+//        }
+//        auto shape = std::static_pointer_cast<tgfx::ShapeLayer>(topLayer);
+//        const auto &path = shape->path();
+//
+//        auto localPoint = shape->globalToLocal({x, y});
+//        if (!path.contains(localPoint.x, localPoint.y)) {
+//            return nullptr;
+//        }
+//    } while (false);
+
     return topLayer;
 }
 
