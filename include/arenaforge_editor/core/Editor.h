@@ -95,7 +95,8 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
 
   private:
     void setupRootLayer();
-
+    void setupProjectSynchronization();
+    void handleProjectCanvasSizeChanged();
   private:
     std::shared_ptr<arenaforge::Project> _project{nullptr};
     std::shared_ptr<Renderer> _renderer{nullptr};

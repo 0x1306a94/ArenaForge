@@ -104,7 +104,7 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
         }
 
         let oldIndex = sourceParent.getChildIndex(source)
-        let oldFrame = source.frame
+        let oldFrame = source.frame()
         let oldGlobal = editor.local(toGlobal: .zero, sourceLayer: source)
 
         // 显示是按照倒序
@@ -123,7 +123,7 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
             let newLocal = editor.global(toLocal: oldGlobal, targetLayer: destination)
             var newFrame = oldFrame
             newFrame.origin = newLocal
-            source.frame = newFrame
+            source.updateFrame(newFrame)
         }
 
         self.project?.undoManager?.registerUndo(withTarget: self) { [weak sourceParent, weak source, weak self] _ in
@@ -134,7 +134,7 @@ extension LayerNavigatorViewController: NSOutlineViewDataSource {
             guard sourceParent.addChild(source, at: oldIndex) else {
                 return
             }
-            source.frame = oldFrame
+            source.updateFrame(oldFrame)
             self.outlineView.reloadData()
         }
 

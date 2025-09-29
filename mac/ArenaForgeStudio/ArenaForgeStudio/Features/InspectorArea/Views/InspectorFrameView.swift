@@ -28,7 +28,7 @@ import arenaforge_editor
 import SwiftUI
 
 struct InspectorFrameView: View {
-    @EnvironmentObject private var project: ProjectDocument
+    @EnvironmentObject private var document: ProjectDocument
     @EnvironmentObject private var editor: EditorViewModel
 
     @State private var x: Double = 0
@@ -67,6 +67,8 @@ struct InspectorFrameView: View {
                     print("W: \(newValue) \(reason)")
                     if isLine {
                         updateLineLayerWidth(value: newValue, reason: reason)
+                    } else if isRoot {
+                        updateVenueSize(value: CGSize(width: newValue, height: height), reason: reason)
                     } else {
                         updateLayerSize(value: CGSize(width: newValue, height: height), reason: reason)
                     }
@@ -74,7 +76,11 @@ struct InspectorFrameView: View {
 
                 DecimalInputField(label: "H", initialValue: height) { newValue, reason in
                     print("H: \(newValue) \(reason)")
-                    updateLayerSize(value: CGSize(width: width, height: newValue), reason: reason)
+                    if isRoot {
+                        updateVenueSize(value: CGSize(width: width, height: newValue), reason: reason)
+                    } else {
+                        updateLayerSize(value: CGSize(width: width, height: newValue), reason: reason)
+                    }
                 }
                 .disabled(isLine)
             }
@@ -84,18 +90,18 @@ struct InspectorFrameView: View {
         .onAppear {
             updateInspectorSource()
         }
-        .onChange(of: project.activeLayer) { _, _ in
+        .onChange(of: document.activeLayer) { _, _ in
             updateInspectorSource()
         }
     }
 
     private func updateInspectorSource() {
-        isRoot = project.activeLayer?.isRoot ?? false
-        let frame = project.activeLayer?.frame ?? .zero
+        isRoot = document.activeLayer?.isRoot ?? false
+        let frame = document.activeLayer?.frame() ?? .zero
         x = frame.minX
         y = frame.minY
 
-        if let lineLayer = project.activeLayer as? AFLineLayer {
+        if let lineLayer = document.activeLayer as? AFLineLayer {
             isLine = true
             width = lineLayer.width
             height = 0
@@ -107,40 +113,44 @@ struct InspectorFrameView: View {
     }
 
     private func updateLayerPosition(value: CGPoint, reason: DecimalInputField.ValueChangeReason) {
-        guard let layer = project.activeLayer else { return }
+        guard let layer = document.activeLayer else { return }
 
-        var newFrame = layer.frame
+        var newFrame = layer.frame()
         newFrame.origin = value
 
         switch reason {
         case .enterKey, .focusLost:
-            let oldPosition = backupPosition ?? layer.frame.origin
-            var oldFrame = layer.frame
+            let oldPosition = backupPosition ?? layer.frame().origin
+            var oldFrame = layer.frame()
             oldFrame.origin = oldPosition
 
-            if value == oldPosition {
+            defer { backupPosition = nil }
+            guard layer.updateFrame(newFrame) else {
                 return
             }
+            updateInspectorSource()
 
-            project.undoManager?.registerUndo(withTarget: layer, handler: {
-                $0.frame = oldFrame
+            document.undoManager?.registerUndo(withTarget: layer, handler: {
+                $0.updateFrame(oldFrame)
                 updateInspectorSource()
             })
-            layer.frame = newFrame
-            updateInspectorSource()
         case .sliderBegin:
-            backupPosition = layer.frame.origin
+            backupPosition = layer.frame().origin
         case .slider:
-            layer.frame = newFrame
+            layer.updateFrame(newFrame)
         case .sliderEnd:
-            layer.frame = newFrame
-            let oldPosition = backupPosition ?? layer.frame.origin
-            var oldFrame = layer.frame
+            let oldPosition = backupPosition ?? layer.frame().origin
+            var oldFrame = layer.frame()
             oldFrame.origin = oldPosition
-            backupPosition = nil
+
+            defer { backupPosition = nil }
+            guard layer.updateFrame(newFrame) else {
+                return
+            }
             updateInspectorSource()
-            project.undoManager?.registerUndo(withTarget: layer, handler: {
-                $0.frame = oldFrame
+
+            document.undoManager?.registerUndo(withTarget: layer, handler: {
+                $0.updateFrame(oldFrame)
                 updateInspectorSource()
             })
         }
@@ -152,31 +162,36 @@ struct InspectorFrameView: View {
             return
         }
 
-        if let lineLayer = project.activeLayer as? AFLineLayer {
+        if let lineLayer = document.activeLayer as? AFLineLayer {
             switch reason {
             case .enterKey, .focusLost:
                 let oldWidth = backupLineFrameWidth ?? lineLayer.width
 
-                if value == oldWidth {
+                defer { backupLineFrameWidth = nil }
+                guard oldWidth != value else {
                     return
                 }
+                lineLayer.width = value
+                updateInspectorSource()
 
-                project.undoManager?.registerUndo(withTarget: lineLayer, handler: {
+                document.undoManager?.registerUndo(withTarget: lineLayer, handler: {
                     $0.width = oldWidth
                     updateInspectorSource()
                 })
-                lineLayer.width = value
-                updateInspectorSource()
             case .sliderBegin:
                 backupLineFrameWidth = lineLayer.width
             case .slider:
                 lineLayer.width = value
             case .sliderEnd:
-                lineLayer.width = value
                 let oldWidth = backupLineFrameWidth ?? lineLayer.width
-                backupLineFrameWidth = nil
+                defer { backupLineFrameWidth = nil }
+                guard oldWidth != value else {
+                    return
+                }
+                lineLayer.width = value
                 updateInspectorSource()
-                project.undoManager?.registerUndo(withTarget: lineLayer, handler: {
+
+                document.undoManager?.registerUndo(withTarget: lineLayer, handler: {
                     $0.width = oldWidth
                     updateInspectorSource()
                 })
@@ -189,42 +204,88 @@ struct InspectorFrameView: View {
             return
         }
 
-        guard let layer = project.activeLayer else { return }
+        guard let layer = document.activeLayer else { return }
 
-        var newFrame = layer.frame
+        var newFrame = layer.frame()
         newFrame.size = value
 
         switch reason {
         case .enterKey, .focusLost:
-            let oldSize = backupSize ?? layer.frame.size
-            var oldFrame = layer.frame
+            let oldSize = backupSize ?? layer.frame().size
+            var oldFrame = layer.frame()
+            oldFrame.size = oldSize
+            defer { backupSize = nil }
+
+            guard layer.updateFrame(newFrame) else {
+                return
+            }
+            updateInspectorSource()
+
+            document.undoManager?.registerUndo(withTarget: layer, handler: {
+                $0.updateFrame(oldFrame)
+                updateInspectorSource()
+            })
+        case .sliderBegin:
+            backupSize = layer.frame().size
+        case .slider:
+            layer.updateFrame(newFrame)
+        case .sliderEnd:
+            let oldSize = backupSize ?? layer.frame().size
+            var oldFrame = layer.frame()
             oldFrame.size = oldSize
 
-            if value == oldSize {
+            defer { backupSize = nil }
+            guard layer.updateFrame(newFrame) else {
                 return
             }
 
-            project.undoManager?.registerUndo(withTarget: layer, handler: {
-                $0.frame = oldFrame
+            updateInspectorSource()
+
+            document.undoManager?.registerUndo(withTarget: layer, handler: {
+                $0.updateFrame(oldFrame)
                 updateInspectorSource()
             })
-            layer.frame = newFrame
+        }
+    }
+
+    private func updateVenueSize(value: CGSize, reason: DecimalInputField.ValueChangeReason) {
+        guard isRoot else {
+            return
+        }
+
+        guard let project = document.project else {
+            return
+        }
+
+        switch reason {
+        case .enterKey, .focusLost:
+            let oldSize = project.canvasSize()
+            defer { backupSize = nil }
+            guard project.updateCanvasSize(value) else {
+                return
+            }
             updateInspectorSource()
+
+            document.undoManager?.registerUndo(withTarget: project, handler: {
+                $0.updateCanvasSize(oldSize)
+                updateInspectorSource()
+            })
         case .sliderBegin:
-            backupSize = layer.frame.size
+            backupSize = project.canvasSize()
         case .slider:
-            layer.frame = newFrame
+            project.updateCanvasSize(value)
         case .sliderEnd:
-            layer.frame = newFrame
-            let oldSize = backupSize ?? layer.frame.size
-            var oldFrame = layer.frame
-            oldFrame.size = oldSize
-            backupPosition = nil
+            let oldSize = backupSize ?? project.canvasSize()
+            defer { backupSize = nil }
+
+            guard project.updateCanvasSize(value) else {
+                return
+            }
 
             updateInspectorSource()
 
-            project.undoManager?.registerUndo(withTarget: layer, handler: {
-                $0.frame = oldFrame
+            document.undoManager?.registerUndo(withTarget: project, handler: {
+                $0.updateCanvasSize(oldSize)
                 updateInspectorSource()
             })
         }

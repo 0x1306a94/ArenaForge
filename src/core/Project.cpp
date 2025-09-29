@@ -95,8 +95,12 @@ const Size Project::canvasSize() const {
     return Size{frame.width(), frame.height()};
 }
 
-void Project::setCanvasSize(const Size &canvasSize) {
-    _root->setFrame(Rect::MakeWH(canvasSize.width, canvasSize.height));
+bool Project::setCanvasSize(const Size &canvasSize) {
+    if (_root->setFrame(Rect::MakeWH(canvasSize.width, canvasSize.height))) {
+        notifyCanvasSizeChanged();
+        return true;
+    }
+    return false;
 }
 
 std::string Project::toJSON(bool pretty) const {
@@ -112,4 +116,13 @@ std::string Project::toJSON(bool pretty) const {
     return j.dump(pretty ? 4 : -1);
 }
 
+void Project::setOnCanvasSizeChanged(CanvasSizeChangedCallback cb) {
+    _onCanvasSizeChanged = std::move(cb);
+}
+
+void Project::notifyCanvasSizeChanged() {
+    if (_onCanvasSizeChanged) {
+        _onCanvasSizeChanged(this);
+    }
+}
 };  // namespace arenaforge

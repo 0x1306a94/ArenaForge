@@ -54,6 +54,7 @@ Editor::Editor(std::shared_ptr<arenaforge::Project> project)
     , _renderer(Renderer::Make(std::make_shared<RendererState>(), nullptr)) {
 
     setupRootLayer();
+    setupProjectSynchronization();
 
     auto root = _project->root();
     _treeAdapter = std::make_shared<arenaforge::LayerTreeAdapter>(root, _containerLayer);
@@ -282,6 +283,32 @@ void Editor::setupRootLayer() {
     _containerLayer->setMask(_maskLayer);
 
     layerTreeRoot->addChild(_rootLayer);
+}
+
+void Editor::setupProjectSynchronization() {
+    if (!_project) {
+        return;
+    }
+
+    _project->setOnCanvasSizeChanged([this](arenaforge::Project *project) {
+        UNUSED_PARAM(project);
+        this->handleProjectCanvasSizeChanged();
+    });
+}
+
+void Editor::handleProjectCanvasSizeChanged() {
+    if (!_project) {
+        return;
+    }
+
+    auto root = _project->root();
+    auto frame = root->frame();
+
+    tgfx::Path rootPath;
+    rootPath.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
+    _rootLayer->setPath(rootPath);
+    _containerLayer->setPath(rootPath);
+    _maskLayer->setPath(rootPath);
 }
 
 };  // namespace arenaforge::editor

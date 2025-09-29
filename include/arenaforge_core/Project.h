@@ -39,6 +39,8 @@ namespace arenaforge {
 class Layer;
 class Project : public std::enable_shared_from_this<Project> {
   public:
+    using CanvasSizeChangedCallback = std::function<void(Project *project)>;
+
     static constexpr float DefaultCanvasWidth = 1400.0f;
     static constexpr float DefaultCanvasHeight = 1200.0f;
 
@@ -70,7 +72,7 @@ class Project : public std::enable_shared_from_this<Project> {
 
     const Size canvasSize() const;
 
-    void setCanvasSize(const Size &canvasSize);
+    bool setCanvasSize(const Size &canvasSize);
 
     const std::shared_ptr<Layer> root() const {
         return _root;
@@ -86,6 +88,10 @@ class Project : public std::enable_shared_from_this<Project> {
 
     std::string toJSON(bool pretty = false) const;
 
+    void setOnCanvasSizeChanged(CanvasSizeChangedCallback cb);
+
+    void notifyCanvasSizeChanged();
+
   protected:
     Project(const std::string &name, const std::string &description, const Size &canvasSize);
 
@@ -98,6 +104,7 @@ class Project : public std::enable_shared_from_this<Project> {
     uint32_t _groupCounter{0};
     Size _canvasSize;
     std::shared_ptr<Layer> _root{};
+    CanvasSizeChangedCallback _onCanvasSizeChanged{nullptr};
 };
 };  // namespace arenaforge
 

@@ -177,6 +177,21 @@
 - (void)enableNotifyPropertyChanged {
     _layer->enableNotifyPropertyChanged();
 }
+
+- (CGRect)frame {
+    auto cppRect = _layer->frame();
+    return CGRectMake(cppRect.x(), cppRect.y(), cppRect.width(), cppRect.height());
+}
+
+- (bool)updateFrame:(CGRect)frame {
+    auto cppRect = arenaforge::Rect::MakeXYWH(
+        static_cast<float>(frame.origin.x),
+        static_cast<float>(frame.origin.y),
+        static_cast<float>(frame.size.width),
+        static_cast<float>(frame.size.height));
+    auto changed = _layer->setFrame(cppRect);
+    return changed;
+}
 #pragma mark - setter getter
 
 - (std::shared_ptr<arenaforge::Layer>)cppObject {
@@ -222,20 +237,6 @@
 
 - (BOOL)transient {
     return _layer->transient();
-}
-
-- (void)setFrame:(CGRect)frame {
-    auto cppRect = arenaforge::Rect::MakeXYWH(
-        static_cast<float>(frame.origin.x),
-        static_cast<float>(frame.origin.y),
-        static_cast<float>(frame.size.width),
-        static_cast<float>(frame.size.height));
-    _layer->setFrame(cppRect);
-}
-
-- (CGRect)frame {
-    auto cppRect = _layer->frame();
-    return CGRectMake(cppRect.x(), cppRect.y(), cppRect.width(), cppRect.height());
 }
 
 - (BOOL)isRoot {

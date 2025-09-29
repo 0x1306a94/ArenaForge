@@ -59,6 +59,8 @@ ARENA_FORGE_EXPORT_API @interface AFProject : NSObject
 - (AFLayer *_Nullable)upgradeGroup:(NSArray<AFLayer *> *)layers;
 
 - (BOOL)undoGroup:(AFLayer *)group;
+- (CGSize)canvasSize;
+- (bool)updateCanvasSize:(CGSize)canvasSize;
 @end
 
 NS_ASSUME_NONNULL_END

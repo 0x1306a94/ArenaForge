@@ -239,7 +239,7 @@ final class ProjectEditCanvasViewController: NSViewController {
                 lineLayer.updateStart(startPoint, end: endPoint)
             } else {
                 let rect = computeRect(start: startPoint, end: endPoint)
-                createShape.frame = rect
+                createShape.updateFrame(rect)
             }
         }
     }
@@ -282,7 +282,7 @@ final class ProjectEditCanvasViewController: NSViewController {
                 lineLayer.updateStart(startPoint, end: endPoint)
             } else {
                 let rect = computeRect(start: startPoint, end: endPoint)
-                createShape.frame = rect
+                createShape.updateFrame(rect)
             }
 
             project.activateEditorToolbarItem = .cursors

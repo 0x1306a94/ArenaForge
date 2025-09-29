@@ -44,7 +44,6 @@ ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 @property (nonatomic, assign, readonly) NSInteger childrenCount;
 @property (nonatomic, assign, readonly) BOOL hasChildren;
 @property (nonatomic, assign) BOOL transient;
-@property (nonatomic, assign) CGRect frame;
 @property (nonatomic, weak, readonly) AFLayer *parent;
 @property (nonatomic, assign, readonly) BOOL isRoot;
 + (instancetype)new NS_UNAVAILABLE;
@@ -59,6 +58,9 @@ ARENA_FORGE_EXPORT_API @interface AFLayer : NSObject
 
 - (void)disableNotifyPropertyChanged;
 - (void)enableNotifyPropertyChanged;
+
+- (CGRect)frame;
+- (bool)updateFrame:(CGRect)frame;
 @end
 
 NS_ASSUME_NONNULL_END

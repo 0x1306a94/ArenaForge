@@ -164,7 +164,7 @@
         maxY = fmax(maxY, frame.origin.y + frame.size.height);
     }
 
-    group.frame = NSMakeRect(minX, minY, maxX - minX, maxY - minY);
+    [group updateFrame:NSMakeRect(minX, minY, maxX - minX, maxY - minY)];
     [self.layerMap addLayer:group];
 
     NSArray<AFLayer *> *sortedLayers = [layers sortedArrayUsingComparator:^NSComparisonResult(AFLayer *_Nonnull obj1, AFLayer *_Nonnull obj2) {
@@ -189,7 +189,7 @@
         NSRect frame = layer.frame;
         frame.origin.x -= group.frame.origin.x;
         frame.origin.y -= group.frame.origin.y;
-        layer.frame = frame;
+        [layer updateFrame:frame];
         [layer removeFromParent];
 
         [group addChild:layer];
@@ -217,13 +217,21 @@
         NSRect childFrame = child.frame;
         childFrame.origin.x += groupFrame.origin.x;
         childFrame.origin.y += groupFrame.origin.y;
-        child.frame = childFrame;
+        [child updateFrame:childFrame];
         [parent addChild:child atIndex:index];
         index++;
     }
     return YES;
 }
 
-#pragma mark - getter
+- (CGSize)canvasSize {
+    auto size = _project->canvasSize();
+    return CGSizeMake(static_cast<CGFloat>(size.width), static_cast<CGFloat>(size.height));
+}
+
+- (bool)updateCanvasSize:(CGSize)canvasSize {
+    auto changed = _project->setCanvasSize(arenaforge::Size{static_cast<float>(canvasSize.width), static_cast<float>(canvasSize.height)});
+    return changed;
+}
 
 @end
