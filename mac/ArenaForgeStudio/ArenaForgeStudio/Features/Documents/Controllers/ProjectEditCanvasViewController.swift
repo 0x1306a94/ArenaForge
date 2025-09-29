@@ -33,24 +33,24 @@ protocol ProjectEditCanvasViewControllerDelegate: AnyObject {
     func projectEditCanvasViewController(_ controller: ProjectEditCanvasViewController, didSelected shape: AFLayer?)
 }
 
+enum CanvasInteractionMode {
+    case cursor
+    case shape(ShapeCreator)
+}
+
 final class ProjectEditCanvasViewController: NSViewController {
     private weak var project: ProjectDocument?
     private weak var editor: EditorViewModel?
     private var canvasView: AFMacCanvasView!
+    private var hoverManager: LayerHoverManager?
+    private var zoomManager: ZoomManager?
+    private var interactionMode: CanvasInteractionMode = .cursor
 
     private var trackingArea: NSTrackingArea?
 
     weak var delegate: ProjectEditCanvasViewControllerDelegate?
 
-    private var minimumZoomScale: CGFloat = 0.1
-    private var maximumZoomScale: CGFloat = 30.0
-    private var mouseScaleRatio: CGFloat = 120.0
-    private var mouseScrollRatio: CGFloat = 0.8
-    private var mousePosition: NSPoint = .zero
-
     private var needAutomaticallyAdjustZoomLevel = true
-
-    private var currentShapeCreator: (any ShapeCreator)?
 
     var cancellables = Set<AnyCancellable>()
 
@@ -65,6 +65,8 @@ final class ProjectEditCanvasViewController: NSViewController {
         super.init(nibName: nil, bundle: nil)
         self.project = project
         self.editor = editor
+        self.hoverManager = LayerHoverManager(editor: editor.editor)
+        self.zoomManager = ZoomManager(editor: editor.editor)
     }
 
     @available(*, unavailable)
@@ -113,7 +115,7 @@ final class ProjectEditCanvasViewController: NSViewController {
             .removeDuplicates()
             .sink { [weak self] in
                 if $0 != .cursors {
-                    self?.editor?.clearHoverWireframe()
+                    self?.hoverManager?.clearHoverWireframe()
                 }
             }
             .store(in: &cancellables)
@@ -139,62 +141,53 @@ final class ProjectEditCanvasViewController: NSViewController {
 
     private func automaticallyAdjustZoomLevel() {
         needAutomaticallyAdjustZoomLevel = false
-        editor?.editor.autoAdjustCanvasScaleForContent()
+        zoomManager?.automaticallyAdjustZoomLevel()
+    }
+
+    private func handleCursorMouseDown(with event: NSEvent) {
+        guard let project, let editor = editor?.editor else { return }
+
+        let location = canvasView.convert(event.locationInWindow, from: nil)
+        let canvasLocation = editor.toCanvasPoint(location)
+        let pickLayer = editor.findLayer(at: canvasLocation) ?? project.project?.root
+        delegate?.projectEditCanvasViewController(self, didSelected: pickLayer)
     }
 
     override func mouseDown(with event: NSEvent) {
-        guard let project, let editor = editor?.editor else {
-            project?.activateEditorToolbarItem = .cursors
-            return
-        }
+        guard let project, let editor = editor?.editor else { return }
 
         switch project.activateEditorToolbarItem {
         case .cursors:
-            let location = canvasView.convert(event.locationInWindow, from: nil)
-            let canvasLocation = editor.toCanvasPoint(location)
-            let pickLayer = editor.findLayer(at: canvasLocation) ?? project.project?.root
-            delegate?.projectEditCanvasViewController(self, didSelected: pickLayer)
-
+            interactionMode = .cursor
+            handleCursorMouseDown(with: event)
         case .shape(let type):
-            guard let shapeCreator = makeShapeCreator(editor: editor, type: type) else {
-                self.currentShapeCreator = nil
-                return
+            if let creator = makeShapeCreator(editor: editor, type: type) {
+                interactionMode = .shape(creator)
+                creator.mouseDown(with: event)
             }
-
-            self.currentShapeCreator = shapeCreator
-            shapeCreator.mouseDown(with: event)
         }
     }
 
     override func mouseDragged(with event: NSEvent) {
-        guard let project else {
-            project?.activateEditorToolbarItem = .cursors
-            return
-        }
-
-        switch project.activateEditorToolbarItem {
-        case .cursors:
+        switch interactionMode {
+        case .cursor:
             break
-        case .shape:
-            currentShapeCreator?.mouseDragged(with: event)
+        case .shape(let creator):
+            creator.mouseDragged(with: event)
         }
     }
 
     override func mouseUp(with event: NSEvent) {
-        defer { project?.activateEditorToolbarItem = .cursors }
-        guard let project else {
-            return
+        defer {
+            interactionMode = .cursor
+            project?.activateEditorToolbarItem = .cursors
         }
 
-        switch project.activateEditorToolbarItem {
-        case .cursors:
+        switch interactionMode {
+        case .cursor:
             break
-        case .shape:
-            defer {
-                project.activateEditorToolbarItem = .cursors
-                self.currentShapeCreator = nil
-            }
-            currentShapeCreator?.mouseUp(with: event)
+        case .shape(let creator):
+            creator.mouseUp(with: event)
         }
     }
 
@@ -207,62 +200,15 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     override func mouseExited(with event: NSEvent) {
-        self.editor?.clearHoverWireframe()
+        self.hoverManager?.clearHoverWireframe()
     }
 
     override func scrollWheel(with event: NSEvent) {
-        guard let editor = editor?.editor else {
-            return
-        }
-
-        let density = editor.density()
-        var contentOffset = editor.contentOffset()
-
-        let scrollingDeltaX = event.scrollingDeltaX
-        let scrollingDeltaY = event.scrollingDeltaY
-
-        let modifiers = event.modifierFlags
-
-        if modifiers.contains(.control) || modifiers.contains(.command) {
-            var location = canvasView.convert(event.locationInWindow, from: nil)
-            location.x *= density
-            location.y *= density
-            mousePosition = location
-
-            let scaleFactor = if event.hasPreciseScrollingDeltas {
-                1.0 + scrollingDeltaY / mouseScaleRatio
-            } else {
-                pow(1.1, event.scrollingDeltaY)
-            }
-
-            updateZooming(scaleFactor: scaleFactor)
-        } else {
-            var deltaX = scrollingDeltaX // * density
-            var deltaY = scrollingDeltaY // * density
-            if !event.hasPreciseScrollingDeltas {
-                deltaX *= mouseScrollRatio
-                deltaY *= mouseScrollRatio
-            }
-            contentOffset.x += deltaX
-            contentOffset.y += deltaY
-            editor.updateOffset(contentOffset)
-        }
+        zoomManager?.scrollWheel(with: event, canvasView: canvasView)
     }
 
     override func magnify(with event: NSEvent) {
-        guard let editor = editor?.editor else {
-            super.magnify(with: event)
-            return
-        }
-
-        let density = editor.density()
-
-        let scaleFactor = 1.0 + event.magnification
-        var location = canvasView.convert(event.locationInWindow, from: nil)
-        location.x *= density
-        location.y *= density
-        mousePosition = location
-        updateZooming(scaleFactor: scaleFactor)
+        zoomManager?.magnify(with: event, canvasView: canvasView)
     }
 
     private func makeShapeCreator(editor: AFEditor, type: AFBuiltinShapeType) -> (any ShapeCreator)? {
@@ -276,34 +222,12 @@ final class ProjectEditCanvasViewController: NSViewController {
     }
 
     private func updateHoverWireframe(with event: NSEvent) {
-        guard let editor, let project, project.activateEditorToolbarItem == .cursors else {
+        guard let project, project.activateEditorToolbarItem == .cursors else {
             return
         }
 
         let location = canvasView.convert(event.locationInWindow, from: nil)
-        let canvasLocation = editor.editor.toCanvasPoint(location)
-
-        guard let targetLayer = editor.findLayer(at: canvasLocation) else {
-            editor.clearHoverWireframe()
-            return
-        }
-
-        editor.createHoverWireframeLayer(targetLayer: targetLayer)
-    }
-
-    private func updateZooming(scaleFactor: CGFloat) {
-        guard let editor = editor?.editor else {
-            return
-        }
-
-        let currentZoom = editor.zoomScale()
-        var contentOffset = editor.contentOffset()
-
-        let newZoom = max(minimumZoomScale, min(maximumZoomScale, currentZoom * scaleFactor))
-        contentOffset.x = (contentOffset.x - mousePosition.x) * (newZoom / currentZoom) + mousePosition.x
-        contentOffset.y = (contentOffset.y - mousePosition.y) * (newZoom / currentZoom) + mousePosition.y
-
-        editor.updateZoomScale(newZoom, offset: contentOffset)
+        self.hoverManager?.updateHoverWireframe(with: location)
     }
 
     deinit {

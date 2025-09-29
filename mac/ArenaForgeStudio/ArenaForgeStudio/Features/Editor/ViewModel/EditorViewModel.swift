@@ -29,31 +29,8 @@ import SwiftUI
 
 final class EditorViewModel: ObservableObject {
     let editor: AFEditor
-
-    private var hoverTargetLayer: AFLayer?
-    private var hoverWireframeLayer: AFLayer?
-
     init(editor: AFEditor) {
         self.editor = editor
-    }
-
-    func findLayer(at point: CGPoint) -> AFLayer? {
-        editor.findLayer(at: point)
-    }
-
-    func clearHoverWireframe() {
-        hoverTargetLayer = nil
-        editor.resetHoverWireframe()
-    }
-
-    func createHoverWireframeLayer(targetLayer: AFLayer) {
-        if let hoverTargetLayer, targetLayer == hoverTargetLayer {
-            return
-        }
-
-        clearHoverWireframe()
-        hoverTargetLayer = targetLayer
-        editor.createHoverWireframeLayer(inTargetLayer: targetLayer)
     }
 
     #if DEBUG

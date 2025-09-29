@@ -31,12 +31,14 @@
 #include <arenaforge_core/Project.h>
 #include <arenaforge_core/Size.h>
 #include <arenaforge_core/layers/Layer.h>
+#include <arenaforge_core/layers/ShapeLayer.h>
 
 #include "renderer/Renderer.h"
 #include "renderer/RendererBackend.h"
 #include "renderer/RendererState.h"
 
 #include "drawers/LayerTreeAdapter.h"
+#include "drawers/PathBuilder.h"
 
 #include <tgfx/layers/Layer.h>
 #include <tgfx/layers/ShapeLayer.h>
@@ -220,14 +222,24 @@ void Editor::addHoverWireframe(std::vector<std::shared_ptr<tgfx::Layer>> targets
 
         auto frame = data->frame();
 
-        tgfx::Path path;
-        path.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
-
         auto hoverLayer = tgfx::ShapeLayer::Make();
-        hoverLayer->setPath(std::move(path));
+
+        if (data->type() == arenaforge::LayerType::Shape) {
+            auto shapeData = std::static_pointer_cast<arenaforge::ShapeLayer>(data);
+            const auto &commands = shapeData->pathCommands();
+            tgfx::Path path = PathBuilder::BuildPath(commands, frame.size());
+            hoverLayer->setPath(std::move(path));
+        } else {
+
+            tgfx::Path path;
+            path.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
+            hoverLayer->setPath(std::move(path));
+        }
+
         hoverLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
         hoverLayer->setPosition(position);
-        hoverLayer->setLineWidth(4);
+        hoverLayer->setLineWidth(2);
+        hoverLayer->setStrokeAlign(tgfx::StrokeAlign::Outside);
 
         // 根节点特殊处理
         if (target == _rootLayer) {
