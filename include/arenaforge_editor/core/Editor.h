@@ -77,9 +77,9 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
 
     void autoAdjustCanvasScaleForContent();
 
-    bool hitTestPointInContainer(float x, float y) const;
+    bool hitTestPointInContainer(float x, float y, bool shapeHitTest = false) const;
 
-    std::shared_ptr<tgfx::Layer> findLayerAtPoint(float x, float y) const;
+    std::shared_ptr<tgfx::Layer> findLayerAtPoint(float x, float y, bool shapeHitTest = false) const;
 
     std::shared_ptr<tgfx::Layer> getLayerByLayerId(const std::string &layerId) const;
 
@@ -97,6 +97,7 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
     void setupRootLayer();
     void setupProjectSynchronization();
     void handleProjectCanvasSizeChanged();
+
   private:
     std::shared_ptr<arenaforge::Project> _project{nullptr};
     std::shared_ptr<Renderer> _renderer{nullptr};

@@ -165,7 +165,7 @@
 }
 
 - (AFLayer *_Nullable)findLayerAtPoint:(CGPoint)point {
-    auto renderLayer = _editor->findLayerAtPoint(static_cast<float>(point.x), static_cast<float>(point.y));
+    auto renderLayer = _editor->findLayerAtPoint(static_cast<float>(point.x), static_cast<float>(point.y), true);
     if (!renderLayer) {
         if (_editor->hitTestPointInContainer(static_cast<float>(point.x), static_cast<float>(point.y))) {
             return self.project.root;

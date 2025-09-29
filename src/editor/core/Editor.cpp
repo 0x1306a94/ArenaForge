@@ -159,11 +159,11 @@ void Editor::autoAdjustCanvasScaleForContent() {
     _renderer->autoAdjustCanvasScaleForContent();
 }
 
-bool Editor::hitTestPointInContainer(float x, float y) const {
-    return _containerLayer->hitTestPoint(x, y);
+bool Editor::hitTestPointInContainer(float x, float y, bool shapeHitTest) const {
+    return _containerLayer->hitTestPoint(x, y, shapeHitTest);
 }
 
-std::shared_ptr<tgfx::Layer> Editor::findLayerAtPoint(float x, float y) const {
+std::shared_ptr<tgfx::Layer> Editor::findLayerAtPoint(float x, float y, bool shapeHitTest) const {
     auto layers = _containerLayer->getLayersUnderPoint(x, y);
     if (layers.empty()) {
         return nullptr;
@@ -174,18 +174,14 @@ std::shared_ptr<tgfx::Layer> Editor::findLayerAtPoint(float x, float y) const {
         return nullptr;
     }
 
-//    do {
-//        if (topLayer->type() != tgfx::LayerType::Shape) {
-//            break;
-//        }
-//        auto shape = std::static_pointer_cast<tgfx::ShapeLayer>(topLayer);
-//        const auto &path = shape->path();
-//
-//        auto localPoint = shape->globalToLocal({x, y});
-//        if (!path.contains(localPoint.x, localPoint.y)) {
-//            return nullptr;
-//        }
-//    } while (false);
+    if (shapeHitTest) {
+        for (auto &layer : layers) {
+            if (layer->hitTestPoint(x, y, true)) {
+                return layer;
+            }
+        }
+        return nullptr;
+    }
 
     return topLayer;
 }
