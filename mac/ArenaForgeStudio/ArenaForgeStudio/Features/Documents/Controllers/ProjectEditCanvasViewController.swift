@@ -161,8 +161,8 @@ final class ProjectEditCanvasViewController: NSViewController {
         let location = canvasView.convert(event.locationInWindow, from: nil)
         let canvasLocation = toCanvasPoint(source: location)
 
-        if project.activateEditorToolbarItem == .cursors, event.clickCount == 2 {
-            let pickLayer = editor.findLayer(at: canvasLocation)
+        if project.activateEditorToolbarItem == .cursors {
+            let pickLayer = editor.findLayer(at: canvasLocation) ?? project.project?.root
             delegate?.projectEditCanvasViewController(self, didSelected: pickLayer)
             return
         }
@@ -184,7 +184,7 @@ final class ProjectEditCanvasViewController: NSViewController {
             let color = NSColor(calibratedRed: CGFloat.random(in: 0.0...1.0), green: CGFloat.random(in: 0.0...1.0), blue: CGFloat.random(in: 0.0...1.0), alpha: 1.0)
             if let line = shape as? AFLineLayer {
                 line.strokeColor = color
-                line.lineWidth = 4
+                line.lineWidth = 1
             } else {
                 shape.fillColor = color
             }

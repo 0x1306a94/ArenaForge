@@ -32,8 +32,10 @@ struct InspectorAreaView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
-                if let _ = project.activeLayer {
-                    InspectorAlignmentView()
+                if let layer = project.activeLayer {
+                    if !layer.isRoot {
+                        InspectorAlignmentView()
+                    }
 
                     InspectorFrameView()
                 }

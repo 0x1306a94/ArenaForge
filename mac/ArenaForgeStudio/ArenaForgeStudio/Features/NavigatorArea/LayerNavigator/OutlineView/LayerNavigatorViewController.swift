@@ -145,6 +145,7 @@ final class LayerNavigatorViewController: NSViewController {
             // root
             outlineView.deselectAll(nil)
         } else {
+            outlineView.deselectRow(outlineView.selectedRow)
             outlineView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: true)
         }
     }

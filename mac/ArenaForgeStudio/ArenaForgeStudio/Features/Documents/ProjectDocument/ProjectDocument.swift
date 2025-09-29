@@ -74,6 +74,7 @@ final class ProjectDocument: NSDocument, ObservableObject {
         }
         
         self.project = try AFProject(fileURL: fileURL)
+        self.activeLayer = self.project?.root
         self.displayName = self.fileURL?.lastPathComponent ?? "Untitled"
     }
     

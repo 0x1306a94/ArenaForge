@@ -101,11 +101,11 @@ struct DecimalInputField: View {
                 .onSubmit {
                     onValueChanged?(value, .enterKey)
                 }
-                .onChange(of: isFocused) { oldValue, newValue in
-                    if oldValue, !newValue, value != initialValue {
-                        onValueChanged?(value, .focusLost)
-                    }
-                }
+//                .onChange(of: isFocused) { oldValue, newValue in
+//                    if oldValue, !newValue, value != initialValue {
+//                        onValueChanged?(value, .focusLost)
+//                    }
+//                }
         }
         .frame(height: 24)
         .background(
