@@ -27,6 +27,7 @@
 #ifndef AFEditor_h_ArenaForge
 #define AFEditor_h_ArenaForge
 
+#import <CoreFoundation/CFCGTypes.h>
 #import <Foundation/Foundation.h>
 
 #import <arenaforge_editor/core/defines.h>
@@ -45,9 +46,11 @@ ARENA_FORGE_EXPORT_API @interface AFEditor : NSObject
 
 - (CGFloat)zoomScale;
 
-- (NSPoint)contentOffset;
+- (CGPoint)contentOffset;
 
 - (CGFloat)density;
+
+- (CGPoint)toCanvasPoint:(CGPoint)source;
 
 - (void)autoAdjustCanvasScaleForContent;
 - (void)updateZoomScale:(CGFloat)zoomScale;

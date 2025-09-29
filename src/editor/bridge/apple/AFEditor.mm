@@ -112,6 +112,19 @@
     return 1.0;
 }
 
+- (CGPoint)toCanvasPoint:(CGPoint)source {
+    CGFloat currentZoom = [self zoomScale];
+    CGFloat density = [self density];
+    CGPoint contentOffset = [self contentOffset];
+
+    CGFloat px = source.x * density;
+    CGFloat py = source.y * density;
+    CGFloat x = (px - contentOffset.x) / currentZoom;
+    CGFloat y = (py - contentOffset.y) / currentZoom;
+
+    return CGPointMake(x, y);
+}
+
 - (void)autoAdjustCanvasScaleForContent {
     if (_editor) {
         _editor->autoAdjustCanvasScaleForContent();

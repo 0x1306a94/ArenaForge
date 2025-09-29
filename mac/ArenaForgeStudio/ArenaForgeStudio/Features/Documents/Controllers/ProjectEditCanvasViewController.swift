@@ -40,10 +40,6 @@ final class ProjectEditCanvasViewController: NSViewController {
 
     private var trackingArea: NSTrackingArea?
 
-    private var createMouseStartPoint: NSPoint?
-
-    private weak var createShape: AFShapeLayer?
-
     weak var delegate: ProjectEditCanvasViewControllerDelegate?
 
     private var minimumZoomScale: CGFloat = 0.1
@@ -54,7 +50,16 @@ final class ProjectEditCanvasViewController: NSViewController {
 
     private var needAutomaticallyAdjustZoomLevel = true
 
+    private var currentShapeCreator: (any ShapeCreator)?
+
     var cancellables = Set<AnyCancellable>()
+
+    private let shapeCreatorFactories: [AFBuiltinShapeType: (AFMacCanvasView, ShapeCreatorContext) -> ShapeCreator] = [
+        .rectangle: { RectangleCreator(canvasView: $0, context: $1) },
+        .ellipse: { EllipseCreator(canvasView: $0, context: $1) },
+        .triangle: { TriangleCreator(canvasView: $0, context: $1) },
+        .line: { LineShapeCreator(canvasView: $0, context: $1) },
+    ]
 
     init(project: ProjectDocument, editor: EditorViewModel) {
         super.init(nibName: nil, bundle: nil)
@@ -153,43 +158,53 @@ final class ProjectEditCanvasViewController: NSViewController {
             return
         }
 
-        guard let rootLayer = project.project?.root else {
-            project.activateEditorToolbarItem = .cursors
-            return
-        }
-
-        let location = canvasView.convert(event.locationInWindow, from: nil)
-        let canvasLocation = toCanvasPoint(source: location)
-
-        if project.activateEditorToolbarItem == .cursors {
+        switch project.activateEditorToolbarItem {
+        case .cursors:
+            let location = canvasView.convert(event.locationInWindow, from: nil)
+            let canvasLocation = editor.toCanvasPoint(location)
             let pickLayer = editor.findLayer(at: canvasLocation) ?? project.project?.root
             delegate?.projectEditCanvasViewController(self, didSelected: pickLayer)
+
+        case .shape(let type):
+            guard let shapeCreator = makeShapeCreator(editor: editor, type: type) else {
+                self.currentShapeCreator = nil
+                return
+            }
+
+            self.currentShapeCreator = shapeCreator
+            shapeCreator.mouseDown(with: event)
+        }
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard let project else {
+            project?.activateEditorToolbarItem = .cursors
             return
         }
-
-        createMouseStartPoint = canvasLocation
 
         switch project.activateEditorToolbarItem {
         case .cursors:
             break
-        case .shape(let type):
-            guard let shape = createShape(editor: editor, type: type) else {
-                return
-            }
+        case .shape:
+            currentShapeCreator?.mouseDragged(with: event)
+        }
+    }
 
-            guard editor.add(shape, toParent: rootLayer) else {
-                return
-            }
+    override func mouseUp(with event: NSEvent) {
+        defer { project?.activateEditorToolbarItem = .cursors }
+        guard let project else {
+            return
+        }
 
-            let color = NSColor(calibratedRed: CGFloat.random(in: 0.0...1.0), green: CGFloat.random(in: 0.0...1.0), blue: CGFloat.random(in: 0.0...1.0), alpha: 1.0)
-            if let line = shape as? AFLineLayer {
-                line.strokeColor = color
-                line.lineWidth = 1
-            } else {
-                shape.fillColor = color
+        switch project.activateEditorToolbarItem {
+        case .cursors:
+            break
+        case .shape:
+            defer {
+                project.activateEditorToolbarItem = .cursors
+                self.currentShapeCreator = nil
             }
-
-            createShape = shape
+            currentShapeCreator?.mouseUp(with: event)
         }
     }
 
@@ -203,92 +218,6 @@ final class ProjectEditCanvasViewController: NSViewController {
 
     override func mouseExited(with event: NSEvent) {
         self.editor?.clearHoverWireframe()
-    }
-
-    override func mouseDragged(with event: NSEvent) {
-        guard let project, project.activateEditorToolbarItem != .cursors, let editor = editor?.editor else {
-            project?.activateEditorToolbarItem = .cursors
-            return
-        }
-
-        guard let createMouseStartPoint else {
-            project.activateEditorToolbarItem = .cursors
-            return
-        }
-
-        guard let rootLayer = project.project?.root else {
-            project.activateEditorToolbarItem = .cursors
-            return
-        }
-
-        let location = canvasView.convert(event.locationInWindow, from: nil)
-        let canvasLocation = toCanvasPoint(source: location)
-
-        switch project.activateEditorToolbarItem {
-        case .cursors:
-            break
-        case .shape:
-            guard let createShape else {
-                return
-            }
-
-            let startPoint = editor.global(toLocal: createMouseStartPoint, targetLayer: rootLayer)
-            let endPoint = editor.global(toLocal: canvasLocation, targetLayer: rootLayer)
-
-            if let lineLayer = createShape as? AFLineLayer {
-                lineLayer.updateStart(startPoint, end: endPoint)
-            } else {
-                let rect = computeRect(start: startPoint, end: endPoint)
-                createShape.updateFrame(rect)
-            }
-        }
-    }
-
-    override func mouseUp(with event: NSEvent) {
-        guard let project, project.activateEditorToolbarItem != .cursors, let editor = editor?.editor else {
-            project?.activateEditorToolbarItem = .cursors
-            return
-        }
-
-        guard let createMouseStartPoint else {
-            project.activateEditorToolbarItem = .cursors
-            return
-        }
-
-        guard let rootLayer = project.project?.root else {
-            project.activateEditorToolbarItem = .cursors
-            return
-        }
-
-        let location = canvasView.convert(event.locationInWindow, from: nil)
-        var canvasLocation = toCanvasPoint(source: location)
-
-        switch project.activateEditorToolbarItem {
-        case .cursors:
-            break
-        case .shape:
-            guard let createShape else {
-                return
-            }
-
-            if createMouseStartPoint == canvasLocation {
-                canvasLocation.x = createMouseStartPoint.x + 100
-                canvasLocation.y = createMouseStartPoint.y + 100
-            }
-
-            let startPoint = editor.global(toLocal: createMouseStartPoint, targetLayer: rootLayer)
-            let endPoint = editor.global(toLocal: canvasLocation, targetLayer: rootLayer)
-            if let lineLayer = createShape as? AFLineLayer {
-                lineLayer.updateStart(startPoint, end: endPoint)
-            } else {
-                let rect = computeRect(start: startPoint, end: endPoint)
-                createShape.updateFrame(rect)
-            }
-
-            project.activateEditorToolbarItem = .cursors
-            delegate?.projectEditCanvasViewController(self, didNewShape: createShape)
-            self.createShape = nil
-        }
     }
 
     override func scrollWheel(with event: NSEvent) {
@@ -346,17 +275,14 @@ final class ProjectEditCanvasViewController: NSViewController {
         updateZooming(scaleFactor: scaleFactor)
     }
 
-    private func createShape(editor: AFEditor, type: AFBuiltinShapeType) -> AFShapeLayer? {
-        switch type {
-        case .rectangle:
-            return editor.project.createShapeLayer(.rectangle)
-        case .ellipse:
-            return editor.project.createShapeLayer(.ellipse)
-        case .line:
-            return editor.project.createLineLayer()
-        default:
-            return nil
+    private func makeShapeCreator(editor: AFEditor, type: AFBuiltinShapeType) -> (any ShapeCreator)? {
+        let context = ShapeCreatorContextImpl(editor: editor)
+        context.onShapeAdd = { [weak self] in
+            guard let self else { return }
+            self.delegate?.projectEditCanvasViewController(self, didNewShape: $0)
         }
+
+        return shapeCreatorFactories[type]?(canvasView, context)
     }
 
     private func updateHoverWireframe(with event: NSEvent) {
@@ -365,7 +291,7 @@ final class ProjectEditCanvasViewController: NSViewController {
         }
 
         let location = canvasView.convert(event.locationInWindow, from: nil)
-        let canvasLocation = toCanvasPoint(source: location)
+        let canvasLocation = editor.editor.toCanvasPoint(location)
 
         guard let targetLayer = editor.findLayer(at: canvasLocation) else {
             editor.clearHoverWireframe()
@@ -373,21 +299,6 @@ final class ProjectEditCanvasViewController: NSViewController {
         }
 
         editor.createHoverWireframeLayer(targetLayer: targetLayer)
-    }
-
-    private func toCanvasPoint(source: CGPoint) -> CGPoint {
-        guard let editor = editor?.editor else { return source }
-
-        let currentZoom = editor.zoomScale()
-        let density = editor.density()
-        let contentOffset = editor.contentOffset()
-
-        let px = source.x * density
-        let py = source.y * density
-        let x = (px - contentOffset.x) / currentZoom
-        let y = (py - contentOffset.y) / currentZoom
-
-        return CGPoint(x: x, y: y)
     }
 
     private func updateZooming(scaleFactor: CGFloat) {
@@ -403,14 +314,6 @@ final class ProjectEditCanvasViewController: NSViewController {
         contentOffset.y = (contentOffset.y - mousePosition.y) * (newZoom / currentZoom) + mousePosition.y
 
         editor.updateZoomScale(newZoom, offset: contentOffset)
-    }
-
-    private func computeRect(start: CGPoint, end: CGPoint) -> CGRect {
-        let x = min(start.x, end.x)
-        let y = min(start.y, end.y)
-        let w = abs(end.x - start.x)
-        let h = abs(end.y - start.y)
-        return CGRect(x: x, y: y, width: w, height: h)
     }
 
     deinit {
