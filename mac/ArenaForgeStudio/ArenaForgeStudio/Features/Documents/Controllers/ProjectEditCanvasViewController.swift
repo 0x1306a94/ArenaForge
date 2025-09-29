@@ -77,6 +77,8 @@ final class ProjectEditCanvasViewController: NSViewController {
 
         setupCanvasView()
 
+        setupTrackingArea()
+
         setupEditor()
     }
 
@@ -85,12 +87,6 @@ final class ProjectEditCanvasViewController: NSViewController {
         if needAutomaticallyAdjustZoomLevel {
             automaticallyAdjustZoomLevel()
         }
-    }
-
-    override func viewDidLayout() {
-        super.viewDidLayout()
-
-        updateTrackingArea()
     }
 
     private func setupCanvasView() {
@@ -123,26 +119,20 @@ final class ProjectEditCanvasViewController: NSViewController {
             .store(in: &cancellables)
     }
 
-    private func updateTrackingArea() {
+    private func setupTrackingArea() {
         if let trackingArea {
             view.removeTrackingArea(trackingArea)
             self.trackingArea = nil
-        }
-
-        guard !canvasView.bounds.isEmpty else {
-            return
         }
 
         let options: NSTrackingArea.Options = [
             .mouseEnteredAndExited,
             .mouseMoved,
             .activeAlways,
+            .inVisibleRect,
         ]
 
-        var frame = canvasView.frame
-        frame = view.convert(frame, from: canvasView)
-
-        let trackingArea = NSTrackingArea(rect: frame, options: options, owner: self)
+        let trackingArea = NSTrackingArea(rect: .zero, options: options, owner: self)
         self.trackingArea = trackingArea
         view.addTrackingArea(trackingArea)
     }

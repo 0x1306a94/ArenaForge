@@ -138,7 +138,6 @@ final class LayerNavigatorViewController: NSViewController {
             outlineView.deselectAll(nil)
             return
         }
-        shouldSendSelectionUpdate = false
         project?.activeLayer = shape
         let row = outlineView.row(forItem: shape)
         if row == -1 {
@@ -146,7 +145,7 @@ final class LayerNavigatorViewController: NSViewController {
             outlineView.deselectAll(nil)
         } else {
             outlineView.deselectRow(outlineView.selectedRow)
-            outlineView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: true)
+            outlineView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         }
     }
 
