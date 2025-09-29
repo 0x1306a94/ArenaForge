@@ -36,7 +36,7 @@ final class EditorViewModel: ObservableObject {
     init(editor: AFEditor) {
         self.editor = editor
     }
-    
+
     func findLayer(at point: CGPoint) -> AFLayer? {
         editor.findLayer(at: point)
     }
@@ -55,4 +55,10 @@ final class EditorViewModel: ObservableObject {
         hoverTargetLayer = targetLayer
         editor.createHoverWireframeLayer(inTargetLayer: targetLayer)
     }
+
+    #if DEBUG
+        deinit {
+            Swift.print("\(type(of: self)) deinit")
+        }
+    #endif
 }

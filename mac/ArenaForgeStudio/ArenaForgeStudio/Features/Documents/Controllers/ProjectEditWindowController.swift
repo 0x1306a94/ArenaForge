@@ -95,9 +95,11 @@ final class ProjectEditWindowController: NSWindowController, NSWindowDelegate, O
         return true
     }
 
-    #if DEBUG
         deinit {
+            // 解决内存泄露问题
+            self.project?.undoManager?.removeAllActions()
+#if DEBUG
             print("\(type(of: self)) deinit")
+#endif
         }
-    #endif
 }
