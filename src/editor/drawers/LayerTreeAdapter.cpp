@@ -36,7 +36,7 @@
 #include <arenaforge_core/layers/ShapeLayer.h>
 #include <arenaforge_editor/core/defines.h>
 
-namespace arenaforge {
+namespace arenaforge::editor {
 
 LayerTreeAdapter::LayerTreeAdapter(std::shared_ptr<Layer> rootDataLayer, std::shared_ptr<tgfx::Layer> rootRenderLayer)
     : _rootDataLayer(std::move(rootDataLayer))
@@ -53,6 +53,68 @@ void LayerTreeAdapter::forceResync() {
     _renderLayerCache.clear();
     _dataLayerCache.clear();
     syncTree(_rootDataLayer, _rootRenderLayer);
+}
+
+void LayerTreeAdapter::setSelectedLayers(const std::vector<std::shared_ptr<arenaforge::Layer>> &targets) {
+    UNUSED_PARAM(targets);
+    if (targets.empty()) {
+        _selectedLayers.clear();
+        return;
+    }
+
+    _selectedLayers = std::move(targets);
+}
+
+void LayerTreeAdapter::updateSelectionDisplay() {
+    if (_selectedLayers.empty()) {
+        return;
+    }
+
+    tgfx::Point min{FLT_MAX, FLT_MAX}, max{FLT_MIN, FLT_MIN};
+    for (const auto &data : _selectedLayers) {
+        auto renderLayer = findRenderLayer(data->layerId());
+        if (!renderLayer) {
+            continue;
+        }
+
+        auto frame = data->frame();
+        auto topLeft = renderLayer->localToGlobal({0.0, 0.0});
+        auto bottomRight = renderLayer->localToGlobal({frame.width(), frame.height()});
+        min.x = std::min(min.x, topLeft.x);
+        min.y = std::min(min.y, topLeft.y);
+
+        max.x = std::max(max.x, bottomRight.x);
+        max.y = std::max(max.y, bottomRight.y);
+    }
+
+    if (!_selectedBoundingBoxLayer) {
+        _selectedBoundingBoxLayer = tgfx::ShapeLayer::Make();
+        _selectedBoundingBoxLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
+        //    _selectedBoundingBoxLayer->setPosition(position);
+        _selectedBoundingBoxLayer->setLineWidth(2);
+        _selectedBoundingBoxLayer->setStrokeAlign(tgfx::StrokeAlign::Outside);
+
+        _rootRenderLayer->root()->addChild(_selectedBoundingBoxLayer);
+    }
+
+    tgfx::Path boundingBoxPath;
+    boundingBoxPath.addRect(min.x, min.y, max.x, max.y);
+    _selectedBoundingBoxLayer->setPath(std::move(boundingBoxPath));
+}
+
+void LayerTreeAdapter::clearSelectionDisplay() {
+    if (_selectedBoundingBoxLayer) {
+        _selectedBoundingBoxLayer->removeFromParent();
+        _selectedBoundingBoxLayer = nullptr;
+    }
+}
+
+bool LayerTreeAdapter::hitTestPointInSelectedBoundingBox(float x, float y) const {
+    if (!_selectedBoundingBoxLayer) {
+        return false;
+    }
+    auto hit = _selectedBoundingBoxLayer->hitTestPoint(x, y);
+    return hit;
 }
 
 void LayerTreeAdapter::setupSynchronization() {
@@ -378,4 +440,4 @@ void LayerTreeAdapter::clearChildren(std::shared_ptr<tgfx::Layer> &renderLayer) 
         _dataLayerCache.erase(layerId);
     }
 }
-};  // namespace arenaforge
+};  // namespace arenaforge::editor

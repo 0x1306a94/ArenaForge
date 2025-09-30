@@ -34,9 +34,18 @@ final class ProjectEditWindowController: NSWindowController, NSWindowDelegate, O
 
     var project: ProjectDocument?
     var editor: EditorViewModel?
+    var selectionManager: SelectionManager?
 
     var splitViewController: ProjectEditSplitViewController? {
         contentViewController as? ProjectEditSplitViewController
+    }
+
+    var layerNavigatorViewController: LayerNavigatorViewController? {
+        splitViewController?.splitViewItems.first?.viewController as? LayerNavigatorViewController
+    }
+
+    var canvasViewController: ProjectEditCanvasViewController? {
+        splitViewController?.splitViewItems[1].viewController as? ProjectEditCanvasViewController
     }
 
     init(window: NSWindow?, project: ProjectDocument?) {
@@ -50,12 +59,16 @@ final class ProjectEditWindowController: NSWindowController, NSWindowDelegate, O
         }
 
         self.editor = EditorViewModel(editor: editor)
+        self.selectionManager = SelectionManager(editor: editor, undoManager: project.undoManager)
 
         guard let splitViewController = setupSplitViewController(project: project, editor: self.editor!) else {
             fatalError("Failed to set up content view.")
         }
 
         contentViewController = splitViewController
+
+        layerNavigatorViewController?.selectionManager = selectionManager
+        canvasViewController?.selectionManager = selectionManager
 
         setupToolbar()
     }
@@ -84,7 +97,7 @@ final class ProjectEditWindowController: NSWindowController, NSWindowDelegate, O
         let editor = AFEditor(project: project)
         return editor
     }
-    
+
     @IBAction func saveDocument(_ sender: Any) {
         project?.save(sender)
     }
@@ -95,11 +108,11 @@ final class ProjectEditWindowController: NSWindowController, NSWindowDelegate, O
         return true
     }
 
-        deinit {
-            // 解决内存泄露问题
-            self.project?.undoManager?.removeAllActions()
+    deinit {
+        // 解决内存泄露问题
+        self.project?.undoManager?.removeAllActions()
 #if DEBUG
-            print("\(type(of: self)) deinit")
+        print("\(type(of: self)) deinit")
 #endif
-        }
+    }
 }

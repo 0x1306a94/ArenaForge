@@ -26,6 +26,8 @@
 
 #include <arenaforge_editor/core/Editor.h>
 
+#include <arenaforge_editor/core/SelectionManager.h>
+
 #include <arenaforge_core/Point.h>
 #include <arenaforge_core/Print.h>
 #include <arenaforge_core/Project.h>
@@ -59,7 +61,9 @@ Editor::Editor(std::shared_ptr<arenaforge::Project> project)
     setupProjectSynchronization();
 
     auto root = _project->root();
-    _treeAdapter = std::make_shared<arenaforge::LayerTreeAdapter>(root, _containerLayer);
+    _treeAdapter = std::make_shared<LayerTreeAdapter>(root, _containerLayer);
+
+    _selectionManager = SelectionManager::Make(_treeAdapter);
 }
 
 Editor::~Editor() {

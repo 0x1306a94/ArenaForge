@@ -44,12 +44,15 @@ namespace arenaforge {
 class Layer;
 class Project;
 class Venue;
-class LayerTreeAdapter;
+
 };  // namespace arenaforge
 
 namespace arenaforge::editor {
 class RendererBackend;
 class Renderer;
+class LayerTreeAdapter;
+class SelectionManager;
+
 class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor> {
   public:
     static std::shared_ptr<Editor> Make(std::shared_ptr<arenaforge::Project> project);
@@ -59,6 +62,14 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
 
     const std::shared_ptr<tgfx::ShapeLayer> &rootLayer() const {
         return _rootLayer;
+    }
+
+    std::shared_ptr<SelectionManager> selectionManager() {
+        return _selectionManager;
+    }
+
+    std::shared_ptr<LayerTreeAdapter> rendererAdapter() {
+        return _treeAdapter;
     }
 
     bool getBoundsSize(float &width, float &height) const;
@@ -83,6 +94,7 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
 
     std::shared_ptr<tgfx::Layer> getLayerByLayerId(const std::string &layerId) const;
 
+    /// MARK: - hover
     void addHoverWireframe(std::vector<std::shared_ptr<tgfx::Layer>> targets);
     void resetHoverWireframe();
 
@@ -105,6 +117,7 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
     std::shared_ptr<tgfx::ShapeLayer> _containerLayer{nullptr};
     std::shared_ptr<tgfx::ShapeLayer> _maskLayer{nullptr};
     std::shared_ptr<LayerTreeAdapter> _treeAdapter{nullptr};
+    std::shared_ptr<SelectionManager> _selectionManager{nullptr};
     std::unordered_map<uintptr_t, std::weak_ptr<tgfx::Layer>> _hoverWireframeLayers{};
 };
 };  // namespace arenaforge::editor

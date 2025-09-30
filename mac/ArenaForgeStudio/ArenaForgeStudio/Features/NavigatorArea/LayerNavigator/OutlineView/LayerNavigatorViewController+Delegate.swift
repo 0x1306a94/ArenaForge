@@ -69,6 +69,16 @@ extension LayerNavigatorViewController: NSOutlineViewDelegate {
 //        guard let item = outlineView.item(atRow: selectedIndex) as? AFLayer else { return }
 
         guard outlineView.selectedRowIndexes.count == 1 else {
+            if shouldSendSelectionUpdate {
+                shouldSendSelectionUpdate = false
+                defer {
+                    shouldSendSelectionUpdate = true
+                }
+                project?.activeLayer = nil
+                let layers = Set(currentSelectIndexSet.compactMap { outlineView.item(atRow: $0) as? AFLayer })
+                selectionManager?.select(layers: Array(layers))
+                shouldSendSelectionUpdate = true
+            }
             return
         }
 
@@ -77,8 +87,11 @@ extension LayerNavigatorViewController: NSOutlineViewDelegate {
 
         if shouldSendSelectionUpdate {
             shouldSendSelectionUpdate = false
+            defer {
+                shouldSendSelectionUpdate = true
+            }
             project?.activeLayer = layer
-            shouldSendSelectionUpdate = true
+            selectionManager?.select(layers: [layer])
         }
     }
 }

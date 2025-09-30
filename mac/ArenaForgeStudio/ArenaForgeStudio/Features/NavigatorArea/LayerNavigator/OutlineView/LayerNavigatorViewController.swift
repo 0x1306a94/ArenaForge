@@ -30,6 +30,9 @@ import arenaforge_editor
 final class LayerNavigatorViewController: NSViewController {
     weak var project: ProjectDocument?
     weak var editor: EditorViewModel?
+
+    weak var selectionManager: SelectionManager?
+
     private var scrollView: NSScrollView!
     var outlineView: NSOutlineView!
 
@@ -134,8 +137,9 @@ final class LayerNavigatorViewController: NSViewController {
         shouldSendSelectionUpdate = false
         defer { shouldSendSelectionUpdate = true }
         guard let shape else {
-            project?.activeLayer = nil
             outlineView.deselectAll(nil)
+            project?.activeLayer = nil
+            selectionManager?.select(layers: [])
             return
         }
         project?.activeLayer = shape
@@ -143,9 +147,12 @@ final class LayerNavigatorViewController: NSViewController {
         if row == -1 {
             // root
             outlineView.deselectAll(nil)
+            selectionManager?.select(layers: [])
         } else {
             outlineView.deselectRow(outlineView.selectedRow)
             outlineView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+            guard let layer = outlineView.item(atRow: row) as? AFLayer else { return }
+            selectionManager?.select(layers: [layer])
         }
     }
 

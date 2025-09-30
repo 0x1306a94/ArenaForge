@@ -29,19 +29,20 @@
 
 #include <arenaforge_core/layers/Layer.h>
 #include <memory>
+#include <vector>
 
 namespace tgfx {
 class Layer;
 class ShapeLayer;
 };  // namespace tgfx
 
-namespace arenaforge::editor {
-class Editor;
-};
-
 namespace arenaforge {
 class Layer;
 class ShapeLayer;
+};  // namespace arenaforge
+
+namespace arenaforge::editor {
+class Editor;
 class LayerTreeAdapter {
   public:
     LayerTreeAdapter(std::shared_ptr<Layer> rootDataLayer, std::shared_ptr<tgfx::Layer> rootRenderLayer);
@@ -51,6 +52,14 @@ class LayerTreeAdapter {
     }
 
     void forceResync();
+
+    void setSelectedLayers(const std::vector<std::shared_ptr<arenaforge::Layer>> &targets);
+
+    void updateSelectionDisplay();
+
+    void clearSelectionDisplay();
+    
+    bool hitTestPointInSelectedBoundingBox(float x, float y) const;
 
   private:
     void setupSynchronization();
@@ -91,11 +100,13 @@ class LayerTreeAdapter {
   private:
     std::shared_ptr<Layer> _rootDataLayer{nullptr};
     std::shared_ptr<tgfx::Layer> _rootRenderLayer{nullptr};
+    std::shared_ptr<tgfx::ShapeLayer> _selectedBoundingBoxLayer{nullptr};
+    std::vector<std::shared_ptr<arenaforge::Layer>> _selectedLayers{};
     std::unordered_map<std::string, std::weak_ptr<Layer>> _dataLayerCache{};
     std::unordered_map<std::string, std::weak_ptr<tgfx::Layer>> _renderLayerCache{};
 
     friend class arenaforge::editor::Editor;
 };
-};  // namespace arenaforge
+};  // namespace arenaforge::editor
 
 #endif /* LayerTreeAdapter_h_ArenaForge */

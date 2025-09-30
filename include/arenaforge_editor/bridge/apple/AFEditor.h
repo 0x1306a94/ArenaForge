@@ -61,8 +61,19 @@ ARENA_FORGE_EXPORT_API @interface AFEditor : NSObject
 - (CGPoint)globalToLocal:(CGPoint)point targetLayer:(AFLayer *)layer;
 - (CGPoint)localToGlobal:(CGPoint)point sourceLayer:(AFLayer *)layer;
 
+/// MARK: hover
 - (void)createHoverWireframeLayerInTargetLayer:(AFLayer *)targetLayer;
 - (void)resetHoverWireframe;
+
+/// MARK: - 选择
+- (void)selectLayers:(NSArray<AFLayer *> *)layers;
+- (void)beginSelectLayerMove:(CGPoint)point;
+- (void)updateSelectLayerMove:(CGPoint)point;
+- (void)endSelectLayerMove;
+- (void)clearSelection;
+- (void)updateSelectionDisplay;
+- (void)clearSelectionDisplay;
+- (bool)hitTestPointInSelectedBoundingBox:(CGPoint)point;
 @end
 
 NS_ASSUME_NONNULL_END

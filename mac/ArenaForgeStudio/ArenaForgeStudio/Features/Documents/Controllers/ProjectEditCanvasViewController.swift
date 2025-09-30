@@ -49,6 +49,7 @@ final class ProjectEditCanvasViewController: NSViewController {
     private var trackingArea: NSTrackingArea?
 
     weak var delegate: ProjectEditCanvasViewControllerDelegate?
+    weak var selectionManager: SelectionManager?
 
     private var needAutomaticallyAdjustZoomLevel = true
 
@@ -149,8 +150,11 @@ final class ProjectEditCanvasViewController: NSViewController {
 
         let location = canvasView.convert(event.locationInWindow, from: nil)
         let canvasLocation = editor.toCanvasPoint(location)
-        let pickLayer = editor.findLayer(at: canvasLocation) ?? project.project?.root
-        delegate?.projectEditCanvasViewController(self, didSelected: pickLayer)
+
+        if !editor.hitTestPoint(inSelectedBoundingBox: canvasLocation) {
+            let pickLayer = editor.findLayer(at: canvasLocation) ?? project.project?.root
+            delegate?.projectEditCanvasViewController(self, didSelected: pickLayer)
+        }
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -160,6 +164,7 @@ final class ProjectEditCanvasViewController: NSViewController {
         case .cursors:
             interactionMode = .cursor
             handleCursorMouseDown(with: event)
+            hoverManager?.clearHoverWireframe()
         case .shape(let type):
             if let creator = makeShapeCreator(editor: editor, type: type) {
                 interactionMode = .shape(creator)
@@ -171,7 +176,8 @@ final class ProjectEditCanvasViewController: NSViewController {
     override func mouseDragged(with event: NSEvent) {
         switch interactionMode {
         case .cursor:
-            break
+            let location = canvasView.convert(event.locationInWindow, from: nil)
+            self.selectionManager?.updateMove(loaction: location)
         case .shape(let creator):
             creator.mouseDragged(with: event)
         }
@@ -185,7 +191,7 @@ final class ProjectEditCanvasViewController: NSViewController {
 
         switch interactionMode {
         case .cursor:
-            break
+            self.selectionManager?.endMove()
         case .shape(let creator):
             creator.mouseUp(with: event)
         }
