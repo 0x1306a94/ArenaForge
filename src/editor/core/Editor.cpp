@@ -26,6 +26,7 @@
 
 #include <arenaforge_editor/core/Editor.h>
 
+#include <arenaforge_editor/core/HoverManager.h>
 #include <arenaforge_editor/core/SelectionManager.h>
 
 #include <arenaforge_core/Point.h>
@@ -63,6 +64,7 @@ Editor::Editor(std::shared_ptr<arenaforge::Project> project)
     _treeAdapter = std::make_unique<LayerTreeAdapter>(root, _containerLayer);
 
     _selectionManager = SelectionManager::Make(_treeAdapter.get(), _renderer->getOverlayRootLayer());
+    _hoverManager = HoverManager::Make(_treeAdapter.get(), _renderer->getOverlayRootLayer(), _rootLayer);
 }
 
 Editor::~Editor() {
@@ -75,19 +77,17 @@ void Editor::setRendererBackend(std::shared_ptr<RendererBackend> rendererBackend
     }
 }
 
-bool Editor::getBoundsSize(float &width, float &height) const {
+arenaforge::Size Editor::getBoundsSize() const {
     if (!_renderer) {
-        return false;
+        return arenaforge::Size::MakeEmpty();
     }
 
     auto state = _renderer->state();
     if (!state) {
-        return false;
+        return arenaforge::Size::MakeEmpty();
     }
     auto bounds = state->getBoundsSize();
-    width = bounds.width;
-    height = bounds.height;
-    return true;
+    return bounds;
 }
 
 float Editor::density() const {
@@ -118,19 +118,17 @@ float Editor::zoomScale() const {
 }
 
 /// 当前滑动偏移
-bool Editor::contentOffset(float &x, float &y) const {
+arenaforge::Point Editor::contentOffset() const {
     if (!_renderer) {
-        return false;
+        return arenaforge::Point::Zero();
     }
 
     auto state = _renderer->state();
     if (!state) {
-        return false;
+        return arenaforge::Point::Zero();
     }
     auto contentOffset = state->contentOffset();
-    x = contentOffset.x;
-    y = contentOffset.y;
-    return true;
+    return contentOffset;
 }
 
 bool Editor::updateZoomAndOffset(float zoomScale, float offsetX, float offsetY) {
@@ -206,103 +204,61 @@ bool Editor::hitTestPointInContainer(float x, float y, bool shapeHitTest) const 
     return _containerLayer->hitTestPoint(x, y, shapeHitTest);
 }
 
-std::shared_ptr<tgfx::Layer> Editor::findLayerAtPoint(float x, float y, bool shapeHitTest) const {
+std::shared_ptr<arenaforge::Layer> Editor::findLayerAtPoint(float x, float y, bool shapeHitTest) const {
     auto layers = _containerLayer->getLayersUnderPoint(x, y);
     if (layers.empty()) {
         return nullptr;
     }
 
-    auto topLayer = layers.front();
-    if (topLayer == _containerLayer) {
+    auto hitLayer = layers.front();
+    if (hitLayer == _containerLayer) {
         return nullptr;
     }
 
     if (shapeHitTest) {
         for (auto &layer : layers) {
             if (layer->hitTestPoint(x, y, true)) {
-                return layer;
+                hitLayer = layer;
+                break;
             }
         }
+    }
+
+    if (!hitLayer) {
         return nullptr;
     }
 
-    return topLayer;
+    auto dataLayer = _treeAdapter->findDataLayer(hitLayer->name());
+    return dataLayer;
 }
 
-std::shared_ptr<tgfx::Layer> Editor::getLayerByLayerId(const std::string &layerId) const {
-    auto layer = _treeAdapter->findRenderLayer(layerId);
+std::shared_ptr<arenaforge::Layer> Editor::getLayerByLayerId(const std::string &layerId) const {
+    auto layer = _treeAdapter->findDataLayer(layerId);
     return layer;
 }
 
-void Editor::addHoverWireframe(std::vector<std::shared_ptr<tgfx::Layer>> targets) {
-    if (targets.empty()) {
-        return;
+std::optional<arenaforge::Point> Editor::globalToLocal(const arenaforge::Point &global, const std::shared_ptr<arenaforge::Layer> &sourceLayer) const {
+    if (!sourceLayer) {
+        return std::nullopt;
     }
-
-    for (auto &target : targets) {
-        auto key = reinterpret_cast<uintptr_t>(target.get());
-        auto it = _hoverWireframeLayers.find(key);
-        if (it != _hoverWireframeLayers.end()) {
-            continue;
-        }
-
-        auto parent = target->parent();
-        if (parent == nullptr) {
-            continue;
-        }
-
-        auto layerId = target->name();
-        auto data = (target == _rootLayer) ? _project->root() : _treeAdapter->findDataLayer(layerId);
-        if (!data) {
-            continue;
-        }
-
-        // 先将自身转为全局，再从全局转为_rootLayer
-        auto position = target->localToGlobal(tgfx::Point::Zero());
-        position = _rootLayer->globalToLocal(position);
-
-        auto frame = data->frame();
-
-        auto hoverLayer = tgfx::ShapeLayer::Make();
-
-        if (data->type() == arenaforge::LayerType::Shape) {
-            auto shapeData = std::static_pointer_cast<arenaforge::ShapeLayer>(data);
-            const auto &commands = shapeData->pathCommands();
-            tgfx::Path path = PathBuilder::BuildPath(commands, frame.size());
-            hoverLayer->setPath(std::move(path));
-        } else {
-
-            tgfx::Path path;
-            path.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
-            hoverLayer->setPath(std::move(path));
-        }
-
-        hoverLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
-        hoverLayer->setPosition(position);
-        hoverLayer->setLineWidth(2);
-        hoverLayer->setStrokeAlign(tgfx::StrokeAlign::Outside);
-
-        // 根节点特殊处理
-        if (target == _rootLayer) {
-            _rootLayer->parent()->addChild(hoverLayer);
-        } else {
-            _rootLayer->addChild(hoverLayer);
-        }
-        _hoverWireframeLayers[key] = hoverLayer;
+    auto renderLayer = sourceLayer->isRoot() ? _rootLayer : _treeAdapter->findRenderLayer(sourceLayer->layerId());
+    if (!renderLayer) {
+        return std::nullopt;
     }
+    auto local = renderLayer->globalToLocal({global.x, global.y});
+    return arenaforge::Point{local.x, local.y};
 }
 
-void Editor::resetHoverWireframe() {
-    if (_hoverWireframeLayers.empty()) {
-        return;
+std::optional<arenaforge::Point> Editor::localToGlobal(const arenaforge::Point &local, const std::shared_ptr<arenaforge::Layer> &sourceLayer) const {
+    if (!sourceLayer) {
+        return std::nullopt;
     }
-    std::unordered_map<uintptr_t, std::weak_ptr<tgfx::Layer>> exists;
-    std::swap(_hoverWireframeLayers, exists);
-    for (auto &[key, value] : exists) {
-        if (auto layer = value.lock()) {
-            layer->removeFromParent();
-        }
+    auto renderLayer = sourceLayer->isRoot() ? _rootLayer : _treeAdapter->findRenderLayer(sourceLayer->layerId());
+    if (!renderLayer) {
+        return std::nullopt;
     }
+    auto global = renderLayer->localToGlobal({local.x, local.y});
+    return arenaforge::Point{global.x, global.y};
 }
 
 void Editor::invalidateContent() {

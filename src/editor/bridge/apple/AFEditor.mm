@@ -29,6 +29,7 @@
 #import <arenaforge_editor/bridge/apple/AFLayer.h>
 #import <arenaforge_editor/bridge/apple/AFProject.h>
 #import <arenaforge_editor/core/Editor.h>
+#import <arenaforge_editor/core/HoverManager.h>
 #import <arenaforge_editor/core/SelectionManager.h>
 
 #import "AFEditor+Private.h"
@@ -101,11 +102,11 @@
 }
 
 - (CGPoint)contentOffset {
-    float offsetX = 0, offsetY = 0;
+    arenaforge::Point offset;
     if (_editor) {
-        _editor->contentOffset(offsetX, offsetY);
+        offset = _editor->contentOffset();
     }
-    return CGPointMake(offsetX, offsetY);
+    return CGPointMake(offset.x, offset.y);
 }
 
 - (CGFloat)density {
@@ -136,9 +137,8 @@
 
 - (void)updateZoomScale:(CGFloat)zoomScale {
     if (_editor) {
-        float offsetX = 0, offsetY = 0;
-        _editor->contentOffset(offsetX, offsetY);
-        _editor->updateZoomAndOffset(static_cast<float>(zoomScale), offsetX, offsetY);
+        auto contentOffset = _editor->contentOffset();
+        _editor->updateZoomAndOffset(static_cast<float>(zoomScale), contentOffset.x, contentOffset.y);
     }
 }
 
@@ -168,16 +168,16 @@
 }
 
 - (AFLayer *_Nullable)findLayerAtPoint:(CGPoint)point {
-    auto renderLayer = _editor->findLayerAtPoint(static_cast<float>(point.x), static_cast<float>(point.y), true);
-    if (!renderLayer) {
+    auto cppLayer = _editor->findLayerAtPoint(static_cast<float>(point.x), static_cast<float>(point.y), true);
+    if (!cppLayer) {
         if (_editor->hitTestPointInContainer(static_cast<float>(point.x), static_cast<float>(point.y))) {
             return self.project.root;
         }
         return nil;
     }
 
-    auto layerName = renderLayer->name();
-    NSString *layerId = [NSString stringWithUTF8String:layerName.c_str()];
+    auto cLayerId = cppLayer->layerId();
+    NSString *layerId = [NSString stringWithUTF8String:cLayerId.c_str()];
     AFLayer *layer = [self.project.layerMap getLayerById:layerId];
     if (layer.parent && layer.parent.type == AFLayerTypeGroup && !layer.parent.isRoot) {
         return layer.parent;
@@ -189,21 +189,12 @@
     if (!_editor || layer == nil) {
         return point;
     }
-
-    if (layer.isRoot) {
-        auto rootLayer = _editor->rootLayer();
-        auto local = rootLayer->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-        return CGPointMake(local.x, local.y);
-    }
-
     auto cppLayer = [layer cppObject];
-    auto layerId = cppLayer->layerId();
-    auto renderLayer = _editor->getLayerByLayerId(layerId);
-    if (!renderLayer) {
+    auto result = _editor->globalToLocal({static_cast<float>(point.x), static_cast<float>(point.y)}, cppLayer);
+    if (!result) {
         return point;
     }
-
-    auto local = renderLayer->globalToLocal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    auto &local = result.value();
     return CGPointMake(local.x, local.y);
 }
 
@@ -212,20 +203,12 @@
         return point;
     }
 
-    if (layer.isRoot) {
-        auto rootLayer = _editor->rootLayer();
-        auto local = rootLayer->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
-        return CGPointMake(local.x, local.y);
-    }
-
     auto cppLayer = [layer cppObject];
-    auto layerId = cppLayer->layerId();
-    auto renderLayer = _editor->getLayerByLayerId(layerId);
-    if (!renderLayer) {
+    auto result = _editor->localToGlobal({static_cast<float>(point.x), static_cast<float>(point.y)}, cppLayer);
+    if (!result) {
         return point;
     }
-
-    auto global = renderLayer->localToGlobal(tgfx::Point{static_cast<float>(point.x), static_cast<float>(point.y)});
+    auto &global = result.value();
     return CGPointMake(global.x, global.y);
 }
 
@@ -233,30 +216,31 @@
     if (targetLayer == nil) {
         return;
     }
-
-    if (targetLayer.isRoot) {
-        _editor->addHoverWireframe({_editor->rootLayer()});
-        return;
-    }
-
     auto cppLayer = [targetLayer cppObject];
-    auto layerId = cppLayer->layerId();
-    auto renderLayer = _editor->getLayerByLayerId(layerId);
-    if (!renderLayer) {
+    if (!cppLayer) {
         return;
     }
-    _editor->addHoverWireframe({renderLayer});
+
+    if (!_editor) {
+        return;
+    }
+    auto hoverManager = _editor->hoverManager();
+    hoverManager->addHoverWireframe({cppLayer});
 }
 
 - (void)resetHoverWireframe {
-    _editor->resetHoverWireframe();
+    if (!_editor) {
+        return;
+    }
+    auto hoverManager = _editor->hoverManager();
+    hoverManager->resetHoverWireframe();
 }
 
 - (void)selectLayers:(NSArray<AFLayer *> *)layers {
-    auto selectionManager = _editor->selectionManager();
-    if (!selectionManager) {
+    if (!_editor) {
         return;
     }
+    auto selectionManager = _editor->selectionManager();
 
     std::vector<std::shared_ptr<arenaforge::Layer>> targets{};
     for (AFLayer *layer : layers) {
@@ -268,58 +252,58 @@
 }
 
 - (void)beginSelectLayerMove:(CGPoint)point {
-    auto selectionManager = _editor->selectionManager();
-    if (!selectionManager) {
+    if (!_editor) {
         return;
     }
+    auto selectionManager = _editor->selectionManager();
     selectionManager->beginMove(static_cast<float>(point.x), static_cast<float>(point.y));
 }
 
 - (void)updateSelectLayerMove:(CGPoint)point {
-    auto selectionManager = _editor->selectionManager();
-    if (!selectionManager) {
+    if (!_editor) {
         return;
     }
+    auto selectionManager = _editor->selectionManager();
     selectionManager->updateMove(static_cast<float>(point.x), static_cast<float>(point.y));
 }
 
 - (void)endSelectLayerMove {
-    auto selectionManager = _editor->selectionManager();
-    if (!selectionManager) {
+    if (!_editor) {
         return;
     }
+    auto selectionManager = _editor->selectionManager();
     selectionManager->endMove();
 }
 
 - (void)clearSelection {
-    auto selectionManager = _editor->selectionManager();
-    if (!selectionManager) {
+    if (!_editor) {
         return;
     }
+    auto selectionManager = _editor->selectionManager();
     selectionManager->clearSelection();
 }
 
 - (void)updateSelectionDisplay {
-    auto selectionManager = _editor->selectionManager();
-    if (!selectionManager) {
+    if (!_editor) {
         return;
     }
+    auto selectionManager = _editor->selectionManager();
     selectionManager->updateSelectionDisplay();
 }
 
 - (void)clearSelectionDisplay {
-    auto selectionManager = _editor->selectionManager();
-    if (!selectionManager) {
+    if (!_editor) {
         return;
     }
+    auto selectionManager = _editor->selectionManager();
     selectionManager->clearSelectionDisplay();
 }
 
 - (bool)hitTestPointInSelectedBoundingBox:(CGPoint)point {
-    auto selectionManager = _editor->selectionManager();
-    if (!selectionManager) {
+    if (!_editor) {
         return false;
     }
+    auto selectionManager = _editor->selectionManager();
     auto hit = selectionManager->hitTestPointInSelectedBoundingBox(static_cast<float>(point.x), static_cast<float>(point.y));
     return hit;
 }

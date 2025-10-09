@@ -35,8 +35,8 @@
 #include <tgfx/layers/SolidColor.h>
 
 namespace arenaforge::editor {
-std::shared_ptr<SelectionManager> SelectionManager::Make(arenaforge::editor::LayerTreeAdapter *layerTreeAdapter, std::shared_ptr<tgfx::Layer> overlayRoot) {
-    return std::shared_ptr<SelectionManager>(new SelectionManager(layerTreeAdapter, std::move(overlayRoot)));
+std::unique_ptr<SelectionManager> SelectionManager::Make(arenaforge::editor::LayerTreeAdapter *layerTreeAdapter, std::shared_ptr<tgfx::Layer> overlayRoot) {
+    return std::unique_ptr<SelectionManager>(new SelectionManager(layerTreeAdapter, std::move(overlayRoot)));
 }
 
 SelectionManager::SelectionManager(arenaforge::editor::LayerTreeAdapter *layerTreeAdapter, std::shared_ptr<tgfx::Layer> overlayRoot)

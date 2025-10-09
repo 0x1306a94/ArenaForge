@@ -44,23 +44,43 @@ class Layer;
 
 namespace arenaforge::editor {
 class LayerTreeAdapter;
-class SelectionManager : public std::enable_shared_from_this<SelectionManager> {
+class SelectionManager {
   public:
-    static std::shared_ptr<SelectionManager> Make(arenaforge::editor::LayerTreeAdapter *layerTreeAdapter, std::shared_ptr<tgfx::Layer> overlayRoot);
+    static std::unique_ptr<SelectionManager> Make(arenaforge::editor::LayerTreeAdapter *layerTreeAdapter, std::shared_ptr<tgfx::Layer> overlayRoot);
     ~SelectionManager();
 
+    /// 更新选中的Layer
+    /// - Parameter targets: 选中的layers
     void updateSelection(const std::vector<std::shared_ptr<arenaforge::Layer>> &targets);
-    
+
+    /// 清除选择
     void clearSelection();
-    
+
+    /// 更新选中的指示框
     void updateSelectionDisplay();
-    
+
+    /// 清除选中的指示框
     void clearSelectionDisplay();
-    
+
+    /// 检查坐标是否在选中的包围盒中
+    /// - Parameters:
+    ///   - x: x 坐标
+    ///   - y: y 坐标
     bool hitTestPointInSelectedBoundingBox(float x, float y) const;
 
+    /// 开始移动
+    /// - Parameters:
+    ///   - x: x 坐标
+    ///   - y: y 坐标
     void beginMove(float x, float y);
+
+    /// 更新移动
+    /// - Parameters:
+    ///   - x: x 坐标
+    ///   - y: y 坐标
     void updateMove(float x, float y);
+
+    /// 结束移动
     void endMove();
 
   protected:
