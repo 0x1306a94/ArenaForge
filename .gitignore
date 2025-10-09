@@ -43,7 +43,6 @@
 
 /.vscode
 /.env
-/GEMINI.md
 /build
 /build*
 /CMakeLists.*.user
