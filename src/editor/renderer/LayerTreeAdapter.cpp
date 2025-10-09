@@ -33,6 +33,7 @@
 #include <tgfx/layers/ShapeLayer.h>
 #include <tgfx/layers/SolidColor.h>
 
+#include <arenaforge_core/Print.h>
 #include <arenaforge_core/layers/ShapeLayer.h>
 #include <arenaforge_editor/core/defines.h>
 
@@ -47,6 +48,10 @@ LayerTreeAdapter::LayerTreeAdapter(std::shared_ptr<Layer> rootDataLayer, std::sh
     setupSynchronization();
 }
 
+LayerTreeAdapter::~LayerTreeAdapter() {
+    PrintLog("%s", __PRETTY_FUNCTION__);
+}
+
 // 手动强制同步（用于复杂场景）
 void LayerTreeAdapter::forceResync() {
     clearChildren(_rootRenderLayer);
@@ -55,66 +60,85 @@ void LayerTreeAdapter::forceResync() {
     syncTree(_rootDataLayer, _rootRenderLayer);
 }
 
-void LayerTreeAdapter::setSelectedLayers(const std::vector<std::shared_ptr<arenaforge::Layer>> &targets) {
-    UNUSED_PARAM(targets);
-    if (targets.empty()) {
-        _selectedLayers.clear();
-        return;
+std::shared_ptr<Layer> LayerTreeAdapter::findDataLayer(const std::string &layerId) {
+    if (layerId.empty()) {
+        return nullptr;
     }
 
-    _selectedLayers = std::move(targets);
-}
-
-void LayerTreeAdapter::updateSelectionDisplay() {
-    if (_selectedLayers.empty()) {
-        return;
-    }
-
-    tgfx::Point min{FLT_MAX, FLT_MAX}, max{FLT_MIN, FLT_MIN};
-    for (const auto &data : _selectedLayers) {
-        auto renderLayer = findRenderLayer(data->layerId());
-        if (!renderLayer) {
-            continue;
+    // 检查缓存
+    auto cacheIt = _dataLayerCache.find(layerId);
+    if (cacheIt != _dataLayerCache.end()) {
+        auto cached = cacheIt->second.lock();
+        if (cached) {
+            return cached;
         }
-
-        auto frame = data->frame();
-        auto topLeft = renderLayer->localToGlobal({0.0, 0.0});
-        auto bottomRight = renderLayer->localToGlobal({frame.width(), frame.height()});
-        min.x = std::min(min.x, topLeft.x);
-        min.y = std::min(min.y, topLeft.y);
-
-        max.x = std::max(max.x, bottomRight.x);
-        max.y = std::max(max.y, bottomRight.y);
     }
 
-    if (!_selectedBoundingBoxLayer) {
-        _selectedBoundingBoxLayer = tgfx::ShapeLayer::Make();
-        _selectedBoundingBoxLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
-        //    _selectedBoundingBoxLayer->setPosition(position);
-        _selectedBoundingBoxLayer->setLineWidth(2);
-        _selectedBoundingBoxLayer->setStrokeAlign(tgfx::StrokeAlign::Outside);
-
-        _rootRenderLayer->root()->addChild(_selectedBoundingBoxLayer);
+    // DFS查找并缓存
+    auto found = findDataLayerRecursive(_rootDataLayer, layerId);
+    if (found) {
+        _dataLayerCache[layerId] = found;
     }
-
-    tgfx::Path boundingBoxPath;
-    boundingBoxPath.addRect(min.x, min.y, max.x, max.y);
-    _selectedBoundingBoxLayer->setPath(std::move(boundingBoxPath));
+    return found;
 }
 
-void LayerTreeAdapter::clearSelectionDisplay() {
-    if (_selectedBoundingBoxLayer) {
-        _selectedBoundingBoxLayer->removeFromParent();
-        _selectedBoundingBoxLayer = nullptr;
+std::shared_ptr<Layer> LayerTreeAdapter::findDataLayerRecursive(const std::shared_ptr<Layer> &node, const std::string &layerId) {
+    if (node == nullptr) {
+        return nullptr;
     }
+
+    if (node->layerId() == layerId) {
+        return node;
+    }
+
+    for (const auto &child : node->children()) {
+        auto found = findDataLayerRecursive(child, layerId);
+        if (found) {
+            return found;
+        }
+    }
+    return nullptr;
 }
 
-bool LayerTreeAdapter::hitTestPointInSelectedBoundingBox(float x, float y) const {
-    if (!_selectedBoundingBoxLayer) {
-        return false;
+// 快速查找渲染层（缓存优化）
+std::shared_ptr<tgfx::Layer> LayerTreeAdapter::findRenderLayer(const std::string &layerId) {
+    if (layerId.empty()) {
+        return nullptr;
     }
-    auto hit = _selectedBoundingBoxLayer->hitTestPoint(x, y);
-    return hit;
+
+    // 检查缓存
+    auto cacheIt = _renderLayerCache.find(layerId);
+    if (cacheIt != _renderLayerCache.end()) {
+        auto cached = cacheIt->second.lock();
+        if (cached) {
+            return cached;
+        }
+    }
+
+    // DFS查找并缓存
+    auto found = findRenderLayerRecursive(_rootRenderLayer, layerId);
+    if (found) {
+        _renderLayerCache[layerId] = found;
+    }
+    return found;
+}
+
+std::shared_ptr<tgfx::Layer> LayerTreeAdapter::findRenderLayerRecursive(const std::shared_ptr<tgfx::Layer> &node, const std::string &layerId) {
+    if (node == nullptr) {
+        return nullptr;
+    }
+
+    if (node->name() == layerId) {
+        return node;
+    }
+
+    for (const auto &child : node->children()) {
+        auto found = findRenderLayerRecursive(child, layerId);
+        if (found) {
+            return found;
+        }
+    }
+    return nullptr;
 }
 
 void LayerTreeAdapter::setupSynchronization() {
@@ -344,87 +368,6 @@ void LayerTreeAdapter::handlePropertyChanged(Layer *changedLayer) {
 
     // 增量同步属性
     syncNodeProperties(changedLayer, renderLayer.get());
-}
-
-std::shared_ptr<Layer> LayerTreeAdapter::findDataLayer(const std::string &layerId) {
-    if (layerId.empty()) {
-        return nullptr;
-    }
-
-    // 检查缓存
-    auto cacheIt = _dataLayerCache.find(layerId);
-    if (cacheIt != _dataLayerCache.end()) {
-        auto cached = cacheIt->second.lock();
-        if (cached) {
-            return cached;
-        }
-    }
-
-    // DFS查找并缓存
-    auto found = findDataLayerRecursive(_rootDataLayer, layerId);
-    if (found) {
-        _dataLayerCache[layerId] = found;
-    }
-    return found;
-}
-
-std::shared_ptr<Layer> LayerTreeAdapter::findDataLayerRecursive(const std::shared_ptr<Layer> &node, const std::string &layerId) {
-    if (node == nullptr) {
-        return nullptr;
-    }
-
-    if (node->layerId() == layerId) {
-        return node;
-    }
-
-    for (const auto &child : node->children()) {
-        auto found = findDataLayerRecursive(child, layerId);
-        if (found) {
-            return found;
-        }
-    }
-    return nullptr;
-}
-
-// 快速查找渲染层（缓存优化）
-std::shared_ptr<tgfx::Layer> LayerTreeAdapter::findRenderLayer(const std::string &layerId) {
-    if (layerId.empty()) {
-        return nullptr;
-    }
-
-    // 检查缓存
-    auto cacheIt = _renderLayerCache.find(layerId);
-    if (cacheIt != _renderLayerCache.end()) {
-        auto cached = cacheIt->second.lock();
-        if (cached) {
-            return cached;
-        }
-    }
-
-    // DFS查找并缓存
-    auto found = findRenderLayerRecursive(_rootRenderLayer, layerId);
-    if (found) {
-        _renderLayerCache[layerId] = found;
-    }
-    return found;
-}
-
-std::shared_ptr<tgfx::Layer> LayerTreeAdapter::findRenderLayerRecursive(const std::shared_ptr<tgfx::Layer> &node, const std::string &layerId) {
-    if (node == nullptr) {
-        return nullptr;
-    }
-
-    if (node->name() == layerId) {
-        return node;
-    }
-
-    for (const auto &child : node->children()) {
-        auto found = findRenderLayerRecursive(child, layerId);
-        if (found) {
-            return found;
-        }
-    }
-    return nullptr;
 }
 
 void LayerTreeAdapter::clearChildren(std::shared_ptr<tgfx::Layer> &renderLayer) {

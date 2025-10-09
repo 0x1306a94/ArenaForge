@@ -36,7 +36,7 @@
 #import "AFLayerMap.h"
 #import "AFProject+Private.h"
 
-#import "drawers/LayerTreeAdapter.h"
+#import "renderer/LayerTreeAdapter.h"
 
 #import "platform/mac/AFMacCanvasView+Private.h"
 #import "platform/mac/MacRendererBackend.h"
@@ -253,6 +253,10 @@
 }
 
 - (void)selectLayers:(NSArray<AFLayer *> *)layers {
+    auto selectionManager = _editor->selectionManager();
+    if (!selectionManager) {
+        return;
+    }
 
     std::vector<std::shared_ptr<arenaforge::Layer>> targets{};
     for (AFLayer *layer : layers) {
@@ -260,43 +264,63 @@
         targets.push_back(cppObject);
     }
 
-    auto selectionManager = _editor->selectionManager();
-    selectionManager->selectLayers(std::move(targets));
+    selectionManager->updateSelection(targets);
 }
 
 - (void)beginSelectLayerMove:(CGPoint)point {
     auto selectionManager = _editor->selectionManager();
+    if (!selectionManager) {
+        return;
+    }
     selectionManager->beginMove(static_cast<float>(point.x), static_cast<float>(point.y));
 }
 
 - (void)updateSelectLayerMove:(CGPoint)point {
     auto selectionManager = _editor->selectionManager();
+    if (!selectionManager) {
+        return;
+    }
     selectionManager->updateMove(static_cast<float>(point.x), static_cast<float>(point.y));
 }
 
 - (void)endSelectLayerMove {
     auto selectionManager = _editor->selectionManager();
+    if (!selectionManager) {
+        return;
+    }
     selectionManager->endMove();
 }
 
 - (void)clearSelection {
     auto selectionManager = _editor->selectionManager();
+    if (!selectionManager) {
+        return;
+    }
     selectionManager->clearSelection();
 }
 
 - (void)updateSelectionDisplay {
-    auto rendererAdapter = _editor->rendererAdapter();
-    rendererAdapter->updateSelectionDisplay();
+    auto selectionManager = _editor->selectionManager();
+    if (!selectionManager) {
+        return;
+    }
+    selectionManager->updateSelectionDisplay();
 }
 
 - (void)clearSelectionDisplay {
-    auto rendererAdapter = _editor->rendererAdapter();
-    rendererAdapter->clearSelectionDisplay();
+    auto selectionManager = _editor->selectionManager();
+    if (!selectionManager) {
+        return;
+    }
+    selectionManager->clearSelectionDisplay();
 }
 
 - (bool)hitTestPointInSelectedBoundingBox:(CGPoint)point {
-    auto rendererAdapter = _editor->rendererAdapter();
-    auto hit = rendererAdapter->hitTestPointInSelectedBoundingBox(static_cast<float>(point.x), static_cast<float>(point.y));
+    auto selectionManager = _editor->selectionManager();
+    if (!selectionManager) {
+        return false;
+    }
+    auto hit = selectionManager->hitTestPointInSelectedBoundingBox(static_cast<float>(point.x), static_cast<float>(point.y));
     return hit;
 }
 

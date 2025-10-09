@@ -46,6 +46,7 @@ class Editor;
 class LayerTreeAdapter {
   public:
     LayerTreeAdapter(std::shared_ptr<Layer> rootDataLayer, std::shared_ptr<tgfx::Layer> rootRenderLayer);
+    ~LayerTreeAdapter();
 
     std::shared_ptr<tgfx::Layer> getRootRenderLayer() const {
         return _rootRenderLayer;
@@ -53,13 +54,13 @@ class LayerTreeAdapter {
 
     void forceResync();
 
-    void setSelectedLayers(const std::vector<std::shared_ptr<arenaforge::Layer>> &targets);
+    std::shared_ptr<Layer> findDataLayer(const std::string &layerId);
 
-    void updateSelectionDisplay();
+    std::shared_ptr<Layer> findDataLayerRecursive(const std::shared_ptr<Layer> &node, const std::string &layerId);
 
-    void clearSelectionDisplay();
-    
-    bool hitTestPointInSelectedBoundingBox(float x, float y) const;
+    std::shared_ptr<tgfx::Layer> findRenderLayer(const std::string &layerId);
+
+    std::shared_ptr<tgfx::Layer> findRenderLayerRecursive(const std::shared_ptr<tgfx::Layer> &node, const std::string &layerId);
 
   private:
     void setupSynchronization();
@@ -87,21 +88,11 @@ class LayerTreeAdapter {
     void handleChildReordered(std::shared_ptr<tgfx::Layer> &parentRender, Layer *childDataLayer, int newIndex);
     void handlePropertyChanged(Layer *changedLayer);
 
-    std::shared_ptr<Layer> findDataLayer(const std::string &layerId);
-
-    std::shared_ptr<Layer> findDataLayerRecursive(const std::shared_ptr<Layer> &node, const std::string &layerId);
-
-    std::shared_ptr<tgfx::Layer> findRenderLayer(const std::string &layerId);
-
-    std::shared_ptr<tgfx::Layer> findRenderLayerRecursive(const std::shared_ptr<tgfx::Layer> &node, const std::string &layerId);
-
     void clearChildren(std::shared_ptr<tgfx::Layer> &renderLayer);
 
   private:
     std::shared_ptr<Layer> _rootDataLayer{nullptr};
     std::shared_ptr<tgfx::Layer> _rootRenderLayer{nullptr};
-    std::shared_ptr<tgfx::ShapeLayer> _selectedBoundingBoxLayer{nullptr};
-    std::vector<std::shared_ptr<arenaforge::Layer>> _selectedLayers{};
     std::unordered_map<std::string, std::weak_ptr<Layer>> _dataLayerCache{};
     std::unordered_map<std::string, std::weak_ptr<tgfx::Layer>> _renderLayerCache{};
 

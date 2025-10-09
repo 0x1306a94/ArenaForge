@@ -29,31 +29,87 @@
 #include <arenaforge_core/Print.h>
 #include <arenaforge_core/layers/Layer.h>
 
-#include "drawers/LayerTreeAdapter.h"
+#include "renderer/LayerTreeAdapter.h"
+
+#include <tgfx/layers/ShapeLayer.h>
+#include <tgfx/layers/SolidColor.h>
 
 namespace arenaforge::editor {
-std::shared_ptr<SelectionManager> SelectionManager::Make(std::shared_ptr<arenaforge::editor::LayerTreeAdapter> layerTreeAdapter) {
-    return std::shared_ptr<SelectionManager>(new SelectionManager(std::move(layerTreeAdapter)));
+std::shared_ptr<SelectionManager> SelectionManager::Make(arenaforge::editor::LayerTreeAdapter *layerTreeAdapter, std::shared_ptr<tgfx::Layer> overlayRoot) {
+    return std::shared_ptr<SelectionManager>(new SelectionManager(layerTreeAdapter, std::move(overlayRoot)));
 }
 
-SelectionManager::SelectionManager(std::shared_ptr<arenaforge::editor::LayerTreeAdapter> layerTreeAdapter)
-    : _layerTreeAdapter(std::move(layerTreeAdapter)) {
+SelectionManager::SelectionManager(arenaforge::editor::LayerTreeAdapter *layerTreeAdapter, std::shared_ptr<tgfx::Layer> overlayRoot)
+    : _layerTreeAdapter(layerTreeAdapter)
+    , _overlayRoot(std::move(overlayRoot)) {
 }
 
 SelectionManager::~SelectionManager() {
     PrintLog("%s", __PRETTY_FUNCTION__);
 }
 
-void SelectionManager::selectLayers(std::vector<std::shared_ptr<arenaforge::Layer>> targets) {
-    if (targets.empty()) {
-        _selectedLayers.clear();
-        _layerTreeAdapter->setSelectedLayers({});
-        _layerTreeAdapter->clearSelectionDisplay();
+void SelectionManager::updateSelection(const std::vector<std::shared_ptr<arenaforge::Layer>> &targets) {
+    _selectedLayers = targets;
+    if (_selectedLayers.empty()) {
+        clearSelectionDisplay();
+    } else {
+        updateSelectionDisplay();
+    }
+}
+
+void SelectionManager::clearSelection() {
+    _selectedLayers.clear();
+    clearSelectionDisplay();
+}
+
+void SelectionManager::updateSelectionDisplay() {
+    if (_selectedLayers.empty() || !_layerTreeAdapter) {
+        clearSelectionDisplay();
         return;
     }
-    _selectedLayers = std::move(targets);
-    _layerTreeAdapter->setSelectedLayers(_selectedLayers);
-    _layerTreeAdapter->updateSelectionDisplay();
+
+    tgfx::Point min{FLT_MAX, FLT_MAX}, max{FLT_MIN, FLT_MIN};
+    for (const auto &data : _selectedLayers) {
+        auto renderLayer = _layerTreeAdapter->findRenderLayer(data->layerId());
+        if (!renderLayer) {
+            continue;
+        }
+
+        auto frame = data->frame();
+        auto topLeft = renderLayer->localToGlobal({0.0, 0.0});
+        auto bottomRight = renderLayer->localToGlobal({frame.width(), frame.height()});
+        min.x = std::min(min.x, topLeft.x);
+        min.y = std::min(min.y, topLeft.y);
+        max.x = std::max(max.x, bottomRight.x);
+        max.y = std::max(max.y, bottomRight.y);
+    }
+
+    if (!_selectedBoundingBoxLayer) {
+        _selectedBoundingBoxLayer = tgfx::ShapeLayer::Make();
+        _selectedBoundingBoxLayer->setName("SelectionBoundingBox");
+        _selectedBoundingBoxLayer->setStrokeStyle(tgfx::SolidColor::Make(tgfx::Color::FromRGBA(0x0c, 0x8c, 0xe9)));
+        _selectedBoundingBoxLayer->setLineWidth(2);
+        _selectedBoundingBoxLayer->setStrokeAlign(tgfx::StrokeAlign::Outside);
+        _overlayRoot->addChild(_selectedBoundingBoxLayer);
+    }
+
+    tgfx::Path boundingBoxPath;
+    boundingBoxPath.addRect(min.x, min.y, max.x, max.y);
+    _selectedBoundingBoxLayer->setPath(std::move(boundingBoxPath));
+}
+
+void SelectionManager::clearSelectionDisplay() {
+    if (_selectedBoundingBoxLayer) {
+        _selectedBoundingBoxLayer->removeFromParent();
+        _selectedBoundingBoxLayer = nullptr;
+    }
+}
+
+bool SelectionManager::hitTestPointInSelectedBoundingBox(float x, float y) const {
+    if (!_selectedBoundingBoxLayer) {
+        return false;
+    }
+    return _selectedBoundingBoxLayer->hitTestPoint(x, y);
 }
 
 void SelectionManager::beginMove(float x, float y) {
@@ -83,17 +139,13 @@ void SelectionManager::updateMove(float x, float y) {
         frame.offset(distanceX, distanceY);
         layer->setFrame(frame);
     }
-    _layerTreeAdapter->updateSelectionDisplay();
+    updateSelectionDisplay();
 }
 
 void SelectionManager::endMove() {
     _beginMoveX = 0.0;
     _beginMoveY = 0.0;
     _memoLayerFrames.clear();
-}
-
-void SelectionManager::clearSelection() {
-    _selectedLayers.clear();
 }
 
 };  // namespace arenaforge::editor

@@ -68,10 +68,6 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
         return _selectionManager;
     }
 
-    std::shared_ptr<LayerTreeAdapter> rendererAdapter() {
-        return _treeAdapter;
-    }
-
     bool getBoundsSize(float &width, float &height) const;
 
     float density() const;
@@ -116,7 +112,7 @@ class ARENA_FORGE_EXPORT_API Editor : public std::enable_shared_from_this<Editor
     std::shared_ptr<tgfx::ShapeLayer> _rootLayer{nullptr};
     std::shared_ptr<tgfx::ShapeLayer> _containerLayer{nullptr};
     std::shared_ptr<tgfx::ShapeLayer> _maskLayer{nullptr};
-    std::shared_ptr<LayerTreeAdapter> _treeAdapter{nullptr};
+    std::unique_ptr<LayerTreeAdapter> _treeAdapter{nullptr};
     std::shared_ptr<SelectionManager> _selectionManager{nullptr};
     std::unordered_map<uintptr_t, std::weak_ptr<tgfx::Layer>> _hoverWireframeLayers{};
 };

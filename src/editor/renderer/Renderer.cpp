@@ -29,9 +29,6 @@
 #include "RendererBackend.h"
 #include "RendererState.h"
 
-#include "drawers/GridBackgroundLayerTree.h"
-#include "drawers/UserDesignLayerTree.h"
-
 #include <arenaforge_core/Print.h>
 #include <arenaforge_core/Size.h>
 
@@ -39,7 +36,9 @@
 #include <tgfx/core/Surface.h>
 #include <tgfx/gpu/Device.h>
 #include <tgfx/gpu/Window.h>
+#include <tgfx/layers/DisplayList.h>
 #include <tgfx/layers/Layer.h>
+#include <tgfx/layers/ShapeLayer.h>
 
 namespace arenaforge::editor {
 std::shared_ptr<Renderer> Renderer::Make(std::shared_ptr<RendererState> state, std::shared_ptr<RendererBackend> backend) {
@@ -49,9 +48,17 @@ std::shared_ptr<Renderer> Renderer::Make(std::shared_ptr<RendererState> state, s
 Renderer::Renderer(std::shared_ptr<RendererState> state, std::shared_ptr<RendererBackend> backend)
     : _state(std::move(state))
     , _backend(std::move(backend))
-    , _gridLayer(std::make_unique<GridBackgroundLayerTree>())
-    , _designLayerTree(std::make_unique<UserDesignLayerTree>())
+    , _displayList(std::make_unique<tgfx::DisplayList>())
     , _invalidate(false) {
+
+    _designLayer = tgfx::Layer::Make();
+    _designLayer->setName("DesignRoot");
+    _overlayLayer = tgfx::Layer::Make();
+    _overlayLayer->setName("OverlayRoot");
+
+    auto root = _displayList->root();
+    root->addChild(_designLayer);
+    root->addChild(_overlayLayer);
 }
 
 Renderer::~Renderer() {
@@ -86,47 +93,12 @@ bool Renderer::updateSize() {
     return sizeChanged;
 }
 
-void Renderer::autoAdjustCanvasScaleForContent() {
-    auto viewSize = _state->getBoundsSize();
-    auto contentBounds = _designLayerTree->root()->getBounds();
-    auto contentWidth = contentBounds.width();
-    auto contentHeight = contentBounds.height();
-
-    float padding = 100.0f * _state->density();
-
-    // 如果内容加上 padding 后仍然小于视口，就不缩放
-    if (contentWidth + 2 * padding < viewSize.width &&
-        contentHeight + 2 * padding < viewSize.height) {
-
-        float offsetX = (viewSize.width - contentWidth) * 0.5f;
-        float offsetY = (viewSize.height - contentHeight) * 0.5f;
-
-        _state->updateZoomAndOffset(1.0f, Point{offsetX, offsetY});
-        return;
-    }
-
-    // 缩放比例：在宽和高方向都考虑 padding
-    float scaleX = viewSize.width / (contentWidth + 2 * padding);
-    float scaleY = viewSize.height / (contentHeight + 2 * padding);
-    float scale = std::min(scaleX, scaleY);
-
-    // offset 需要考虑 bounds 的 left/top 和 padding
-    float offsetX = (viewSize.width - (contentWidth + 2 * padding) * scale) / 2.0f - (contentBounds.left - padding) * scale;
-    float offsetY = (viewSize.height - (contentHeight + 2 * padding) * scale) / 2.0f - (contentBounds.top - padding) * scale;
-
-    _state->updateZoomAndOffset(scale, Point{offsetX, offsetY});
-}
-
 void Renderer::invalidateContent() {
     _invalidate = true;
 }
 
-tgfx::Layer *Renderer::designLayerRoot() const {
-    return _designLayerTree->root();
-}
-
 std::vector<std::shared_ptr<tgfx::Layer>> Renderer::getDesignLayersUnderPoint(float x, float y) const {
-    return _designLayerTree->getLayersUnderPoint(x, y);
+    return _designLayer->getLayersUnderPoint(x, y);
 }
 
 void Renderer::draw(bool force) {
@@ -165,13 +137,12 @@ void Renderer::draw(bool force) {
         return;
     }
 
-    auto statePtr = _state.get();
-    //    _gridLayer->prepare(canvas, statePtr, force);
-    _designLayerTree->prepare(canvas, statePtr, force);
+    auto zoomScale = _state->zoomScale();
+    auto contentOffset = _state->contentOffset();
+    _displayList->setZoomScale(zoomScale);
+    _displayList->setContentOffset(contentOffset.x, contentOffset.y);
 
-    bool hasContentChanged = /*_gridLayer->hasContentChanged() ||*/ _designLayerTree->hasContentChanged();
-
-    if (!hasContentChanged && !force && !_invalidate) {
+    if (!_displayList->hasContentChanged() && !force && !_invalidate) {
         device->unlock();
         return;
     }
@@ -179,8 +150,7 @@ void Renderer::draw(bool force) {
     canvas->clear();
     canvas->save();
 
-    //    _gridLayer->draw(canvas, statePtr);
-    _designLayerTree->draw(canvas, statePtr);
+    _displayList->render(surface.get(), false);
 
     canvas->restore();
 

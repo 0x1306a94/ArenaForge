@@ -33,6 +33,11 @@
 
 #include <arenaforge_core/Rect.h>
 
+namespace tgfx {
+class Layer;
+class ShapeLayer;
+};  // namespace tgfx
+
 namespace arenaforge {
 class Layer;
 };
@@ -41,20 +46,30 @@ namespace arenaforge::editor {
 class LayerTreeAdapter;
 class SelectionManager : public std::enable_shared_from_this<SelectionManager> {
   public:
-    static std::shared_ptr<SelectionManager> Make(std::shared_ptr<arenaforge::editor::LayerTreeAdapter> layerTreeAdapter);
+    static std::shared_ptr<SelectionManager> Make(arenaforge::editor::LayerTreeAdapter *layerTreeAdapter, std::shared_ptr<tgfx::Layer> overlayRoot);
     ~SelectionManager();
 
-    void selectLayers(std::vector<std::shared_ptr<arenaforge::Layer>> targets);
+    void updateSelection(const std::vector<std::shared_ptr<arenaforge::Layer>> &targets);
+    
+    void clearSelection();
+    
+    void updateSelectionDisplay();
+    
+    void clearSelectionDisplay();
+    
+    bool hitTestPointInSelectedBoundingBox(float x, float y) const;
+
     void beginMove(float x, float y);
     void updateMove(float x, float y);
     void endMove();
-    void clearSelection();
 
   protected:
-    SelectionManager(std::shared_ptr<arenaforge::editor::LayerTreeAdapter> layerTreeAdapter);
+    SelectionManager(arenaforge::editor::LayerTreeAdapter *layerTreeAdapter, std::shared_ptr<tgfx::Layer> overlayRoot);
 
   private:
-    std::shared_ptr<arenaforge::editor::LayerTreeAdapter> _layerTreeAdapter{nullptr};
+    arenaforge::editor::LayerTreeAdapter *_layerTreeAdapter{nullptr};
+    std::shared_ptr<tgfx::Layer> _overlayRoot;
+    std::shared_ptr<tgfx::ShapeLayer> _selectedBoundingBoxLayer{nullptr};
     float _beginMoveX{0.0};
     float _beginMoveY{0.0};
     std::vector<std::shared_ptr<arenaforge::Layer>> _selectedLayers{};

@@ -32,14 +32,13 @@
 
 namespace tgfx {
 class Layer;
+class DisplayList;
 class Window;
 };  // namespace tgfx
 
 namespace arenaforge::editor {
 class RendererBackend;
 class RendererState;
-class GridBackgroundLayerTree;
-class UserDesignLayerTree;
 class Renderer : public std::enable_shared_from_this<Renderer> {
   public:
     static std::shared_ptr<Renderer> Make(std::shared_ptr<RendererState> state, std::shared_ptr<RendererBackend> backend);
@@ -55,10 +54,11 @@ class Renderer : public std::enable_shared_from_this<Renderer> {
 
     bool updateSize();
 
-    void autoAdjustCanvasScaleForContent();
-
     void invalidateContent();
-    tgfx::Layer *designLayerRoot() const;
+
+    std::shared_ptr<tgfx::Layer> getDesignRootLayer() const { return _designLayer; }
+    std::shared_ptr<tgfx::Layer> getOverlayRootLayer() const { return _overlayLayer; }
+
     std::vector<std::shared_ptr<tgfx::Layer>> getDesignLayersUnderPoint(float x, float y) const;
 
     void draw(bool force = false);
@@ -69,8 +69,9 @@ class Renderer : public std::enable_shared_from_this<Renderer> {
   private:
     std::shared_ptr<RendererState> _state;
     std::shared_ptr<RendererBackend> _backend;
-    std::unique_ptr<GridBackgroundLayerTree> _gridLayer;
-    std::unique_ptr<UserDesignLayerTree> _designLayerTree;
+    std::unique_ptr<tgfx::DisplayList> _displayList;
+    std::shared_ptr<tgfx::Layer> _designLayer;
+    std::shared_ptr<tgfx::Layer> _overlayLayer;
     bool _invalidate;
 };
 };  // namespace arenaforge::editor

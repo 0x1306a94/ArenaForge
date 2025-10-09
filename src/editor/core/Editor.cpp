@@ -35,12 +35,11 @@
 #include <arenaforge_core/layers/Layer.h>
 #include <arenaforge_core/layers/ShapeLayer.h>
 
+#include "renderer/LayerTreeAdapter.h"
+#include "renderer/PathBuilder.h"
 #include "renderer/Renderer.h"
 #include "renderer/RendererBackend.h"
 #include "renderer/RendererState.h"
-
-#include "drawers/LayerTreeAdapter.h"
-#include "drawers/PathBuilder.h"
 
 #include <tgfx/layers/Layer.h>
 #include <tgfx/layers/ShapeLayer.h>
@@ -61,9 +60,9 @@ Editor::Editor(std::shared_ptr<arenaforge::Project> project)
     setupProjectSynchronization();
 
     auto root = _project->root();
-    _treeAdapter = std::make_shared<LayerTreeAdapter>(root, _containerLayer);
+    _treeAdapter = std::make_unique<LayerTreeAdapter>(root, _containerLayer);
 
-    _selectionManager = SelectionManager::Make(_treeAdapter);
+    _selectionManager = SelectionManager::Make(_treeAdapter.get(), _renderer->getOverlayRootLayer());
 }
 
 Editor::~Editor() {
@@ -162,7 +161,45 @@ void Editor::autoAdjustCanvasScaleForContent() {
     if (!_renderer) {
         return;
     }
-    _renderer->autoAdjustCanvasScaleForContent();
+
+    auto state = _renderer->state();
+    if (!state) {
+        return;
+    }
+
+    auto designLayer = _renderer->getDesignRootLayer();
+    if (!designLayer) {
+        return;
+    }
+
+    auto viewSize = state->getBoundsSize();
+    auto contentBounds = designLayer->getBounds();
+    auto contentWidth = contentBounds.width();
+    auto contentHeight = contentBounds.height();
+
+    float padding = 100.0f * state->density();
+
+    // 如果内容加上 padding 后仍然小于视口，就不缩放
+    if (contentWidth + 2 * padding < viewSize.width &&
+        contentHeight + 2 * padding < viewSize.height) {
+
+        float offsetX = (viewSize.width - contentWidth) * 0.5f;
+        float offsetY = (viewSize.height - contentHeight) * 0.5f;
+
+        state->updateZoomAndOffset(1.0f, Point{offsetX, offsetY});
+        return;
+    }
+
+    // 缩放比例：在宽和高方向都考虑 padding
+    float scaleX = viewSize.width / (contentWidth + 2 * padding);
+    float scaleY = viewSize.height / (contentHeight + 2 * padding);
+    float scale = std::min(scaleX, scaleY);
+
+    // offset 需要考虑 bounds 的 left/top 和 padding
+    float offsetX = (viewSize.width - (contentWidth + 2 * padding) * scale) / 2.0f - (contentBounds.left - padding) * scale;
+    float offsetY = (viewSize.height - (contentHeight + 2 * padding) * scale) / 2.0f - (contentBounds.top - padding) * scale;
+
+    state->updateZoomAndOffset(scale, Point{offsetX, offsetY});
 }
 
 bool Editor::hitTestPointInContainer(float x, float y, bool shapeHitTest) const {
@@ -290,7 +327,7 @@ void Editor::setupRootLayer() {
     tgfx::Path rootPath;
     rootPath.addRect(tgfx::Rect::MakeWH(frame.width(), frame.height()));
 
-    auto layerTreeRoot = _renderer->designLayerRoot();
+    auto layerTreeRoot = _renderer->getDesignRootLayer();
     _rootLayer = tgfx::ShapeLayer::Make();
     _rootLayer->setPath(rootPath);
 
